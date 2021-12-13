@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="timer_size">56dp</dimen>
+    <dimen name="button_1_width">100dp</dimen>
+    <dimen name="button_height">100dp</dimen>
+    <dimen name="buttin_2_width">150dp</dimen>
+</resources>
