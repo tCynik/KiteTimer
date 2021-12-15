@@ -2,86 +2,74 @@ package com.example.racertimer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
-    private Button butPrevTimer; // кнопка сброса на предыдущий таймер
-    private Button butCurrTimer; // кнопка сброса текущего аткмера на начало
-    private Button butNextTimer; // кнопка сброса на следующий таймер
-    private TextView timerResult; // значение для отображения в приложении в формате мм:сс
+////////////// это меню главного экрана, в котором выбираем ти стартовой процедуры - 5 минут, 3 минуты, немедленный старт.
+////////////// в 5 минутном открывается окно таймера со следующими режимами:
+////////////// 5 минут, кнопки "главное меню", "5 минут" (таймер на 5:00), "2 минуты" (таймер на 2:00)
+////////////// по достижении 2 минут переключение на экран с кнопками: "5 минут", "2 минуты", "1 минута"
+////////////// по достижении 1 минуты экран с кнопками "2 минуты", "1 минута", "старт"
 
-    private int timerSec = 300; // текущий таймер в секундах
-    private String timerMinSec; // значение стринговое для передачи на вывод в формате мм:сс
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+    private Button butTimer5Min; // кнопка выбора 5 минутной процедуры
+    private Button butTimer3Min; // кнопка выбора 3 минутной процедуры
+    private Button butTimerInstant; // кнопка немедленного начала гонки
+
+    private TextView textTime; // переменная времени в левом вехнем углу
+
+    private String testString = "test";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        butPrevTimer = findViewById(R.id.but_prev_timer); // Заводим кнопки таймеров
-        butCurrTimer = findViewById(R.id.but_curr_timer);
-        butNextTimer = findViewById(R.id.but_next_timer);
+        butTimer5Min = findViewById(R.id.but_5mins); // Заводим кнопки таймеров
+        butTimer5Min.setOnClickListener(this);
+        butTimer3Min = findViewById(R.id.but_3mins);
+        butTimer3Min.setOnClickListener(this);
+        butTimerInstant = findViewById(R.id.but_instant);
+        butTimerInstant.setOnClickListener(this);
 
-        timerResult = findViewById(R.id.timer_min_sec);
+        textTime = findViewById(R.id.currentTime);
 
-        View.OnClickListener butPrevIsClicked = new View.OnClickListener() { // описываем нажатие первой кнопки
-            @Override
-            public void onClick(View view) {
-                timerSec = 120;
-            }
-        };
-        butPrevTimer.setOnClickListener(butPrevIsClicked);
+        butTimerInstant.setText(testString);
 
-        View.OnClickListener butCurrIsClicked = new View.OnClickListener() { // нажатие второй кнопки
-            @Override
-            public void onClick(View view) {
-                timerSec = 60;
-            }
-        };
-        butCurrTimer.setOnClickListener(butCurrIsClicked);
-
-        View.OnClickListener butNextIsClicked = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                timerSec = 30;
-            }
-        };
-        butNextTimer.setOnClickListener(butNextIsClicked);
-
-        timerRunning(300);
+//        View.OnClickListener timer5Min = new View.OnClickListener() { // описываем нажатие первой кнопки
+//            @Override
+//            public void onClick(View view) {
+//                // переход на экран 5 минутной процедуры
+//            }
+//        };
+//        butTimer5Min.setOnClickListener(timer5Min);
+//
+//        View.OnClickListener timer3Min = new View.OnClickListener() { // нажатие второй кнопки
+//            @Override
+//            public void onClick(View view) {
+//                ////////// вот тут по идее должен быть переход на экран 3 минутной процедуры Screen3Min
+//            }
+//        };
+//        butTimer3Min.setOnClickListener(timer3Min);
 
     }
 
-    public String calcTimeMinSec (int timerSec) {
-        String result=null;
-        int sec;
-        int min;
-        min = timerSec / 60;
-        result = min + ":00";
-        sec = timerSec % 60;
-        if (sec !=0) result = min + ":" + sec;
-        return result;
+    @Override
+    public void onClick(View view) {
+
+        switch (view.getId()){
+            case R.id.but_5mins:
+                Intent intent = new Intent(this, ActivityTimer.class);
+                startActivity(intent);
+                break;
+            case R.id.but_3mins:
+                Intent intent2 = new Intent(this, ActivityTimer.class);
+                startActivity(intent2);
+                break;
+            default: break;
+        }
     }
-
-    public void timerRunning(int timerMiliSec) {
-        new CountDownTimer(timerMiliSec * 1000, 1000) {
-            @Override
-            public void onTick(long l) { // действия во время отсчета
-                timerSec--;
-                timerMinSec = calcTimeMinSec(timerSec);
-                if (timerSec <= 0) timerMinSec = "GO!!!";
-                timerResult.setText(timerMinSec.toString()); // выводим значение на экран
-            }
-
-            @Override
-            public void onFinish() { // действия по окончании отсчета
-                if (timerSec > 0) timerRunning(timerMiliSec);
-            }
-        }.start();
-    }
-
 }
