@@ -35,7 +35,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="20"
-        android:textSize="@dimen/timer_size" />
+        android:textSize="@dimen/timer_size"
+        android:clickable="true"/>
 
   </LinearLayout>
 
@@ -68,7 +69,7 @@
         android:layout_height="@dimen/button_height"
         android:layout_weight="1"
         android:layout_margin="5dp"
-        android:text="START" />
+        />
   </LinearLayout>
 
 </LinearLayout>

@@ -21,8 +21,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private TextView textTime; // переменная времени в левом вехнем углу
 
-    private String testString = "test";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +34,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         butTimerInstant.setOnClickListener(this);
 
         textTime = findViewById(R.id.currentTime);
-
-        butTimerInstant.setText(testString);
 
 //        View.OnClickListener timer5Min = new View.OnClickListener() { // описываем нажатие первой кнопки
 //            @Override
@@ -58,18 +54,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick(View view) {
-
+    public void onClick(View view) { // view - элемент, на который произошло нажатие (его id)
+        Intent intent = new Intent();
         switch (view.getId()){
             case R.id.but_5mins:
-                Intent intent = new Intent(this, ActivityTimer.class);
-                startActivity(intent);
+                intent = new Intent(this, ActivityTimer.class); // this - элемент view???
                 break;
             case R.id.but_3mins:
-                Intent intent2 = new Intent(this, ActivityTimer.class);
-                startActivity(intent2);
+                intent = new Intent(this, ActivityTimer.class);
                 break;
+            case R.id.but_instant:
+                intent = new Intent (this, ActivityRace.class);
             default: break;
         }
+
+        startActivity(intent);
     }
 }
