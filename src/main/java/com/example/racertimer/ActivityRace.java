@@ -4,13 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class ActivityRace extends AppCompatActivity {
+import com.example.racertimer.GPSContent.LocListenerInterface;
+
+public class ActivityRace extends AppCompatActivity implements LocListenerInterface {
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
     private TextView timerRace; // таймер гонки
     private TextView textTime; // переменная времени в левом вехнем углу
@@ -47,15 +50,15 @@ public class ActivityRace extends AppCompatActivity {
     }
 
     private void timerRunning () {
-        new CountDownTimer(60000, 10) {
+        new CountDownTimer(60000, 1000) {
 
             @Override
             public void onTick(long l) {
                 //timerRace.setText("blabla");
 
                 timerSec++;
-                if (timerSec > 600) {
-                    timerSec -= 600;
+                if (timerSec > 59) {
+                    timerSec -= 60;
                     timerMin ++;
                 }
                 if (timerMin == 60) {
@@ -76,11 +79,18 @@ public class ActivityRace extends AppCompatActivity {
     }
 
     private String calcTimer (int timerHour, int timerMin, int timerSec) {
-        timerString = timerSec / 10+ "." + (int) timerSec % 10;
-        if (timerSec < 100 ) timerString = "" + 0 + timerString;
-        timerString = timerMin + ":" + timerString;
-        if (timerMin < 10 ) timerString = "" + 0 + timerString;
+//        timerString = timerSec / 10+ "." + (int) timerSec % 10; // тут таймер с сотыми секунды, но там время неверное
+//        if (timerSec < 100 ) timerString = "" + 0 + timerString;
+//        timerString = timerMin + ":" + timerString;
+        if (timerSec < 10) timerString = timerMin + ":0" + timerSec;
+        else timerString = timerMin + ":" + timerSec;
+        if (timerMin < 10 ) timerString = "0" + timerString;
         if (timerHour !=0 ) timerString = timerHour + ":" + timerString;
         return timerString;
+    }
+
+    @Override
+    public void whenLocationChanged(Location location) {
+
     }
 }

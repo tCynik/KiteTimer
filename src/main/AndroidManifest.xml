@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.racertimer">
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:allowBackup="true"
@@ -11,7 +13,8 @@
         android:theme="@style/Theme.RacerTimer">
         <activity
             android:name=".ActivityRace"
-            android:exported="false" >
+            android:exported="false"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.ActivityRace" />
 
@@ -21,17 +24,18 @@
         </activity>
         <activity
             android:name=".ActivityTimer"
-            android:exported="false" >
+            android:exported="false"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.ActivityTimer" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="sensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

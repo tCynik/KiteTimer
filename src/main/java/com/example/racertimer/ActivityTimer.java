@@ -6,13 +6,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +19,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
     private Button butPrevTimer; // кнопка сброса на предыдущий таймер
     private Button butCurrTimer; // кнопка сброса текущего аткмера на начало
     private Button butNextTimer; // кнопка сброса на следующий таймер
+    private Button butMinus1Sec, butMinus5Sec, butPlus1Sec, butPlus5Sec; // кнопки корректировки времени
     private TextView timerResult; // значение для отображения в приложении в формате мм:сс
     private TextView textTime; // переменная времени в левом вехнем углу
 
@@ -47,6 +46,44 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         butNextTimer = findViewById(R.id.but_next_timer);
             butNextTimer.setOnClickListener((View.OnClickListener) thisActivity);
 
+        butMinus1Sec = findViewById(R.id.but_minus_1sec);
+        butMinus5Sec = findViewById(R.id.but_minus_5sec);
+        butPlus1Sec = findViewById(R.id.but_plus_1sec);
+        butPlus5Sec = findViewById(R.id.but_plus_5sec);
+
+        butMinus1Sec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                timerSec -= 1;
+                timerString2Print = calcTimeMinSec(timerSec);
+                timerResult.setText(timerString2Print.toString());
+            }
+        });
+        butMinus5Sec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                timerSec -= 5;
+                timerString2Print = calcTimeMinSec(timerSec);
+                timerResult.setText(timerString2Print.toString());
+            }
+        });
+        butPlus1Sec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                timerSec += 1;
+                timerString2Print = calcTimeMinSec(timerSec);
+                timerResult.setText(timerString2Print.toString());
+            }
+        });
+        butPlus5Sec.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                timerSec += 5;
+                timerString2Print = calcTimeMinSec(timerSec);
+                timerResult.setText(timerString2Print.toString());
+            }
+        });
+
         timerResult = findViewById(R.id.timer_min_sec); // привязка таймера к полю вывода таймера
 
         timerResult.setOnClickListener(new View.OnClickListener() { // пауза таймера вручную
@@ -63,7 +100,11 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         Context context = ActivityTimer.this; // выводим Toast подсказку
         Toast.makeText(context, "tap the timer to pause", Toast.LENGTH_LONG).show();
 
-        procedureTiming = 5; ////// реализовать передачу этого значения из главного экрана
+        procedureTiming = 5; // по умолчанию тайминг 5 минут
+        Intent catchProcedureTiming = getIntent(); // получаем данные по таймингу процедуры из шлавного меню
+        if (catchProcedureTiming.hasExtra("procedureTiming")) { // проверка, получили ли данные с нужным ключом
+            procedureTiming = catchProcedureTiming.getIntExtra("procedureTiming", 5); //принимаем данные
+        }
         timerSec = procedureTiming * 60; // задаем начальное значение таймера
         timerRunning(procedureTiming * 60);
 
@@ -77,6 +118,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         result = min + ":00";
         sec = timerSec % 60;
         if (sec !=0) result = min + ":" + sec;
+        if (sec < 10) result = min + ":0" + sec;
         return result;
     }
 
@@ -96,7 +138,6 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
                     Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
                     startActivity(intent); // запуск активити
                 }
-
             }
 
             @Override
@@ -137,7 +178,6 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
             }
             default: break;
         }
-
     }
 
     public boolean flashing (boolean flasher) {

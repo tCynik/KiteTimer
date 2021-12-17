@@ -2,6 +2,7 @@ package com.example.racertimer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -35,36 +36,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         textTime = findViewById(R.id.currentTime);
 
-//        View.OnClickListener timer5Min = new View.OnClickListener() { // описываем нажатие первой кнопки
-//            @Override
-//            public void onClick(View view) {
-//                // переход на экран 5 минутной процедуры
-//            }
-//        };
-//        butTimer5Min.setOnClickListener(timer5Min);
-//
-//        View.OnClickListener timer3Min = new View.OnClickListener() { // нажатие второй кнопки
-//            @Override
-//            public void onClick(View view) {
-//                ////////// вот тут по идее должен быть переход на экран 3 минутной процедуры Screen3Min
-//            }
-//        };
-//        butTimer3Min.setOnClickListener(timer3Min);
-
     }
 
     @Override
     public void onClick(View view) { // view - элемент, на который произошло нажатие (его id)
+        Context context = this; // создаем контекст относительно текущего активити
+        Class nextActivity = ActivityTimer.class; // активити, в которое будем переходить чаще всего
         Intent intent = new Intent();
         switch (view.getId()){
             case R.id.but_5mins:
-                intent = new Intent(this, ActivityTimer.class); // this - элемент view???
+                intent = new Intent(context, nextActivity); // по умолчанию 5 минут (ничего не передаем)
                 break;
             case R.id.but_3mins:
-                intent = new Intent(this, ActivityTimer.class);
+                intent = new Intent(context, nextActivity); // при трехминутке передаем тайминг 3 мин
+                intent.putExtra("procedureTiming", 3);
                 break;
             case R.id.but_instant:
-                intent = new Intent (this, ActivityRace.class);
+                intent = new Intent (context, ActivityRace.class);
             default: break;
         }
 
