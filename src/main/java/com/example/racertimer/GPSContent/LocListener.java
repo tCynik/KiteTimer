@@ -5,19 +5,20 @@ import android.location.LocationListener;
 
 import androidx.annotation.NonNull;
 
-import java.util.List;
-
-public class LocListener implements LocationListener {
-    private LocListenerInterface locListenerInterface;
-
-
+public class LocListener implements LocationListener { //LocationListener - библиотечный класс для работы с геопозиционииованием
+    private LocListenerInterface locListenerInterface; // переменная с информацией о позиции (см. интерфейс)
 
     @Override
-    public void onLocationChanged(@NonNull Location location) {
-        locListenerInterface.whenLocationChanged(location);
+    public void onLocationChanged(@NonNull Location location) { // каждый раз при изменении позиции
+        ///// через интерфейс будет запускаться метод whenLocationChanged, переопределенный в классе MainLocal
+        locListenerInterface.whenLocationChanged(location); //
     }
 
-    public void setLocListenerInterface(LocListenerInterface locListenerInterface) {
+    public void setLocListenerInterface(LocListenerInterface locListenerInterface) { // сеттер - чтобы из другого класса,
+        // поддерживающего данный интерфейс, можно было присвоить текущему полю locListenerInterface значение,
+        // передаваемое при запуске метода - сеттера.
         this.locListenerInterface = locListenerInterface;
     }
+
+
 }

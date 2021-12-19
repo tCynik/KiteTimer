@@ -1,7 +1,5 @@
 package com.example.racertimer;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
@@ -11,7 +9,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.racertimer.GPSContent.LocListenerInterface;
+import com.example.racertimer.GPSContent.MainLocal;
 
 public class ActivityRace extends AppCompatActivity implements LocListenerInterface {
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
@@ -24,6 +25,10 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
     private int timerMin = 0; // переменная счетчика в минутах
     private int timerSec = 0; // текущее значение таймера в сотых долей секунды
 
+    private TextView speedTV, courseTV; // переменные для привызки полей скорости и курса
+
+    private MainLocal mainLocal; // обьект для работы с главным классом по GPS
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,8 +40,11 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
         textTime = findViewById(R.id.currentTime);
         exitToMain = findViewById(R.id.exit_to_main);
 
+        speedTV = findViewById(R.id.speed);
+        courseTV = findViewById(R.id.course);
+
         timerRunning();
-        // секундомер нужно будет откалибровать или переписать или хз - в эмуляторе время идет
+        ///// продолжение урока с 11:50
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -68,6 +76,8 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
                 timerString = calcTimer(timerHour, timerMin, timerSec);
 
                 timerRace.setText(timerString.toString());
+
+                speedTV.setText(String.valueOf(mainLocal.getVelosity()));
             }
 
             @Override
