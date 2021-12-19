@@ -43,6 +43,7 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
         speedTV = findViewById(R.id.speed);
         courseTV = findViewById(R.id.course);
 
+        mainLocal = new MainLocal();
         timerRunning();
         ///// продолжение урока с 11:50
 
