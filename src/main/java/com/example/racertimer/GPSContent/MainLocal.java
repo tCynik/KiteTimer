@@ -12,6 +12,7 @@ public class MainLocal extends AppCompatActivity implements LocListenerInterface
 
     private int velosity = 0; // скорость в кмч
     private int course; // курс в градусах
+    private int countLocarionChanged = 0; // счетчик сколько раз изменялось геоположение
 
     public int getVelosity() { // геттер для получения скорости другими классами
         return velosity;
@@ -20,6 +21,14 @@ public class MainLocal extends AppCompatActivity implements LocListenerInterface
     public int getCourse() { // геттер для получения курса другими классами
         return course;
     }
+
+    public int getCountLocarionChanged() {
+        return countLocarionChanged;
+    }
+
+//    public static int inkCountLocationChanged() {
+//        countLocarionChanged++;
+//    }
 
 //    public void initLocationManager() { // метод для доступа к GPS-модулю и создания слушателя
 //        locationManager = (LocationManager)getSystemService(this.LOCATION_SERVICE); // доступ к Location сервису
@@ -56,5 +65,6 @@ public class MainLocal extends AppCompatActivity implements LocListenerInterface
     @Override
     public void whenLocationChanged(Location location) { // переопрел=деление метода действий при обновлении геолокации
         velosity = (int) location.getSpeed(); // когда изменилось местоположение, получаем скорость
+        countLocarionChanged ++;
     }
 }

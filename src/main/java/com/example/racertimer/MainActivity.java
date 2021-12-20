@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,12 +29,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button butTimer5Min, butTimer3Min; // кнопки выбора стартовой процедуры
     private Button butTimerInstant; // кнопка немедленного начала гонки
 
-    private TextView textTime; // переменная времени в левом вехнем углу (дата и время)
+    private TextView textTime, changeMain, velMain; // переменная времени в левом вехнем углу (дата и время)
 
     private MainLocal mainLocal; // поле класса Mainlocal для вызова функции запуска LocationManager
 
     private LocationManager locationManager; // поле класса LocationManager - для управления GPS
     private LocListener locListener; // объект класса Loclistener
+
+    private int velosity = 0; // скорость в кмч
+    private int course; // курс в градусах
+    private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         butTimerInstant.setOnClickListener(this);
 
         textTime = findViewById(R.id.currentTime);
+        changeMain = findViewById(R.id.tv_main);
+        velMain = findViewById(R.id.tv2_main);
 
         ///// карочи, долбаная срань с этим GPSом. Все в кучу.
         ///// проблемы: 1. запуск приемника - из мэйна, получение данных - экранами timer и Race
@@ -74,7 +79,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        mainlocal.initLocationManager(); // запускаем LocationManager
         initLocationManager();
 
+//        velMain.setText(String.valueOf(countLocationChanged));
     }
+
 
     @Override
     public void onClick(View view) { // view - элемент, на который произошло нажатие (его id)
@@ -112,8 +119,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
         } else
         { // в противном случае (если разрешения есть), запускаем запрос на начало обновления геолокации
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 5, locListener);
-
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                                                   2,
+                                                   5,
+                                                   locListener);
         }
     }
 
@@ -124,12 +133,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (requestCode == 100 && grantResults[0] == RESULT_OK) { // ключ 100, такой же как выше
             checkPermissionLoc();
         } else { ///// вроде по факту все равно возникает, надо будет посмотреть
-            Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG ).show(); // выводим сообщение об отсутствии разрешения га GPS
+            //Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG ).show(); // выводим сообщение об отсутствии разрешения га GPS
         }
     }
 
     @Override
     public void whenLocationChanged(Location location) {
-
+        velosity = (int) location.getSpeed(); // когда изменилось местоположение, получаем скорость
+        velMain.setText(String.valueOf(velosity));
+        countLocationChanged++;
+        changeMain.setText(String.valueOf(countLocationChanged));
     }
 }

@@ -11,7 +11,8 @@ public class LocListener implements LocationListener { //LocationListener - би
     @Override
     public void onLocationChanged(@NonNull Location location) { // каждый раз при изменении позиции
         ///// через интерфейс будет запускаться метод whenLocationChanged, переопределенный в классе MainLocal
-        locListenerInterface.whenLocationChanged(location); //
+        locListenerInterface.whenLocationChanged(location); // при каждом изменении позиции мы запускаем
+        // для обьекта класса интерфейс кастомный метод whenLocationChanged - это действует на все классы, поддерживающие интрф?
     }
 
     public void setLocListenerInterface(LocListenerInterface locListenerInterface) { // сеттер - чтобы из другого класса,

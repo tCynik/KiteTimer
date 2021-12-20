@@ -27,6 +27,11 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
 
     private TextView speedTV, courseTV; // переменные для привызки полей скорости и курса
 
+    private int velosity = 0; // скорость в кмч
+    private int course; // курс в градусах
+    private int countLocarionChanged = 0; // счетчик сколько раз изменялось геоположение
+
+
     private MainLocal mainLocal; // обьект для работы с главным классом по GPS
 
     @Override
@@ -78,7 +83,10 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
 
                 timerRace.setText(timerString.toString());
 
-                speedTV.setText(String.valueOf(mainLocal.getVelosity()));
+                speedTV.setText(String.valueOf(velosity));
+
+                courseTV.setText(String.valueOf(countLocarionChanged));
+//                courseTV.setText(countLocarionChanged);
             }
 
             @Override
@@ -102,6 +110,10 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
 
     @Override
     public void whenLocationChanged(Location location) {
+        velosity = (int) location.getSpeed(); // когда изменилось местоположение, получаем скорость
+//        speedTV.setText(String.valueOf(velosity));
+        countLocarionChanged ++;
+//        speedTV.setText(String.valueOf(countLocarionChanged));
 
     }
 }
