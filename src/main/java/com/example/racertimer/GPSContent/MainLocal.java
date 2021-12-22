@@ -3,10 +3,8 @@ package com.example.racertimer.GPSContent;
 import android.location.Location;
 import android.location.LocationManager;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 // главный класс обработки GPS
-public class MainLocal extends AppCompatActivity implements LocListenerInterface{
+public class MainLocal  implements LocListenerInterface, Runnable{
     private LocationManager locationManager; // поле класса LocationManager - для управления GPS
     private LocListener locListener; // объект класса Loclistener
 
@@ -29,14 +27,14 @@ public class MainLocal extends AppCompatActivity implements LocListenerInterface
 //    public static int inkCountLocationChanged() {
 //        countLocarionChanged++;
 //    }
-
+//
 //    public void initLocationManager() { // метод для доступа к GPS-модулю и создания слушателя
 //        locationManager = (LocationManager)getSystemService(this.LOCATION_SERVICE); // доступ к Location сервису
 //        locListener = new LocListener(); // создаем новый обьект класса loclistener
 //        locListener.setLocListenerInterface(this); // вызываем метод передачи данных через интерфейс
 //        checkPermissionLoc(); // обращаемся за разрешением на использование GPS
 //    }
-//
+
 //    private void checkPermissionLoc() { // проверяем наличие разрешений на гпс, если нет - запрашиваем их.
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
 //                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -50,7 +48,7 @@ public class MainLocal extends AppCompatActivity implements LocListenerInterface
 //
 //        }
 //    }
-//
+
 //    // если пользователь не дал разрешение, выводим тоаст что разрешения нет, а если дал - меняем доступ
 //    @Override
 //    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -66,5 +64,11 @@ public class MainLocal extends AppCompatActivity implements LocListenerInterface
     public void whenLocationChanged(Location location) { // переопрел=деление метода действий при обновлении геолокации
         velosity = (int) location.getSpeed(); // когда изменилось местоположение, получаем скорость
         countLocarionChanged ++;
+    }
+
+    @Override
+    public void run() {
+        locListener.setLocListenerInterface(this); // вызываем метод передачи данных через интерфейс
+
     }
 }
