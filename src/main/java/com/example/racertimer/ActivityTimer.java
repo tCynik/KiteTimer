@@ -1,8 +1,5 @@
 package com.example.racertimer;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +10,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class ActivityTimer extends AppCompatActivity implements View.OnClickListener {
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
@@ -234,8 +234,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
                         break;
                     }
                     case 1: {
-                        Intent intent = new Intent (thisActivity, ActivityRace.class);
-                        startActivity(intent); // начинаем гонку
+                        timerSec = 0; // обнуляем таймер на старт
                         break;
                     }
                 }

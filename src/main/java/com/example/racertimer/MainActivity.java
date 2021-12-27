@@ -14,8 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.racertimer.GPSContent.LocListener;
 import com.example.racertimer.GPSContent.LocListenerInterface;
-import com.example.racertimer.GPSContent.LocationThread;
-import com.example.racertimer.GPSContent.MainLocal;
 
 ////////////// это меню главного экрана, в котором выбираем тип стартовой процедуры - 5 минут, 3 минуты, немедленный старт.
 ////////////// после выбора типа процедуры открывается окно стартового таймера:
@@ -28,8 +26,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private TextView textTime, changeMain, velMain; // переменная времени в левом вехнем углу (дата и время)
 
-    private MainLocal mainLocal; // поле класса Mainlocal для вызова функции запуска LocationManager
-
     private LocationManager locationManager; // поле класса LocationManager - для управления GPS
     private LocListener locListener; // объект класса Loclistener
     private Location location;
@@ -39,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int velosity = 0; // скорость в кмч
     private int course; // курс в градусах
     private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,37 +50,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         butTimerInstant.setOnClickListener(this);
 
         textTime = findViewById(R.id.currentTime);
-        changeMain = findViewById(R.id.tv_main);
-        velMain = findViewById(R.id.tv2_main);
 
-        ///// карочи, долбаная срань с этим GPSом. Все в кучу.
-        ///// проблемы: 1. запуск приемника - из мэйна, получение данных - экранами timer и Race
-        ///// нужно переносить все в отдельные классы, и туда обращаться
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        // запуск LocationThread с передачей в него locationManager
 
 
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setTitle("Test1");
-//        builder.setCancelable(true);
-//        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() { // Кнопка ОК
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                dialog.dismiss(); // Отпускает диалоговое окно
-//            }
-//        });
-//        AlertDialog dialog = builder.create();
-
-
-//        Context context = this;
+        Context context = this;
 //        MainLocal mainlocal = new MainLocal();
 //        locationManager = (LocationManager)getSystemService(this.LOCATION_SERVICE); // доступ к Location сервису
 //        mainlocal.initLocationManager(); // запускаем LocationManager
         MainActivityThis = this;
         locListener = new LocListener(); // создаем новый обьект класса loclistener
 
-        LocationThread locationThread = new LocationThread();
-        locationThread.start();
-
-        showLocation(locationThread);
+//        LocationThread locationThread = new LocationThread();
+////        locationThread.start();
+//
+//        showLocation(locationThread);
 //        initLocationManager();
 
 //        velMain.setText(String.valueOf(countLocationChanged));
@@ -94,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) { // view - элемент, на который произошло нажатие (его id)
         Context context = this; // создаем контекст относительно текущего активити
         Class nextActivity = ActivityTimer.class; // активити, в которое будем переходить чаще всего
-        Intent intent = new Intent();
         switch (view.getId()) {
             case R.id.but_5mins:
                 intent = new Intent(context, nextActivity); // по умолчанию 5 минут (ничего не передаем)
@@ -151,11 +132,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        countLocationChanged++;
 //        changeMain.setText(String.valueOf(countLocationChanged));
     }
-    public void showLocation (LocationThread locationThread) {
-        while (true) {
-            location = locationThread.getLocation();
-            if (location.hasSpeed()) velosity = (int) location.getSpeed();
-            velMain.setText(String.valueOf(velosity));
-        }
-    }
+//    public void showLocation (LocationThread locationThread) {
+//        while (true) {
+//            location = locationThread.getLocation();
+//            if (location.hasSpeed()) velosity = (int) location.getSpeed();
+//            velMain.setText(String.valueOf(velosity));
+//        }
+//    }
 }

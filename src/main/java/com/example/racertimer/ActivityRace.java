@@ -1,38 +1,52 @@
 package com.example.racertimer;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
-import com.example.racertimer.GPSContent.LocListenerInterface;
-import com.example.racertimer.GPSContent.MainLocal;
+// из этой активити начинаем работу с GPS.
+// испрашиваем разрешение на получение геоданных
+// если разрешение получено - сознаем экземпляр класса, отвечающего за получение геоданных
 
-public class ActivityRace extends AppCompatActivity implements LocListenerInterface {
+public class ActivityRace extends AppCompatActivity { // добавить интерфейс
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
     private TextView timerRace; // таймер гонки
     private TextView textTime; // переменная времени в левом вехнем углу
-    private Button exitToMain;
+    private Button buttonExitToMain;
 
     private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
     private int timerHour = 0; // переменная в часах
     private int timerMin = 0; // переменная счетчика в минутах
     private int timerSec = 0; // текущее значение таймера в сотых долей секунды
 
-    private TextView speedTV, courseTV; // переменные для привызки полей скорости и курса
+    private TextView speedTV, courseTV, countLocalChangedTV; // переменные для привызки полей скорости и курса
 
     private int velosity = 0; // скорость в кмч
     private int course; // курс в градусах
-    private int countLocarionChanged = 0; // счетчик сколько раз изменялось геоположение
+    private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
 
+    private LocationManager locationManager;
 
-    private MainLocal mainLocal; // обьект для работы с главным классом по GPS
+    private LocationListener locationListener;
+
+    private AsyncTask task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +57,65 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
 
         timerRace = findViewById(R.id.timer_race);
         textTime = findViewById(R.id.currentTime);
-        exitToMain = findViewById(R.id.exit_to_main);
+        buttonExitToMain = findViewById(R.id.exit_to_main);
 
         speedTV = findViewById(R.id.speed);
         courseTV = findViewById(R.id.course);
+        countLocalChangedTV = findViewById(R.id.counter_loc_changed);
 
-        mainLocal = new MainLocal();
         timerRunning();
-        ///// продолжение урока с 11:50
+
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                double tempVelosity;
+                if (location.hasSpeed()) {
+                    tempVelosity = (double) location.getSpeed()*3.6;
+                    velosity = (int) tempVelosity;
+                    course = (int) location.getBearing();
+                } else velosity = 0;
+                countLocationChanged++;
+                countLocalChangedTV.setText(String.valueOf(countLocationChanged));
+                speedTV.setText(String.valueOf(velosity * 3.6));
+                courseTV.setText(String.valueOf(course));
+                textTime.setText(String.valueOf(location.getTime()));
+            }
+        };
+
+//        task = new LocationAsyncTask();
+//        task.execute();
+
+        if (checkLokalPermissoin()) { // проверяем разрешения на GPS, если нет - запрашиваем
+//////// задвоение запроса на разрешение, нужно убирать половину
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locationListener);
+            Log.i("ActivityRace", "getSystemService(LOCATION_SERVICE)");
+//            locListener.runLocationListener(this, locationManager);
+//            Log.i("ActivityRace", "runLocationListener");
+
+        }
+//        locListener.setLocListenerInterface(new LocListenerInterface() {
+//            @Override
+//            public void whenLocationChanged(Location location) {
+//                if (location.hasSpeed()) {
+//                    velosity = (int) location.getSpeed();
+//                    course = (int) location.getBearing();
+//                } else velosity = 0;
+//                speedTV.setText(String.valueOf(velosity * 3.6));
+//                courseTV.setText(String.valueOf(course));
+//            }
+//        });
+
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -59,8 +124,24 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
                 startActivity(intent);
             }
         };
-        exitToMain.setOnClickListener(listener);
+        buttonExitToMain.setOnClickListener(listener);
 
+    }
+
+    private boolean checkLokalPermissoin() {
+        boolean flag= false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        { // если разрешения нет, то запускаем запрос разрешения, код ответа 100
+            requestPermissions(new String[] {Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
+                    Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
+        } else // в противном случае (если разрешения есть)
+        flag = true; // меняем флаг
+
+        if (flag) Toast.makeText(this, "GPS permission OK", Toast.LENGTH_LONG ).show(); // выводим сообщение об отсутствии разрешения га GPS
+        else Toast.makeText(this, "no GPS permission", Toast.LENGTH_LONG ).show();
+            return flag;
     }
 
     private void timerRunning () {
@@ -83,10 +164,6 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
 
                 timerRace.setText(timerString.toString());
 
-                speedTV.setText(String.valueOf(velosity));
-
-                courseTV.setText(String.valueOf(countLocarionChanged));
-//                courseTV.setText(countLocarionChanged);
             }
 
             @Override
@@ -108,12 +185,4 @@ public class ActivityRace extends AppCompatActivity implements LocListenerInterf
         return timerString;
     }
 
-    @Override
-    public void whenLocationChanged(Location location) {
-        velosity = (int) location.getSpeed(); // когда изменилось местоположение, получаем скорость
-//        speedTV.setText(String.valueOf(velosity));
-        countLocarionChanged ++;
-//        speedTV.setText(String.valueOf(countLocarionChanged));
-
-    }
 }

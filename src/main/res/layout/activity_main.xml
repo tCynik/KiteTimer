@@ -63,22 +63,8 @@
     </LinearLayout>
 <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="30dp"
     android:gravity="center">
-    <TextView
-        android:id="@+id/tv_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="changed"
-        android:layout_gravity="center"
-        android:textSize="30dp"
-        android:layout_margin="10dp"/>
-    <TextView
-        android:id="@+id/tv2_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="velosity"
-        android:textSize="30dp"/>
 </LinearLayout>
 
 </LinearLayout>

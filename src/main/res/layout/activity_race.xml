@@ -21,6 +21,19 @@
             android:text="time hour:minute"
             android:textSize="16dp" />
 
+        <LinearLayout
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+        <TextView
+            android:id="@+id/GPS_health"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
+            android:text="GPS health"
+            android:textSize="16dp" />
+
+
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,19 +47,13 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/timer_race"
+            android:layout_width="80dp"
             android:layout_height="match_parent"
             android:paddingHorizontal="10dp"
-            android:text="speed"
+            android:text="timer"
             android:textSize="16dp" />
 
-        <TextView
-            android:id="@+id/speed"
-            android:layout_width="60dp"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="10dp"
-            android:text="kmh"
-            android:textSize="16dp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -60,6 +67,19 @@
             android:layout_height="match_parent"
             android:paddingHorizontal="10dp"
             android:text="degr"
+            android:textSize="16dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
+            android:text="CountLocChanged"
+            android:textSize="16dp" />
+        <TextView
+            android:id="@+id/counter_loc_changed"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="10dp"
+            android:text="count"
             android:textSize="16dp" />
 
     </LinearLayout>
@@ -75,15 +95,40 @@
         android:gravity="center">
 
         <TextView
-            android:id="@+id/timer_race"
+            android:id="@+id/speed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textSize="40dp"
-            android:text="Time"/>
+            android:text="kmh"
+            android:textSize="70dp" />
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_weight="1"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+        <TextView
+            android:id="@+id/max_speed"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:text="kmh"/>
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:text="max speed"/>
+
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="10dp"
@@ -98,6 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="End the race"/>
+
 
     </LinearLayout>
 
