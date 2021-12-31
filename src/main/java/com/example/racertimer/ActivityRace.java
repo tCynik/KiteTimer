@@ -36,10 +36,12 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
     private int timerMin = 0; // переменная счетчика в минутах
     private int timerSec = 0; // текущее значение таймера в сотых долей секунды
 
-    private TextView speedTV, courseTV, countLocalChangedTV; // переменные для привызки полей скорости и курса
+    private TextView speedTV, maxSpeedTV, courseTV, countLocalChangedTV; // переменные для привызки полей скорости и курса
 
     private int velosity = 0; // скорость в кмч
+    private int maxSpeed = 0; // максимальная зарегистрированная скорость
     private int course; // курс в градусах
+    private boolean isFirstIteration = true; // флаг о том, что это первая итерация для выставления первичных цифр
     private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
 
     private LocationManager locationManager;
@@ -60,6 +62,7 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         buttonExitToMain = findViewById(R.id.exit_to_main);
 
         speedTV = findViewById(R.id.speed);
+        maxSpeedTV = findViewById(R.id.max_speed);
         courseTV = findViewById(R.id.course);
         countLocalChangedTV = findViewById(R.id.counter_loc_changed);
 
@@ -72,12 +75,19 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
                 double tempVelosity;
                 if (location.hasSpeed()) {
                     tempVelosity = (double) location.getSpeed()*3.6;
-                    velosity = (int) tempVelosity;
-                    course = (int) location.getBearing();
+                    velosity = (velosity + (int) tempVelosity) / 2;
+                    course = courseAverage((int) location.getBearing()); // с учетом усреднения
                 } else velosity = 0;
+//                if (isFirstIteration) { // если это первая итерация - выставляем цифры
+//                    isFirstIteration = false;
+//                    velosity = 0;
+//                    lastCourse = course;
+//                }
                 countLocationChanged++;
                 countLocalChangedTV.setText(String.valueOf(countLocationChanged));
-                speedTV.setText(String.valueOf(velosity * 3.6));
+                speedTV.setText(String.valueOf(velosity));
+                if (velosity > maxSpeed) maxSpeed = velosity;
+                maxSpeedTV.setText(String.valueOf(maxSpeed));
                 courseTV.setText(String.valueOf(course));
                 textTime.setText(String.valueOf(location.getTime()));
             }
@@ -126,6 +136,20 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         };
         buttonExitToMain.setOnClickListener(listener);
 
+    }
+
+    private int courseAverage (int newCourse) {
+        int deltaCourse = (newCourse - course); // разница курсов: "курс новый (newCourse) - курс старый (course)"
+//        Log.i("ActivityRace", "course = "+course+", newCourse1 = "+ newCourse+ ", deltaCourse = " + deltaCourse);
+        if (deltaCourse > 180) deltaCourse = deltaCourse - 360; //newCourse - (360  - course);
+        if (deltaCourse < -180) deltaCourse = 360 + deltaCourse;
+//        Log.i("ActivityRace", "deltaCourse = " + deltaCourse);
+
+        course = (int) (course + (deltaCourse * 0.75)) ; // усреднение - приращиваем на 75% от разницы
+        if (course > 360) course = course - 360;
+        if (course < 0) course = course + 360;
+        Log.i("ActivityRace", "averageCourse = " + course);
+        return course;
     }
 
     private boolean checkLokalPermissoin() {

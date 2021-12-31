@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -134,10 +135,17 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
                 if (timerSec <= 0) timerString2Print = "GO!!!";
                 timerResult.setText(timerString2Print.toString()); // выводим значение на экран
 
-                if (timerSec == 0) {
-                    Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
-                    startActivity(intent); // запуск активити
-                }
+                if (timerSec == 0) startRace(); //если таймер кончился, стартуем активити гонки
+//                {
+//                    Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
+//                    Log.i("Race", Thread.currentThread().getName() + timerSec);
+//                    startActivity(intent); // запуск активити
+//                }
+            }
+
+            @Override
+            protected void finalize() throws Throwable {
+                super.finalize();
             }
 
             @Override
@@ -146,6 +154,13 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
             }
         }.start();
     }
+
+    void startRace(){
+        Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
+        Log.i("Race", Thread.currentThread().getName() + timerSec);
+        startActivity(intent); // запуск активити
+    }
+
 
     public int checkPeriod(int timer) {
         int period = 1; // Значения периода: 0 - старт, 1 - от 0 до 1, 2 - от 1 до 2, 3 - от 2 до макс
@@ -235,6 +250,8 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
                     }
                     case 1: {
                         timerSec = 0; // обнуляем таймер на старт
+                        Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
+                        startActivity(intent); // запуск активити
                         break;
                     }
                 }
