@@ -52,6 +52,9 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         butPlus1Sec = findViewById(R.id.but_plus_1sec);
         butPlus5Sec = findViewById(R.id.but_plus_5sec);
 
+        timerResult = findViewById(R.id.timer_min_sec); // привязка таймера к полю вывода таймера
+
+        /** слушатели кнопок*/ ///// сделать моментальное обновление счетчика при нажатии кнопки (бесит)
         butMinus1Sec.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -85,9 +88,9 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
             }
         });
 
-        timerResult = findViewById(R.id.timer_min_sec); // привязка таймера к полю вывода таймера
 
-        timerResult.setOnClickListener(new View.OnClickListener() { // пауза таймера вручную
+        /** пауза отсчета при нажатии на счетчик*/
+        timerResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (timerPaused) {
@@ -96,51 +99,29 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
             }
         });
 
-        textTime = findViewById(R.id.currentTime); // привязываем переменную полю в активити
+        textTime = findViewById(R.id.currentTime); // время и дата
 
-        Context context = ActivityTimer.this; // выводим Toast подсказку
+        Context context = ActivityTimer.this; // выводим Toast подсказку про паузу таймера
         Toast.makeText(context, "tap the timer to pause", Toast.LENGTH_LONG).show();
 
+        /** выставляем тайминг отсчета на основе выбранного в MainActivity типа процедуры */
         procedureTiming = 5; // по умолчанию тайминг 5 минут
         Intent catchProcedureTiming = getIntent(); // получаем данные по таймингу процедуры из шлавного меню
         if (catchProcedureTiming.hasExtra("procedureTiming")) { // проверка, получили ли данные с нужным ключом
             procedureTiming = catchProcedureTiming.getIntExtra("procedureTiming", 5); //принимаем данные
         }
         timerSec = procedureTiming * 60; // задаем начальное значение таймера
+
+        /** запуск счетчика таймера*/
         timerRunning(procedureTiming * 60);
-
     }
 
-    public String calcTimeMinSec (int timerSec) {
-        String result=null;
-        int sec;
-        int min;
-        min = timerSec / 60;
-        result = min + ":00";
-        sec = timerSec % 60;
-        if (sec !=0) result = min + ":" + sec;
-        if (sec < 10) result = min + ":0" + sec;
-        return result;
-    }
-
+    /** счетчик таймера */ //////// вывести в отдельный поток??
     public void timerRunning(long timerMiliSec) {
         new CountDownTimer(timerMiliSec * 1000, 1000) {
             @Override
             public void onTick(long l) { // действия во время отсчета
-                if (timerPaused == false) timerSec--;
-                period = checkPeriod(timerSec); // определяем период, в котором таймер
-                buttonsNames(period); // выставляем надписи на кнопках в зависимости от периода
-
-                timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
-                if (timerSec <= 0) timerString2Print = "GO!!!";
-                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
-
-                if (timerSec == 0) startRace(); //если таймер кончился, стартуем активити гонки
-//                {
-//                    Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
-//                    Log.i("Race", Thread.currentThread().getName() + timerSec);
-//                    startActivity(intent); // запуск активити
-//                }
+                onTimerTicked();
             }
 
             @Override
@@ -155,13 +136,40 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         }.start();
     }
 
+    /** обновление и обработка данных таймера*/
+    private void onTimerTicked () { // таймер обновился
+        if (timerPaused == false) timerSec --;
+        period = checkPeriod(timerSec); // определяем период, в котором таймер
+        buttonsNames(period); // выставляем надписи на кнопках в зависимости от периода
+
+        timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
+        if (timerSec <= 0) timerString2Print = "GO!!!";
+        timerResult.setText(timerString2Print.toString()); // выводим значение на экран
+
+        if (timerSec == 0) startRace(); //если таймер кончился, стартуем активити гонки
+    }
+
+    /** получение стринговых показаний для TextView */
+    public String calcTimeMinSec (int timerSec) {
+        String result=null;
+        int sec;
+        int min;
+        min = timerSec / 60;
+        result = min + ":00";
+        sec = timerSec % 60;
+        if (sec !=0) result = min + ":" + sec;
+        if (sec < 10) result = min + ":0" + sec;
+        return result;
+    }
+
+    /** обработка запуска гонки */
     void startRace(){
         Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
         Log.i("Race", Thread.currentThread().getName() + timerSec);
         startActivity(intent); // запуск активити
     }
 
-
+    /** Вычисление текущей стадии стартовой процедуры */
     public int checkPeriod(int timer) {
         int period = 1; // Значения периода: 0 - старт, 1 - от 0 до 1, 2 - от 1 до 2, 3 - от 2 до макс
         if (timer > 60 & timer < 120) period = 2;
@@ -169,6 +177,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         return period;
     }
 
+    /** Переименование кнопок в зависимости от стадии стартовой процедуры */
     public void buttonsNames (int period) { // метод именования кнопок экрана в зависимости от периода времени
         switch (period) {
             case 3: {
@@ -177,14 +186,12 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
                 butNextTimer.setText("2 min");
                 break;
             }
-
             case 2: {
                 butPrevTimer.setText(procedureTiming + " min");
                 butCurrTimer.setText("2 min");
                 butNextTimer.setText("1 min");
                 break;
             }
-
             case 1: {
                 butPrevTimer.setText("2 min");
                 butCurrTimer.setText("1 min");
@@ -195,12 +202,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    public boolean flashing (boolean flasher) {
-        if (flasher) flasher = false;
-        else flasher = true;
-        return flasher;
-    }
-
+    /** обработчик действия кнопок в зависимости от периода стартовой процедуры */
     @Override
     public void onClick(View view) { // отработка действия кнопок
         switch (view.getId()) {
