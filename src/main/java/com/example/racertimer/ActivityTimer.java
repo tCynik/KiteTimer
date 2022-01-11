@@ -3,6 +3,7 @@ package com.example.racertimer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -29,7 +30,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
 
     private int procedureTiming; // тип стартовой процедуры в минутах
     private int timerSec; // текущий таймер в секундах
-    private int period, lastPeriod; // участок времени, на котором значения счетчика по умолчанию начало
+    private int period = 1; // участок времени, на котором значения счетчика по умолчанию начало
     private String timerString2Print; // значение стринговое для передачи на вывод в формате мм:сс
     private boolean flasher = false; // переменная для реализации мигания
     private boolean timerPaused = false;
@@ -41,6 +42,8 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
+
+//        Log.i("Race", " Thread: "+Thread.currentThread().getName() + " starting... ");
 
         thisActivity = this;
 
@@ -92,14 +95,16 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
             }
         });
 
-
         /** пауза отсчета при нажатии на счетчик*/
         timerResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (timerPaused) {
                     timerPaused = false;
-                } else timerPaused = true;
+                } else {
+                    timerPaused = true;
+                    voiceover.makeSound(voiceover.pause);
+                }
             }
         });
 
@@ -129,13 +134,13 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
             @Override
             public void onTick(long l) { // действия во время отсчета
                 if (timerSec > 0) onTimerTicked();
-            }
+//                Log.i("Race", " Thread: "+Thread.currentThread().getName() + " timerSec = " +timerSec);
 
+            }
             @Override
             protected void finalize() throws Throwable {
                 super.finalize();
             }
-
             @Override
             public void onFinish() { // действия по окончании отсчета
                 if (timerSec > 0) timerRunning(timerSec * 1000);
@@ -146,26 +151,37 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
     /** обновление и обработка данных таймера*/
     private void onTimerTicked () { // таймер обновился
         if (timerPaused == false) {
-            timerSec --;
-            if (timerSec <= 10)
-                voiceover.makeSound("secondFinalSound");
-            else voiceover.makeSound("secondSound");
+            timerSec -- ;
+            switch (timerSec) {
+                case 130: voiceover.makeSound(voiceover.twoMinutesReady); break;
+                case 120: voiceover.makeSound(voiceover.twoMinutes); break;
+                case 70: voiceover.makeSound(voiceover.oneMinutesReady); break;
+                case 60: voiceover.makeSound(voiceover.oneMinute); break;
+                case 50: voiceover.makeSound(voiceover.fivety); break;
+                case 40: voiceover.makeSound(voiceover.fourty); break;
+                case 30: voiceover.makeSound(voiceover.thrity); break;
+                case 20: voiceover.makeSound(voiceover.twenty); break;
+                case 10: voiceover.makeSound(voiceover.ten); break;
+                case 9: voiceover.makeSound(voiceover.nine); break;
+                case 8: voiceover.makeSound(voiceover.eight); break;
+                case 7: voiceover.makeSound(voiceover.seven); break;
+                case 6: voiceover.makeSound(voiceover.six); break;
+                case 5: voiceover.makeSound(voiceover.five); break;
+                case 4: voiceover.makeSound(voiceover.four); break;
+                case 3: voiceover.makeSound(voiceover.three); break;
+                case 2: voiceover.makeSound(voiceover.two); break;
+                case 1: voiceover.makeSound(voiceover.one); break;
+                case 0: voiceover.makeSound(voiceover.startSound);
+                startRace(); break;
+                default: break;
+            }
         }
-        period = checkPeriod(timerSec); // определяем период, в котором таймер
-        if (period != lastPeriod) { // звук мены периода
-            voiceover.makeSound("periodChangeSound");
-            lastPeriod = period;
-        }
+        period = checkPeriod(timerSec);
         buttonsNames(period); // выставляем надписи на кнопках в зависимости от периода
 
         timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
         if (timerSec <= 0) timerString2Print = "GO!!!";
         timerResult.setText(timerString2Print.toString()); // выводим значение на экран
-
-        if (timerSec == 0) {
-            voiceover.makeSound("startSound");
-            startRace(); //если таймер кончился, стартуем активити гонки
-        }
     }
 
     /** получение стринговых показаний для TextView */
@@ -190,7 +206,8 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
 
     /** Вычисление текущей стадии стартовой процедуры */
     public int checkPeriod(int timer) {
-        int period = 1; // Значения периода: 0 - старт, 1 - от 0 до 1, 2 - от 1 до 2, 3 - от 2 до макс
+//        int period = 1; // Значения периода: 0 - старт, 1 - от 0 до 1, 2 - от 1 до 2, 3 - от 2 до макс
+        if (timer < 60) period = 1;
         if (timer > 60 & timer < 120) period = 2;
         if (timer > 120 ) period = 3;
         return period;
@@ -198,24 +215,28 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
 
     /** Переименование кнопок в зависимости от стадии стартовой процедуры */
     public void buttonsNames (int period) { // метод именования кнопок экрана в зависимости от периода времени
+        butPrevTimer.setBackgroundColor(Color.BLUE);
+        butCurrTimer.setBackgroundColor(Color.BLUE);
         switch (period) {
             case 3: {
                 butPrevTimer.setText("back");
                 butCurrTimer.setText(procedureTiming + " min");
                 butNextTimer.setText("2 min");
+                butNextTimer.setBackgroundColor(Color.BLUE);
                 break;
             }
             case 2: {
                 butPrevTimer.setText(procedureTiming + " min");
                 butCurrTimer.setText("2 min");
                 butNextTimer.setText("1 min");
+                butNextTimer.setBackgroundColor(Color.BLUE);
                 break;
             }
             case 1: {
                 butPrevTimer.setText("2 min");
                 butCurrTimer.setText("1 min");
                 butNextTimer.setText("START");
-//                butNextTimer.setBackgroundColor(Integer.parseInt("#ff0000"));
+                butNextTimer.setBackgroundColor(Color.RED);
                 break;
             }
             default: break;

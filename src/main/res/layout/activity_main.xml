@@ -58,6 +58,7 @@
             android:id="@+id/but_instant"
             android:layout_width="200dp"
             android:layout_height="match_parent"
+            android:background="@color/red"
             android:text="Instant Start" />
 
     </LinearLayout>
