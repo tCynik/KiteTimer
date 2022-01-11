@@ -71,12 +71,14 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         courseTV = findViewById(R.id.course);
         countLocalChangedTV = findViewById(R.id.counter_loc_changed);
 
+        /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
 
         initLocationListener(); // запускаем процедуру приема данных GPS
         if (checkPermission()) // если есть все разрешения, запускаем прием геолокации с передачей в поток листенеар
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locListener.locationListener);
         locListener.start();
+
 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
@@ -179,8 +181,7 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         }
     }
 
-
-/** обработчик проверки наличия разрешений     */
+        /** обработчик проверки наличия разрешений     */
         public boolean checkPermission() { // проверяем наличие разрешения на геоданные
             // если разрешения нет:
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)

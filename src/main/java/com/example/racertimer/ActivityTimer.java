@@ -15,6 +15,8 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.racertimer.multimedia.Voiceover;
+
 public class ActivityTimer extends AppCompatActivity implements View.OnClickListener {
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
     private Button butPrevTimer; // кнопка сброса на предыдущий таймер
@@ -27,10 +29,12 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
 
     private int procedureTiming; // тип стартовой процедуры в минутах
     private int timerSec; // текущий таймер в секундах
-    private int period; // участок времени, на котором значения счетчика по умолчанию начало
+    private int period, lastPeriod; // участок времени, на котором значения счетчика по умолчанию начало
     private String timerString2Print; // значение стринговое для передачи на вывод в формате мм:сс
     private boolean flasher = false; // переменная для реализации мигания
     private boolean timerPaused = false;
+
+    private Voiceover voiceover;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -112,6 +116,9 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         }
         timerSec = procedureTiming * 60; // задаем начальное значение таймера
 
+        /** запускаем озвучку */
+        voiceover = new Voiceover(this);
+
         /** запуск счетчика таймера*/
         timerRunning(procedureTiming * 60);
     }
@@ -121,7 +128,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
         new CountDownTimer(timerMiliSec * 1000, 1000) {
             @Override
             public void onTick(long l) { // действия во время отсчета
-                onTimerTicked();
+                if (timerSec > 0) onTimerTicked();
             }
 
             @Override
@@ -138,15 +145,27 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
 
     /** обновление и обработка данных таймера*/
     private void onTimerTicked () { // таймер обновился
-        if (timerPaused == false) timerSec --;
+        if (timerPaused == false) {
+            timerSec --;
+            if (timerSec <= 10)
+                voiceover.makeSound("secondFinalSound");
+            else voiceover.makeSound("secondSound");
+        }
         period = checkPeriod(timerSec); // определяем период, в котором таймер
+        if (period != lastPeriod) { // звук мены периода
+            voiceover.makeSound("periodChangeSound");
+            lastPeriod = period;
+        }
         buttonsNames(period); // выставляем надписи на кнопках в зависимости от периода
 
         timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
         if (timerSec <= 0) timerString2Print = "GO!!!";
         timerResult.setText(timerString2Print.toString()); // выводим значение на экран
 
-        if (timerSec == 0) startRace(); //если таймер кончился, стартуем активити гонки
+        if (timerSec == 0) {
+            voiceover.makeSound("startSound");
+            startRace(); //если таймер кончился, стартуем активити гонки
+        }
     }
 
     /** получение стринговых показаний для TextView */
@@ -196,6 +215,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
                 butPrevTimer.setText("2 min");
                 butCurrTimer.setText("1 min");
                 butNextTimer.setText("START");
+//                butNextTimer.setBackgroundColor(Integer.parseInt("#ff0000"));
                 break;
             }
             default: break;
