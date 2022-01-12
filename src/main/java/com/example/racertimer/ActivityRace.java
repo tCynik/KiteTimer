@@ -2,7 +2,9 @@ package com.example.racertimer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -83,11 +85,34 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent (".MainActivity");
-                startActivity(intent);
             }
         };
         buttonExitToMain.setOnClickListener(listener);
+    }
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder confurmingRaceEnd = new AlertDialog.Builder(this); // строитель диалога
+        confurmingRaceEnd.setMessage("End the race?")
+                .setCancelable(false) // не отменяемый (без крестика вверху)
+                // назначаем кнопки взаимодействия
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent (".MainActivity");
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+        AlertDialog alertDialog = confurmingRaceEnd.create(); // создание диалога
+        alertDialog.setTitle("Ending the race"); // заголовок
+        alertDialog.show(); // отображение диалога
     }
 
     /** усреднитель курса и обработчик перехода через нулевой азимут */
@@ -103,7 +128,6 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         return course;
     }
 
-
     /** Счетчик таймера*/
     private void timerRunning () {
         new CountDownTimer(60000, 1000) {
@@ -114,7 +138,6 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
             @Override
             public void onFinish() {
                 timerRunning();
-
             }
         }.start();
     }

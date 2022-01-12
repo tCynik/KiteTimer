@@ -295,6 +295,7 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
                         timerSec = 0; // обнуляем таймер на старт
                         Intent intent = new Intent (thisActivity, ActivityRace.class); // запускаем активность "Race"
                         startActivity(intent); // запуск активити
+                        finish();
                         break;
                     }
                 }

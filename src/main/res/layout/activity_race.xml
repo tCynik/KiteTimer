@@ -142,7 +142,7 @@
             android:id="@+id/exit_to_main"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="End the race"/>
+            android:text="button"/>
 
 
     </LinearLayout>
