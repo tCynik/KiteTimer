@@ -1,6 +1,5 @@
 package com.example.racertimer;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -8,12 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -22,14 +16,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
-import com.example.racertimer.GPSContent.LocListener;
-import com.example.racertimer.GPSContent.LocListenerInterface;
-
-// из этой активити начинаем работу с GPS.
-// испрашиваем разрешение на получение геоданных
-// если разрешение получено - сознаем экземпляр класса, отвечающего за получение геоданных
 
 public class ActivityRace extends AppCompatActivity { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -47,9 +33,6 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
 
     private TextView speedTV, maxSpeedTV, courseTV, countLocalChangedTV; // переменные для привызки полей скорости и курса
 
-    private LocListener locListener; // слушатель геолокации в отдельном потоке
-    private LocListenerInterface locListenerInterface;
-
     private int velosity = 0; // скорость в кмч
     private int maxSpeed = 0; // максимальная зарегистрированная скорость
     private int course; // курс в градусах
@@ -59,21 +42,13 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
     private BroadcastReceiver locationBroadcastReceiver;
     private IntentFilter locationIntentFilter;
 
-    private LocationManager locationManager;
-
-    private LocationListener locationListener;
-
-    private AsyncTask task;
-
     private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
-
-        thisActivity = this;
-
+////////// вынеси определение вьюшек в отдельный метод
         timerRace = findViewById(R.id.timer_race);
         textTime = findViewById(R.id.currentTime);
         buttonExitToMain = findViewById(R.id.exit_to_main);
@@ -83,17 +58,20 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         courseTV = findViewById(R.id.course);
         countLocalChangedTV = findViewById(R.id.counter_loc_changed);
 
+        thisActivity = this;
+
+/////////// добавляем в пакет Instruments класс thread с мясом для отправки и обработки погодных запросов
+/////////// при наличии геоданных направляем запрос
+/////////// по получении запроса исходя из актуального времени выбираем текущий ветер, выводим в отдельный TV
+/////////// добавляем ImageLayout, вставляем туда шкалу ветра, стрелку скорости
+/////////// исходя из текущего курса поворачиваем шкалу ветра, из скорости стрелку скорости
+/////////// курить по conctrateLayout, порядок прорисовки, наложение, и т.д....
         context = this;
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
 
-//        initLocationListener(); // запускаем процедуру приема данных GPS
-//        if (checkPermission()) // если есть все разрешения, запускаем прием геолокации с передачей в поток листенеар
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locListener.locationListener);
-//        locListener.start();
-
-        initBroadcastListener();
+        initBroadcastListener(); // запускаем слушатель новых геоданных
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
         View.OnClickListener listener = new View.OnClickListener() {
@@ -104,6 +82,7 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         buttonExitToMain.setOnClickListener(listener);
     }
 
+    /** Отработка нажатия кнопки "Назад" */
     @Override
     public void onBackPressed() { // в случае нажатия кнопки назад диалег по переходу в главное меню
         AlertDialog.Builder confurmingRaceEnd = new AlertDialog.Builder(this); // строитель диалога
@@ -113,9 +92,7 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent (context, MainActivity.class);
-                        intent.setPackage("com.example.racertimer");
-                        startActivity(intent);
+                        stopRace();
                         finish(); // закрываем эту активити
                     }
                 })
@@ -128,6 +105,10 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         AlertDialog alertDialog = confurmingRaceEnd.create(); // создание диалога
         alertDialog.setTitle("Ending the race"); // заголовок
         alertDialog.show(); // отображение диалога
+    }
+
+    private void stopRace() { // остановка гонки
+        super.onBackPressed();
     }
 
     /** усреднитель курса и обработчик перехода через нулевой азимут */
@@ -199,32 +180,9 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
-
-
-    /** Запуск приема данных геолокации */
-    private void initLocationListener () {
-        /** запускаем сервис геолокации */
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        /** создаем отдельный поток - листенер */
-        locListener = new LocListener();
-        locListenerInterface = new LocListenerInterface() {
-            @Override
-            public void whenLocationChanged(Location location) {
-                Log.i("Main", " Thread: " + Thread.currentThread().getName() + "locListInterf get new info");
-                processorChangedLocation(location);
-            }
-        };
-
-        /** связываем интерфейс листенера */
-        locListener.setLocationListenerInterface(locListenerInterface);
-
-        /** процедура запроса разрешений и запуска приема сигналов GPS */
-        if (!checkPermission()) { // если разрешения нет,
-            askPermission(); //  запрашиваем разрешение. Далее если не будет разрешения,
-        }
-    }
-
+    /** обработка вновь полученных геолокации */
     private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
+        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " Activity race get new location ");
         double tempVelosity;
         if (location.hasSpeed()) {
             tempVelosity = (double) location.getSpeed()*3.6;
@@ -239,23 +197,4 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         courseTV.setText(String.valueOf(course));
         textTime.setText(String.valueOf(location.getTime()));
     }
-
-    /** обработчик проверки наличия разрешений     */
-    public boolean checkPermission() { // проверяем наличие разрешения на геоданные
-            // если разрешения нет:
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) // если разрешения нет, то запускаем запрос разрешения, код ответа 100
-            {
-                return false; // если разрешения нет, возвращаем false
-            } else
-                return true; // в противном случае разрешение есть, возвращаем true
-    }
-
-    /** запроса разрешения на геолокацию     */ // - вызываем в мэйне, тут убрать
-    private void askPermission() { // запрос разрешения
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
-                    Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
-    }
-
 }

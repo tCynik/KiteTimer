@@ -9,7 +9,7 @@
     tools:context=".ActivityTimer">
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="30dp"
+      android:layout_height="20dp"
       android:orientation="horizontal">
     <TextView
         android:id="@+id/currentTime"
@@ -23,7 +23,7 @@
 
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="20dp"
+      android:layout_height="1dp"
       android:layout_weight="1"/>
 
   <LinearLayout
@@ -31,7 +31,7 @@
       android:layout_height="100dp"
       android:orientation="horizontal"
       android:layout_gravity="center"
-      android:paddingHorizontal="20dp"
+      android:paddingHorizontal="10dp"
       >
     <LinearLayout
         android:layout_width="wrap_content"
@@ -93,42 +93,87 @@
 
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="20dp"
+      android:layout_height="1dp"
       android:layout_weight="1"/>
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="80dp"
       android:orientation="horizontal"
       android:gravity="center">
-
     <Button
         android:id="@+id/but_prev_timer"
         android:layout_width="100dp"
-        android:layout_height="@dimen/button_height"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:layout_margin="5dp"
-
         />
     <Button
         android:id="@+id/but_curr_timer"
         android:layout_width="100dp"
-        android:layout_height="@dimen/button_height"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:layout_margin="5dp"
-
         />
-
     <Button
         android:id="@+id/but_next_timer"
         android:layout_width="@dimen/button_1_width"
-        android:layout_height="@dimen/button_height"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:layout_margin="5dp"
         />
   </LinearLayout>
+
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="40dp"
-      android:layout_weight="1"></LinearLayout>
+      android:layout_height="1dp"
+      android:layout_weight="1"/>
+
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="velocity:"
+        android:textSize="20sp" />
+    <LinearLayout
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+      android:gravity="end">
+      <TextView
+          android:id="@+id/timer_velocity"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textSize="20sp"
+          android:text="0"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" kmh. bearing:"
+        android:textSize="20sp"/>
+    <LinearLayout
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:gravity="end">
+      <TextView
+          android:id="@+id/timer_bearing"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textSize="20sp"
+          android:text="0"/>
+
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text=" deg."/>
+
+  </LinearLayout>
+
 
 </LinearLayout>

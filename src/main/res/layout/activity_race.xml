@@ -113,20 +113,48 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="end">
-        <TextView
-            android:id="@+id/max_speed"
-            android:layout_width="80dp"
+        >
+        <LinearLayout
+            android:layout_width="1dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="20dp"
-            android:text="kmh"/>
-        <TextView
-            android:layout_width="100dp"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:text="wind:"/>
+            <TextView
+                android:id="@+id/race_wind_dir"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"/>
+            <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:text="deg."/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="1dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="20dp"
-            android:text="max speed"/>
+            android:layout_weight="1"
+            android:gravity="end">
+            <TextView
+                android:id="@+id/max_speed"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="20dp"
+                android:text="kmh"/>
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="20dp"
+                android:text="max speed"/>
+
+        </LinearLayout>
+
 
     </LinearLayout>
     <LinearLayout
