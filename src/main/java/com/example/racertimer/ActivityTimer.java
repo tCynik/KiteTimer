@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.racertimer.multimedia.Voiceover;
 
 public class ActivityTimer extends AppCompatActivity implements View.OnClickListener {
+    private final static String PROJECT_LOG_TAG = "racer_timer";
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
     private Button butPrevTimer; // кнопка сброса на предыдущий таймер
     private Button butCurrTimer; // кнопка сброса текущего аткмера на начало
@@ -42,8 +43,6 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
-
-//        Log.i("Race", " Thread: "+Thread.currentThread().getName() + " starting... ");
 
         thisActivity = this;
 

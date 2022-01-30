@@ -1,16 +1,22 @@
 package com.example.racertimer;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.example.racertimer.GPSContent.LocListener;
 import com.example.racertimer.GPSContent.LocListenerInterface;
@@ -21,6 +27,9 @@ import com.example.racertimer.GPSContent.LocListenerInterface;
 ////////////// при запуске главного экрана происходит запуск работы GPS модуля
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocListenerInterface {
+    private final static String PROJECT_LOG_TAG = "racer_timer";
+    final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
+
     private Button butTimer5Min, butTimer3Min; // кнопки выбора стартовой процедуры
     private Button butTimerInstant; // кнопка немедленного начала гонки
 
@@ -29,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LocationManager locationManager; // поле класса LocationManager - для управления GPS
     private LocListener locListener; // объект класса Loclistener
     private Location location;
+    private Intent intentLocationService; // интент для создания сервиса геолокации
 
     public Activity MainActivityThis;
     public boolean flagGps = true; // флаг работы Loclistener
@@ -51,26 +61,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         textTime = findViewById(R.id.currentTime);
 
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        // запуск LocationThread с передачей в него locationManager
+//        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+        /////// при выходе из приложения сделать меню выхода. в меню сообщить что с закрытием программы
+/////// убиваем сервис если нажато "да"
 
-        Context context = this;
-//        MainLocal mainlocal = new MainLocal();
-//        locationManager = (LocationManager)getSystemService(this.LOCATION_SERVICE); // доступ к Location сервису
-//        mainlocal.initLocationManager(); // запускаем LocationManager
-        MainActivityThis = this;
+//        Context context = this;
+//        MainActivityThis = this;
+
         locListener = new LocListener(); // создаем новый обьект класса loclistener
 
-//        LocationThread locationThread = new LocationThread();
-////        locationThread.start();
-//
-//        showLocation(locationThread);
-//        initLocationManager();
-
-//        velMain.setText(String.valueOf(countLocationChanged));
+        if (!checkPermission()) askPermission(); // проверяем разрешения на геолокацию и зпрашиваем
+        createLocationService();
     }
-
 
     @Override
     public void onClick(View view) { // view - элемент, на который произошло нажатие (его id)
@@ -91,29 +94,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         startActivity(intent);
     }
-//    public void initLocationManager() { // метод для доступа к GPS-модулю и создания слушателя
-//        locationManager = (LocationManager)getSystemService(this.LOCATION_SERVICE); // доступ к Location сервису
-//        locListener = new LocListener(); // создаем новый обьект класса loclistener
-//        locListener.setLocListenerInterface(this); // вызываем метод передачи данных через интерфейс
-//        checkPermissionLoc(); // обращаемся за разрешением на использование GPS
-//    }
-//
-//    private void checkPermissionLoc() { // проверяем наличие разрешений на гпс, если нет - запрашиваем их.
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
-//                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-//                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-//        { // если разрешения нет, то запускаем запрос разрешения, код ответа 100
-//            requestPermissions(new String[] {Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
-//                    Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
-//        } else
-//        { // в противном случае (если разрешения есть), запускаем запрос на начало обновления геолокации
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-//                                                   2,
-//                                                   5,
-//                                                   locListener);
-//        }
-//    }
-//
+
+    private void createLocationService() {
+        if (checkPermission()) { // если разрешение есть, запускаем сервис
+            Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " permission good, starting service ");
+            intentLocationService = new Intent();
+            intentLocationService.setAction(".LocationService");
+            intentLocationService.setPackage("com.example.racertimer.Instruments");
+//            intentLocationService.setFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+            Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " starting?? ");
+
+            this.startService(intentLocationService);
+        } // если разрешения нет, выводим тост
+        else Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG);
+    }
+
+    /** Методы для работы с разрешениями на геолокацию */
+    public boolean checkPermission() { // проверяем наличие разрешения на геоданные
+        // если разрешения нет:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) // если разрешения нет, то запускаем запрос разрешения, код ответа 100
+        {
+            return false; // если разрешения нет, возвращаем false
+        } else
+            return true; // в противном случае разрешение есть, возвращаем true
+    }
+    private void askPermission() { // запрос разрешения
+        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
+                Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
+    }
+
+    //
 //    // если пользователь не дал разрешение, выводим тоаст что разрешения нет, а если дал - меняем доступ
 //    @Override
 //    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

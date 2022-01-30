@@ -3,9 +3,11 @@ package com.example.racertimer;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -30,6 +32,9 @@ import com.example.racertimer.GPSContent.LocListenerInterface;
 // если разрешение получено - сознаем экземпляр класса, отвечающего за получение геоданных
 
 public class ActivityRace extends AppCompatActivity { // добавить интерфейс
+    private final static String PROJECT_LOG_TAG = "racer_timer";
+    final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
+
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
     private TextView timerRace; // таймер гонки
     private TextView textTime; // переменная времени в левом вехнем углу
@@ -51,11 +56,16 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
     private boolean isFirstIteration = true; // флаг о том, что это первая итерация для выставления первичных цифр
     private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
 
+    private BroadcastReceiver locationBroadcastReceiver;
+    private IntentFilter locationIntentFilter;
+
     private LocationManager locationManager;
 
     private LocationListener locationListener;
 
     private AsyncTask task;
+
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,15 +83,19 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         courseTV = findViewById(R.id.course);
         countLocalChangedTV = findViewById(R.id.counter_loc_changed);
 
+        context = this;
+
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
 
-        initLocationListener(); // запускаем процедуру приема данных GPS
-        if (checkPermission()) // если есть все разрешения, запускаем прием геолокации с передачей в поток листенеар
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locListener.locationListener);
-        locListener.start();
+//        initLocationListener(); // запускаем процедуру приема данных GPS
+//        if (checkPermission()) // если есть все разрешения, запускаем прием геолокации с передачей в поток листенеар
+//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locListener.locationListener);
+//        locListener.start();
 
+        initBroadcastListener();
 
+//// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -91,7 +105,7 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed() { // в случае нажатия кнопки назад диалег по переходу в главное меню
         AlertDialog.Builder confurmingRaceEnd = new AlertDialog.Builder(this); // строитель диалога
         confurmingRaceEnd.setMessage("End the race?")
                 .setCancelable(false) // не отменяемый (без крестика вверху)
@@ -99,9 +113,10 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent (".MainActivity");
+                        Intent intent = new Intent (context, MainActivity.class);
+                        intent.setPackage("com.example.racertimer");
                         startActivity(intent);
-                        finish();
+                        finish(); // закрываем эту активити
                     }
                 })
                 .setNegativeButton("no", new DialogInterface.OnClickListener() {
@@ -169,6 +184,23 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         return timerString;
     }
 
+    /** создаем и регистрируем слушатель геолокации */
+    private void initBroadcastListener() {
+        locationBroadcastReceiver = new BroadcastReceiver() { // создаем broadcastlistener
+            @Override
+            public void onReceive(Context context, Intent intent) { // обработка интента
+                if (intent.hasExtra("location")) { // если в сообщении есть геолокация
+                    Location location = (Location) intent.getExtras().get("location");
+                    processorChangedLocation(location); // отдаем точку на обработку в процессор
+                }
+            }
+        };
+        locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
+        registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
+    }
+
+
+
     /** Запуск приема данных геолокации */
     private void initLocationListener () {
         /** запускаем сервис геолокации */
@@ -179,19 +211,7 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
             @Override
             public void whenLocationChanged(Location location) {
                 Log.i("Main", " Thread: " + Thread.currentThread().getName() + "locListInterf get new info");
-                double tempVelosity;
-                if (location.hasSpeed()) {
-                    tempVelosity = (double) location.getSpeed()*3.6;
-                    velosity = (velosity + (int) tempVelosity) / 2;
-                    course = courseAverage((int) location.getBearing()); // с учетом усреднения
-                } else velosity = 0;
-                countLocationChanged++;
-                countLocalChangedTV.setText(String.valueOf(countLocationChanged));
-                speedTV.setText(String.valueOf(velosity));
-                if (velosity > maxSpeed) maxSpeed = velosity;
-                maxSpeedTV.setText(String.valueOf(maxSpeed));
-                courseTV.setText(String.valueOf(course));
-                textTime.setText(String.valueOf(location.getTime()));
+                processorChangedLocation(location);
             }
         };
 
@@ -204,8 +224,24 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         }
     }
 
-        /** обработчик проверки наличия разрешений     */
-        public boolean checkPermission() { // проверяем наличие разрешения на геоданные
+    private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
+        double tempVelosity;
+        if (location.hasSpeed()) {
+            tempVelosity = (double) location.getSpeed()*3.6;
+            velosity = (velosity + (int) tempVelosity) / 2;
+            course = courseAverage((int) location.getBearing()); // с учетом усреднения
+        } else velosity = 0;
+        countLocationChanged++;
+        countLocalChangedTV.setText(String.valueOf(countLocationChanged));
+        speedTV.setText(String.valueOf(velosity));
+        if (velosity > maxSpeed) maxSpeed = velosity;
+        maxSpeedTV.setText(String.valueOf(maxSpeed));
+        courseTV.setText(String.valueOf(course));
+        textTime.setText(String.valueOf(location.getTime()));
+    }
+
+    /** обработчик проверки наличия разрешений     */
+    public boolean checkPermission() { // проверяем наличие разрешения на геоданные
             // если разрешения нет:
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -214,12 +250,12 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
                 return false; // если разрешения нет, возвращаем false
             } else
                 return true; // в противном случае разрешение есть, возвращаем true
-        }
+    }
 
-        /** запроса разрешения на геолокацию     */
-        private void askPermission() { // запрос разрешения
+    /** запроса разрешения на геолокацию     */ // - вызываем в мэйне, тут убрать
+    private void askPermission() { // запрос разрешения
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
                     Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
-        }
+    }
 
 }
