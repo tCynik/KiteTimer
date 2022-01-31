@@ -1,6 +1,5 @@
 package com.example.racertimer.Instruments;
 
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -15,36 +14,41 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class ForecastManager {
-    private final static String PROJECT_LOG_TAG = "racer_timer";
+    private final static String PROJECT_LOG_TAG = "racer_timer, forecastManager";
 
     private static final String WEBSITE_FORECAST = "https://api.openweathermap.org/data/2.5";
     private static final String FORECAST_ACTION = "/forecast?";
     private static final String WEBSITE_KEY = "fc35b8ee90f4ee45109149cc13ee7a4f";
     private Handler handler;
+    double latitude ;
+    double longitude ;
+
 
     public ForecastManager(Handler handler){ // в конструктор передается хендлер для обратной связи
         this.handler = handler;
     }
 
-    public void updateForecast (Location location) {
-        String URLRequest = sintezateURL(location);
+    public void updateForecast (double latitude, double longitude) {
+        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", updating forecast starting" );
+        this.latitude = latitude;
+        this.longitude = longitude;
+
+        String URLRequest = sintezateURL();
         MakeRequest makeRequest = new MakeRequest(handler);
         makeRequest.execute(URLRequest);
     }
 
-    private String sintezateURL (Location location) {
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
+    private String sintezateURL () {
         String URLRequest = WEBSITE_FORECAST + FORECAST_ACTION+ "lat=" + latitude + "&lon=" + longitude +
-                "&appid" + WEBSITE_KEY + "&units=metric";
-        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " making URL request: "+ URLRequest );
+                "&appid=" + WEBSITE_KEY + "&units=metric";
+        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", making URL request: "+ URLRequest );
 
         return URLRequest;
     }
 }
 
 class MakeRequest extends AsyncTask<String, String, String> {
-    private final static String PROJECT_LOG_TAG = "racer_timer";
+    private final static String PROJECT_LOG_TAG = "racer_timer, requestAsyncTask";
 
     private String line = "";
     private String connectionError = "connection error";

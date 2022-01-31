@@ -2,9 +2,12 @@ package com.example.racertimer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,6 +41,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int velosity = 0; // скорость в кмч
     private int course; // курс в градусах
     private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
+    private BroadcastReceiver locationBroadcastReceiver;
+    private IntentFilter locationIntentFilter;
+    private Location location;
+    private double latitude, longitude;
     private Intent intent;
 
     @Override
@@ -53,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (!checkPermission()) askPermission(); // проверяем разрешения на геолокацию и зпрашиваем
         createLocationService(); // запускаем сервис для полученич геоданных
-
+        initBroadcastListener();
     }
     /** Слушатель кнопок */
     @Override
@@ -72,8 +79,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent = new Intent(context, ActivityRace.class);
                 break;
             case R.id.but_forecast:
-
                 intent = new Intent(context, ActivityForecast.class);
+                intent.putExtra("latitude", latitude);
+                intent.putExtra("longitude", longitude);
             break;
             default:
                 break;
@@ -125,5 +133,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
                 Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
     }
+
+    /** создаем и регистрируем слушатель геолокации */
+    private void initBroadcastListener() {
+        locationBroadcastReceiver = new BroadcastReceiver() { // создаем broadcastlistener
+            @Override
+            public void onReceive(Context context, Intent intent) { // обработка интента
+                if (intent.hasExtra("location")) { // если в сообщении есть геолокация
+                    if (location == null) { // если это первое значение локации,
+                        location = (Location) intent.getExtras().get("location");
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
+                        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location getted ");
+                    }
+                }
+            }
+        };
+        locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
+        registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
+    }
+
 
 }
