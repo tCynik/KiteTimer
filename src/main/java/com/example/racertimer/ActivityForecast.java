@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,14 +35,7 @@ public class ActivityForecast extends AppCompatActivity {
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
     private Context context;
 
-    private int numberForecastStrings = 3; // сколько у нас отображается периодов прогноза
-    // !!!!! при корректировке поправить Findview для предотвращения выхода за предлы массива
-    ////////// изменить формат вьюшки для отображения большой таблицы произвольной длинны
-
-    private TextView[] timeTV = new TextView[numberForecastStrings];
-    private TextView[] tempTV = new TextView[numberForecastStrings];
-    private TextView[] windTV = new TextView[numberForecastStrings];
-    private TextView[] windDirTV = new TextView[numberForecastStrings];
+    private TextView timeTV, tempTV, windDirTV, windSpeedTV, windGustTV;
 
     private Button updateButton;
 
@@ -59,25 +54,6 @@ public class ActivityForecast extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
         context = this;
-        // все окна времени
-        timeTV[0] = findViewById(R.id.string0_time);
-        timeTV[1] = findViewById(R.id.string1_time);
-        timeTV[2] = findViewById(R.id.string2_time);
-
-        // все окна температуры
-        tempTV[0] = findViewById(R.id.string0_temp);
-        tempTV[1] = findViewById(R.id.string1_temp);
-        tempTV[2] = findViewById(R.id.string2_temp);
-
-        // все окна скорости ветра
-        windTV[0] = findViewById(R.id.string0_wind);
-        windTV[1] = findViewById(R.id.string1_wind);
-        windTV[2] = findViewById(R.id.string2_wind);
-
-        // все окна направления ветра
-        windDirTV[0] = findViewById(R.id.string0_wind_dir);
-        windDirTV[1] = findViewById(R.id.string1_wind_dir);
-        windDirTV[2] = findViewById(R.id.string2_wind_dir);
 
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", ForecastActivity is working " );
 
@@ -157,60 +133,51 @@ public class ActivityForecast extends AppCompatActivity {
 ////////////////// вот сюда дописать обработку Json со всеми вытекающими.
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", Json is updated" );
         int numberForecastPeriods = 40; // переменная о количестве периодов прогноза (8 раз в сут * 5 сут)
-        long[] times = new long[numberForecastPeriods];
-        int[] winds = new int[numberForecastPeriods];
-        double[] speeds = new double[numberForecastPeriods];
-        double[] gusts = new double[numberForecastPeriods];
-        double[] tempers = new double[numberForecastPeriods];
-        int currentTVStringNumber = 0;
+        long time;
+        int windDirection;
+        double temperature, windSpeed, windGust;
 
-
-        Date date; // переменная для перевода long в дату
         // формат для отображения даты
         @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("HH:mm");
 
-        Date currentDateTime = new Date(); // текущее время и дата в милисекундах
-
         // сначала вытаскиваем массив прогноза из Json
-        JSONArray jsonArray =jsonObject.getJSONArray("list");
+        JSONArray jsonArray = jsonObject.getJSONArray("list");
+
+        LinearLayout layoutToBeFulled = (LinearLayout) findViewById(R.id.listView);
+        LayoutInflater layoutInflater = getLayoutInflater();
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("d MMM HH:mm"); // определяем формат отображения времени
 
         // перебираем строчки прогноза и вытаскиваем конкретные данные для каждой текущей строчки
         for (int i = 0; i < numberForecastPeriods; i ++ ) {
             Log.i(PROJECT_LOG_TAG, "parsing forecast string #" + i );
-//+
-            int j = 0; // переменная для исп периоа времени перед текущим
+            // разбираем JSON на поля, заполняем
+            time = jsonArray.getJSONObject(i).getLong("dt") * 1000;
+            temperature = jsonArray.getJSONObject(i).getJSONObject("main").getInt("temp");
+            windDirection = jsonArray.getJSONObject(i).getJSONObject("wind").getInt("deg");
+            windSpeed = jsonArray.getJSONObject(i).getJSONObject("wind").getInt("speed");
+            windGust = jsonArray.getJSONObject(i).getJSONObject("wind").getDouble("gust");
+            // заполняем arrayList, создавая конструктором новый экземпляр с полученными полями
 
-            Log.i(PROJECT_LOG_TAG, "long = " + jsonArray.getJSONObject(i).getLong("dt"));
+            // из нашго XML файла готовим VIEW, используем его как образец.
+            View item = layoutInflater.inflate(R.layout.forecast_string, layoutToBeFulled, false);
 
-            times[i] = jsonArray.getJSONObject(i).getLong("dt") * 1000;
-            winds[i] = jsonArray.getJSONObject(i).getJSONObject("wind").getInt("deg");
-            speeds[i] = jsonArray.getJSONObject(i).getJSONObject("wind").getInt("speed");
-            gusts[i] = jsonArray.getJSONObject(i).getJSONObject("wind").getDouble("gust");
-            tempers[i] = jsonArray.getJSONObject(i).getJSONObject("main").getInt("temp");
+            timeTV = (TextView) item.findViewById(R.id.forecast_string_time);
+            timeTV.setText(timeFormat.format(new Date (time)));
 
-            Log.i(PROJECT_LOG_TAG, ", times = " + times [i]);
-            date = new Date (times [i]); // переводим long в формат даты
-            Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", iter. = " + i + ", time is - " + date);
+            tempTV = (TextView) item.findViewById(R.id.forecast_string_temp);
+            tempTV.setText(String.valueOf(temperature));
 
-            // работаем только с периодами, близкими к текущему (для старых прогнозов)
-            if (date.after(currentDateTime)) { // выясняем, что дата прогноза близка к текущей
-                if (i > 0) { // если началось сразу с 0, продолжаем с 0
-                    j = i - 1; // если нет - с предыдущего периода
-                    Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", writing TV string #" + currentTVStringNumber );
+            windDirTV = (TextView) item.findViewById(R.id.forecast_string_dir);
+            windDirTV.setText(String.valueOf(windDirection));
 
-                    // заполняем поочередно все TV
-                    timeTV[currentTVStringNumber].setText(String.valueOf(format.format(date)));
-                    tempTV[currentTVStringNumber].setText(String.valueOf(tempers[j]));
-                    windTV[currentTVStringNumber].setText(String.valueOf(speeds[j]));
-                    windDirTV[currentTVStringNumber].setText(String.valueOf(winds[j]));
-                    currentTVStringNumber++;
-                }
-            }
+            windSpeedTV = (TextView) item.findViewById(R.id.forecast_string_wind);
+            windSpeedTV.setText(String.valueOf(windSpeed));
 
-            // если заполнили все TV, заказнчиваем заполнение
-            if (currentTVStringNumber == numberForecastStrings) { // если заполнили все TV - выходим
-                break;
-            }
+            windGustTV = (TextView) item.findViewById(R.id.forecast_string_gust);
+            windGustTV.setText(String.valueOf(windGust));
+
+            layoutToBeFulled.addView(item);
 
         }
     }
