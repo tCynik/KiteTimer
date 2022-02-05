@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="red">#ff0000</color>
     <color name="color_primary">#333</color>
+    <color name="velocity_color">#2CEE00</color>
+    <color name="wind_color">#143083</color>
 </resources>

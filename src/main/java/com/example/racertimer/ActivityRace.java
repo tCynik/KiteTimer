@@ -13,13 +13,24 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
-public class ActivityRace extends AppCompatActivity { // добавить интерфейс
+public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
+
+    private ImageView windFrameIV, arrowVelocityIV, frameVelocityIV, arrowDirectionIV;
+    private SeekBar windSB, bearingSB, velocitySB;
+    private Button btnReset, btnWindPlus, btnWindMinus;
+    private TextView velocityTV, bearingTV, windTV, VMGTV, maxVelocityTV, maxVMGTV;
+    private ConstraintLayout constraintLayout;
+
+    private int velocity, bearing, wind, velocityMadeGood, velocityMax, VMGMax;
 
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
     private TextView timerRace; // таймер гонки
@@ -35,7 +46,6 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
 
     private int velosity = 0; // скорость в кмч
     private int maxSpeed = 0; // максимальная зарегистрированная скорость
-    private int course; // курс в градусах
     private boolean isFirstIteration = true; // флаг о том, что это первая итерация для выставления первичных цифр
     private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
 
@@ -49,14 +59,38 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
 ////////// вынеси определение вьюшек в отдельный метод
-        timerRace = findViewById(R.id.timer_race);
-        textTime = findViewById(R.id.currentTime);
-        buttonExitToMain = findViewById(R.id.exit_to_main);
+        constraintLayout = findViewById(R.id.constraintLayout);
+        windFrameIV = findViewById(R.id.wind_frame);
+        arrowVelocityIV = findViewById(R.id.arrow);
+        frameVelocityIV = findViewById(R.id.frame_velocity);
+        arrowDirectionIV = findViewById(R.id.arrow_direction);
+        windSB = findViewById(R.id.seekBar_wind);
+        bearingSB = findViewById(R.id.seekBar_bearing);
+        velocitySB = findViewById(R.id.seekBar_velosity);
+        velocityTV = findViewById(R.id.velocity);
+        bearingTV = findViewById(R.id.bearing);
+        windTV = findViewById(R.id.wind);
+        VMGTV = findViewById(R.id.vmg);
+        maxVelocityTV = findViewById(R.id.max_velocity);
+        maxVMGTV = findViewById(R.id.max_vmg);
+        btnReset = findViewById(R.id.but_reset);
+        btnWindPlus = findViewById(R.id.wind_inc);
+        btnWindMinus = findViewById(R.id.wind_dec);
 
-        speedTV = findViewById(R.id.speed);
-        maxSpeedTV = findViewById(R.id.max_speed);
-        courseTV = findViewById(R.id.course);
-        countLocalChangedTV = findViewById(R.id.counter_loc_changed);
+        velocityMax = 1;
+        wind = 125;
+        windTV.setText(String.valueOf(wind));
+        windFrameIV.setRotation(wind + 180);
+
+
+//        timerRace = findViewById(R.id.timer_race);
+        textTime = findViewById(R.id.currentTime);
+//        buttonExitToMain = findViewById(R.id.exit_to_main);
+
+//        speedTV = findViewById(R.id.speed);
+//        maxSpeedTV = findViewById(R.id.max_speed);
+//        courseTV = findViewById(R.id.course);
+//        countLocalChangedTV = findViewById(R.id.counter_loc_changed);
 
         thisActivity = this;
 
@@ -73,13 +107,83 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
 
         initBroadcastListener(); // запускаем слушатель новых геоданных
 
+        // обновляем положение вьюшек
+
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
-        View.OnClickListener listener = new View.OnClickListener() {
+        btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                velocityMax = 1;
+                VMGMax = 0;
+                calculateViewsPosition();
+                updateMaxVelocityVMG();
             }
-        };
-        buttonExitToMain.setOnClickListener(listener);
+        });
+
+        btnWindPlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wind ++;
+                calculateViewsPosition();
+                updateMaxVelocityVMG();
+                windTV.setText(String.valueOf(wind));
+                windFrameIV.setRotation(180- wind);
+            }
+        });
+
+        btnWindMinus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                wind--;
+                calculateViewsPosition();
+                updateMaxVelocityVMG();
+                windTV.setText(String.valueOf(wind));
+                windFrameIV.setRotation(180 - wind);
+            }
+        });
+
+        bearing = 0;
+        windSB.setOnSeekBarChangeListener(this);
+        bearingSB.setOnSeekBarChangeListener(this);
+        velocitySB.setOnSeekBarChangeListener(this);
+
+        velocity = 0;
+
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        if (seekBar == windSB) {
+            wind = i;
+            windFrameIV.setRotation(180 - wind);
+            windTV.setText(String.valueOf(wind));
+            calculateViewsPosition();
+            updateMaxVelocityVMG();
+        }
+        if (seekBar == bearingSB) {
+            bearing = i;
+            bearingTV.setText(String.valueOf(bearing));
+//            arrowVelocityIV.setRotation(bearing); // - 90 - первоначальная ориентация
+            calculateViewsPosition();
+            updateMaxVelocityVMG();
+        }
+        if (seekBar == velocitySB) {
+            velocity = i;
+            velocityTV.setText(String.valueOf(velocity));
+            calculateViewsPosition();
+            updateMaxVelocityVMG();
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+//        Log.i(PROJECT_LOG_TAG, "heigh = " + constraintLayout.getHeight() + ", widht = "+ constraintLayout.getWidth());
+
     }
 
     /** Отработка нажатия кнопки "Назад" */
@@ -113,15 +217,15 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
 
     /** усреднитель курса и обработчик перехода через нулевой азимут */
     private int courseAverage (int newCourse) {
-        int deltaCourse = (newCourse - course); // разница курсов: "курс новый (newCourse) - курс старый (course)"
+        int deltaCourse = (newCourse - bearing); // разница курсов: "курс новый (newCourse) - курс старый (course)"
         if (deltaCourse > 180) deltaCourse = deltaCourse - 360; //newCourse - (360  - course);
         if (deltaCourse < -180) deltaCourse = 360 + deltaCourse;
 
-        course = (int) (course + (deltaCourse * 0.75)) ; // усреднение - приращиваем на 75% от разницы
-        if (course > 360) course = course - 360;
-        if (course < 0) course = course + 360;
-        Log.i("ActivityRace", "averageCourse = " + course);
-        return course;
+        bearing = (int) (bearing + (deltaCourse * 0.75)) ; // усреднение - приращиваем на 75% от разницы
+        if (bearing > 360) bearing = bearing - 360;
+        if (bearing < 0) bearing = bearing + 360;
+        Log.i("ActivityRace", "averageCourse = " + bearing);
+        return bearing;
     }
 
     /** Счетчик таймера*/
@@ -150,7 +254,7 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
             timerHour ++;
         }
         timerString = calcTimer(timerHour, timerMin, timerSec);
-        timerRace.setText(timerString.toString());
+//        timerRace.setText(timerString.toString());
     }
 
     /** Калькулятор гоночного таймера */
@@ -186,15 +290,63 @@ public class ActivityRace extends AppCompatActivity { // добавить инт
         double tempVelosity;
         if (location.hasSpeed()) {
             tempVelosity = (double) location.getSpeed()*3.6;
-            velosity = (velosity + (int) tempVelosity) / 2;
-            course = courseAverage((int) location.getBearing()); // с учетом усреднения
+            velocity = (int) tempVelosity;
+//            velosity = (velosity + (int) tempVelosity) / 2; // усреднение скорости
+            bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         } else velosity = 0;
-        countLocationChanged++;
-        countLocalChangedTV.setText(String.valueOf(countLocationChanged));
-        speedTV.setText(String.valueOf(velosity));
-        if (velosity > maxSpeed) maxSpeed = velosity;
-        maxSpeedTV.setText(String.valueOf(maxSpeed));
-        courseTV.setText(String.valueOf(course));
-        textTime.setText(String.valueOf(location.getTime()));
+//        countLocationChanged++;
+//        countLocalChangedTV.setText(String.valueOf(countLocationChanged));
+//        speedTV.setText(String.valueOf(velosity));
+//        if (velosity > maxSpeed) maxSpeed = velosity;
+//        maxSpeedTV.setText(String.valueOf(maxSpeed));
+//        courseTV.setText(String.valueOf(course));
+//        textTime.setText(String.valueOf(location.getTime()));
+        velocityTV.setText(String.valueOf(velocity));
+        bearingTV.setText(String.valueOf(bearing));
+
+        calculateViewsPosition();
+        updateMaxVelocityVMG();
+    }
+
+    void calculateViewsPosition () {
+        int centerScreenX, centerScreenY;
+        double radiusSpeedMin = (windFrameIV.getWidth() / 2) - windFrameIV.getWidth()/3.7; // радиус при нулевой скорости
+        int radiusMaxMinDiference = arrowDirectionIV.getHeight(); // максимальная разница между максимальными и минимальным значениями
+        int priceGradeSpeed;
+        priceGradeSpeed = radiusMaxMinDiference / velocityMax; // цена деления: сколько ед сикбара в ед радиуса
+        int deltaBearing = bearing - wind ;
+
+        // поворот рамы скорости
+        frameVelocityIV.setRotation( deltaBearing + 180);
+
+        // разворот стрелки скорости
+        arrowVelocityIV.setRotation( deltaBearing + 225);
+
+        // положение стрелки скорости
+        centerScreenX = windFrameIV.getWidth()/2;
+        centerScreenY = windFrameIV.getHeight()/2;
+        double courseForWindRadians = Math.toRadians(90 + deltaBearing);
+        double radiusVelocityArrow = radiusSpeedMin + velocity * priceGradeSpeed;
+        if (radiusVelocityArrow > (radiusSpeedMin + radiusMaxMinDiference)) radiusVelocityArrow = radiusSpeedMin + radiusMaxMinDiference;
+        arrowVelocityIV.setX((float) (centerScreenX - arrowVelocityIV.getWidth()/2 + radiusVelocityArrow * Math.cos(courseForWindRadians)));
+        arrowVelocityIV.setY((float) (centerScreenY - arrowVelocityIV.getHeight()/2 + radiusVelocityArrow * Math.sin(courseForWindRadians)));
+        velocityMadeGood = (int) (Math.sin(Math.toRadians(90 - Math.abs(deltaBearing))) * velocity);
+        VMGTV.setText(String.valueOf(velocityMadeGood));
+
+        // разворот стрелки направления
+        arrowDirectionIV.setRotation( deltaBearing);
+        // положение стрелки направления
+        courseForWindRadians = Math.toRadians(90 + deltaBearing);
+        arrowDirectionIV.setX((float) (centerScreenX - arrowDirectionIV.getWidth()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.cos(courseForWindRadians)));
+        arrowDirectionIV.setY((float) (centerScreenY - arrowDirectionIV.getHeight()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.sin(courseForWindRadians)));
+
+    }
+
+    void updateMaxVelocityVMG () {
+        if (velocity > velocityMax) velocityMax = velocity;
+        maxVelocityTV.setText(String.valueOf(velocityMax));
+
+        if (velocityMadeGood > VMGMax) VMGMax = velocityMadeGood;
+        maxVMGTV.setText(String.valueOf(VMGMax));
     }
 }
