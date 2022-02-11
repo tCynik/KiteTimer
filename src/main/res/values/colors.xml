@@ -10,5 +10,10 @@
     <color name="red">#ff0000</color>
     <color name="color_primary">#333</color>
     <color name="velocity_color">#2CEE00</color>
-    <color name="wind_color">#143083</color>
+    <color name="wind_stat_color">#0035D3</color>
+    <color name="wind_frame_color">#807414</color>
+    <color name="race_secondary_signs">#8F8E8E</color>
+    <color name="race_last_signs">#465270</color>
+    <color name="vmg_line">#E80101</color>
+
 </resources>

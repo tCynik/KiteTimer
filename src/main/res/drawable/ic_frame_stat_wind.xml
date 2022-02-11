@@ -7,15 +7,15 @@
       android:pathData="M182.1,375.7v-5.6l35.3,-0.4v5.6l21.1,21.1v-25.7l-20.1,-20.3c0.2,-3.1 0,-11.4 0,-11.4s42.9,-2.4 80,-39.5s41,-78.5 41,-98.1c0,-19.8 -4.2,-61.7 -40.9,-98.5s-80.2,-39.3 -80.2,-39.3l0.1,-32.2h20.5L200.1,-7.3l-38.7,38.7h19.5l1.2,32.2c0,0 -40.1,0.4 -80,39.8s-40.5,85.7 -40.5,98s1.1,58.6 40.4,98s80,39.7 80,39.7V350l-20.6,20.6v25.7L182.1,375.7"
       android:strokeWidth="2"
       android:fillColor="#00000000"
-      android:strokeColor="@color/wind_color"/>
+      android:strokeColor="@color/wind_stat_color"/>
   <path
       android:pathData="M161.4,392.5l0,6.8l-113.5,0"
       android:strokeWidth="2"
       android:fillColor="#00000000"
-      android:strokeColor="@color/wind_color"/>
+      android:strokeColor="@color/wind_stat_color"/>
   <path
       android:pathData="M4.9,374.4h103.8c8.4,0 11.9,3.5 11.9,7.9v8.8c0,4.4 -3.5,7.9 -7.9,7.9H8.9c-4.4,0 -7.9,-3.5 -7.9,-7.9v-8.8C1,378 4.5,374.4 4.9,374.4z"
       android:strokeWidth="2"
       android:fillColor="#00000000"
-      android:strokeColor="@color/wind_color"/>
+      android:strokeColor="@color/wind_stat_color"/>
 </vector>
