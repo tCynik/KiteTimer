@@ -53,7 +53,7 @@
         <activity
             android:name=".ActivityTimer"
             android:exported="false"
-            android:screenOrientation="landscape">
+            android:screenOrientation="reverseLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.ActivityTimer" />
 

@@ -21,6 +21,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.example.racertimer.Instruments.CoursesCalculator;
+
 public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
@@ -186,7 +188,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         if (seekBar == windSB) {
             wind = i;
-            wind = azimuthLess360(wind);
+            wind = CoursesCalculator.setAngleFrom0To360(wind);
             windFrameIV.setRotation(180 - wind);
             windTV.setText(String.valueOf(wind));
             calculateViewsPosition();
@@ -339,12 +341,6 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         updateMaxVelocityVMG();
     }
 
-    int azimuthLess360 (int azimuth) { // метод перевода любого азимута в интервал 0-360
-        if (azimuth > 360) azimuth = azimuth - 360;
-        if (azimuth < 0) azimuth = azimuth + 360;
-        return azimuth;
-    }
-
     void calculateViewsPosition () {
         arrowDirectionIV.setVisibility(View.VISIBLE);
         arrowVelocityIV.setVisibility(View.VISIBLE);
@@ -353,9 +349,9 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         int priceGradeSpeed;
         priceGradeSpeed = radiusMaxMinDiference / velocityMax; // цена деления: сколько ед сикбара в ед радиуса
         deltaBearing = bearing - wind;
-        bearing = azimuthLess360(bearing);
-        courseToWind = calcWindCourseAngle(wind, bearing);
-        wind = azimuthLess360(wind);
+        bearing = CoursesCalculator.setAngleFrom0To360(bearing);
+        courseToWind = CoursesCalculator.calcWindCourseAngle(wind, bearing);
+        wind = CoursesCalculator.setAngleFrom0To360(wind);
         courseToWindTV.setText(String.valueOf(courseToWind));
 
         // поворот рамы скорости
@@ -384,31 +380,6 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         arrowDirectionIV.setX((float) (centerScreenX - arrowDirectionIV.getWidth()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.cos(courseForWindRadians)));
         arrowDirectionIV.setY((float) (centerScreenY - arrowDirectionIV.getHeight()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.sin(courseForWindRadians)));
 
-    }
-
-    int calcWindCourseAngle (int windDir, int bearing) { // расчет курса относительно ветра (позорная срань с ifами)
-        windCourseAngle = 0;
-        bearing = azimuthLess360(bearing);
-        if (windDir < 180) { // частный случай если напр ветра до 180 градусов
-            if (bearing > windDir & bearing < windDir + 180) { // с какой стороны относительно ветра вектор движения
-                windCourseAngle = bearing - windDir + 180; // если слева, считаем от вектора ветра. Азимут положительный
-            } else {
-                windCourseAngle = bearing - windDir ; // если справа, считаем в обратную сторону от ветра. Азимут отрицательный
-                if (bearing > windDir) windCourseAngle = windCourseAngle - 360 ; //windCourseAngle = 180 - windCourseAngle;
-            }
-            if (windCourseAngle > 180) windCourseAngle -= 180;
-        } else { // если направление ветра более 180 градусов
-            if (windDir > bearing & (windDir - 180) < bearing ) { // если вектор движения справа по ветру
-                windCourseAngle = bearing - windDir;
-            } else { // если слева по ветру
-                windCourseAngle = bearing - windDir;
-                if (bearing < windDir) {
-                    windCourseAngle = windCourseAngle + 360;
-                }
-            }
-        }
-
-        return windCourseAngle;
     }
 
     void updateMaxVelocityVMG () {
