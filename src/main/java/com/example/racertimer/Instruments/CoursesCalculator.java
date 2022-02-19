@@ -37,4 +37,27 @@ public class CoursesCalculator {
         }
         return windCourseAngle;
     }
+
+    // нахождение симметричного к ветру угла
+    public static int symmetryAngle (int windDirection, int windCourseAngle) {
+        // на вход подается направление ветра (с какого азимута дует) и курс к ветру:
+        // от бакштага к бейдевинду увеличение; правый галс отрицательный, левый галс положительный
+        int symmetryCourse;
+        symmetryCourse = windDirection - windCourseAngle;
+        symmetryCourse = setAngleFrom0To360(symmetryCourse);
+        return symmetryCourse;
+    }
+
+    public static int bearingByCoordinates (double x, double y) { // вычисление азимута вектора по координатам конца (первая точка 0:0)
+        double vectorLength = vectorLevgthByCoordinates(x, y);
+        int direction = (int) Math.toDegrees(Math.acos(y / vectorLength)); // симметрично нулевой оси 0Y
+        if (x < 0) // если левее оси, симметрично переносим
+            direction = 180 + (180 - direction);
+
+        return direction;
+    }
+
+    public static double vectorLevgthByCoordinates (double x, double y) {
+        return Math.pow((Math.pow(x, 2) + Math.pow(y, 2)), 0.5); // длина вектора
+    }
 }
