@@ -8,67 +8,16 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="200dp"
+    <fragment
+        android:name="com.example.racertimer.ForecastFragment"
+        android:id="@+id/timer_forecast_fr"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
+        app:layout_constraintWidth_percent="0.25"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="text"
-            android:textSize="20sp" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:orientation="vertical">
-            <TextView
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="FORECAST"/>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-                <LinearLayout
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <TextView
-                        android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="now:"/>
-
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="20dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <TextView
-                        android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="soon:"/>
-                </LinearLayout>
-
-            </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/but_reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="RESET MAX"/>
-
-    </LinearLayout>
+    </fragment>
 
     <!-- главное размещение UI элементов -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -163,7 +112,7 @@
                 android:text="-21"
                 android:textSize="90sp"
                 android:gravity="end"
-                android:layout_marginEnd="100dp"
+                android:layout_marginEnd="105dp"
                 app:layout_constraintVertical_bias="0.32"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -447,6 +396,14 @@
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_weight="1"/>
+        <Button
+            android:layout_gravity="end"
+            android:id="@+id/but_start_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="start new timer"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

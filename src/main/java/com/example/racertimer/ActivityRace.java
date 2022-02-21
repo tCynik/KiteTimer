@@ -2,6 +2,7 @@ package com.example.racertimer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,6 +22,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 
@@ -33,7 +36,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private ImageView lineUpLeftIV, lineUpRightIV, lineDownLeftTV, lineDownRightTV; // линии отображения курса VMG
     private Space centerScreenSpace;
     private SeekBar windSB, bearingSB, velocitySB;
-    private Button btnReset, btnWindPlus, btnWindMinus;
+    private Button btnReset, btnWindPlus, btnWindMinus, btnStartNewRace;
     private TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
     private ConstraintLayout centralParamsCL, centralUiCL;
 
@@ -90,6 +93,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         btnReset = findViewById(R.id.but_reset);
         btnWindPlus = findViewById(R.id.wind_inc);
         btnWindMinus = findViewById(R.id.wind_dec);
+        btnStartNewRace = findViewById(R.id.but_start_timer);
 
         // определим линии отображения исторических показаний VMG
         lineVMGIV = new ImageView[4];
@@ -139,6 +143,16 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         // обновляем положение вьюшек
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
+        btnStartNewRace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TimerFragment fragment = new TimerFragment();
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace()
+            }
+        });
+
         btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -327,6 +341,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
     private void updateMaxVMGByNewWindDirection (int updatedWindDirection) {
         int deltaWindDirection = Math.abs(windDirection - updatedWindDirection);
+        Log.i("racer_timer", "windDir updated, changing VMG stat. delta wind dir = " + deltaWindDirection);
         if (deltaWindDirection > 180) { // обрабатываем возможный переход через 0-360
             deltaWindDirection = 360 - deltaWindDirection;
         }
@@ -335,8 +350,10 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
             VMGmax = 0;
         } else { // если изменение <90 град, обновляем пропорционально изменению ветра
             double correction = Math.cos(Math.toRadians(deltaWindDirection));
+            Log.i("racer_timer", "VMGmin1 = "+ VMGmin +", VMGmax1 = "+ VMGmax +", correction = " + correction);
             VMGmin = (int) (VMGmin * correction);
             VMGmax = (int) (VMGmax * correction);
+            Log.i("racer_timer", " finaly VMG's now: VMGmin2 = "+ VMGmin +", VMGmax2 = "+ VMGmax);
         }
     }
 
