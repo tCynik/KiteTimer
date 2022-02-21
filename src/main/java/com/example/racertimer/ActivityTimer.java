@@ -28,7 +28,6 @@ public class ActivityTimer extends AppCompatActivity implements View.OnClickList
     private TextView timerResult; // значение для отображения в приложении в формате мм:сс
     private TextView textTime; // переменная времени в левом вехнем углу
 
-
     private int procedureTiming; // тип стартовой процедуры в минутах
     private int timerSec; // текущий таймер в секундах
     private int period = 1; // участок времени, на котором значения счетчика по умолчанию начало

@@ -47,12 +47,12 @@ public class LocationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is started");
         return super.onStartCommand(intent, flags, startId);
-
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is started");
         /** создаем листенер и описываем его действия */
 
@@ -63,6 +63,7 @@ public class LocationService extends Service {
                 intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
                 intent.putExtra("windDirection", windDirection);
                 sendBroadcast(intent); // отправляем передачу
+                Log.i(PROJECT_LOG_TAG, " sending new wind direction into broadcastListener by herald. the win = " + windDirection);
             }
         };
         // создаем экземпляр класса для расчета направлений ветра

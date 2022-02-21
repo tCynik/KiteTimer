@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -36,7 +37,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
     private ConstraintLayout centralParamsCL, centralUiCL;
 
-    private int velocity, bearing, wind, velocityMadeGood, velocityMax, VMGMax, VMGmin, windCourseAngle;
+    private int velocity, bearing, windDirection, velocityMadeGood, velocityMax, VMGmax, VMGmin, windCourseAngle;
 
     private Activity thisActivity; // эта активность - для простоты перехода между экранами
     private TextView timerRace; // таймер гонки
@@ -106,9 +107,9 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
         velocityMax = 1;
         //wind = 201;
-        wind = 24;
-        windTV.setText(String.valueOf(wind));
-        windFrameIV.setRotation(180 - wind);
+        windDirection = 24;
+        windTV.setText(String.valueOf(windDirection));
+        windFrameIV.setRotation(180 - windDirection);
 
 
 //        timerRace = findViewById(R.id.timer_race);
@@ -142,7 +143,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
             @Override
             public void onClick(View view) {
                 velocityMax = 1;
-                VMGMax = 0;
+                VMGmax = 0;
                 VMGmin = 0;
                 lineVMGIV[0].setVisibility(View.INVISIBLE);
                 lineVMGIV[1].setVisibility(View.INVISIBLE);
@@ -156,22 +157,16 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         btnWindPlus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                wind ++;
-                calculateViewsPosition();
-                updateMaxVelocityVMG();
-                windTV.setText(String.valueOf(wind));
-                windFrameIV.setRotation(180- wind);
+                windDirection++;
+                onWindDirectionChanged(windDirection);
             }
         });
 
         btnWindMinus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                wind--;
-                calculateViewsPosition();
-                updateMaxVelocityVMG();
-                windTV.setText(String.valueOf(wind));
-                windFrameIV.setRotation(180 - wind);
+                windDirection--;
+                onWindDirectionChanged(windDirection);
             }
         });
 
@@ -187,12 +182,9 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         if (seekBar == windSB) {
-            wind = i;
-            wind = CoursesCalculator.setAngleFrom0To360(wind);
-            windFrameIV.setRotation(180 - wind);
-            windTV.setText(String.valueOf(wind));
-            calculateViewsPosition();
-            updateMaxVelocityVMG();
+            windDirection = i;
+            windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
+            onWindDirectionChanged( windDirection);
         }
         if (seekBar == bearingSB) {
             bearing = i;
@@ -310,11 +302,42 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
                 if (intent.hasExtra("location")) { // если в сообщении есть геолокация
                     Location location = (Location) intent.getExtras().get("location");
                     processorChangedLocation(location); // отдаем точку на обработку в процессор
+                    Log.i("ActivityRace", "getted location broadcast from locationService, " +
+                            "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
+                }
+                if (intent.hasExtra("windDirection")) {
+                    onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
+                    windTV.setTextColor(Color.WHITE);
+                    Log.i("ActivityRace", "getted wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
                 }
             }
         };
         locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
+    }
+
+    private void onWindDirectionChanged (int updatedWindDirection) {
+        updateMaxVMGByNewWindDirection (updatedWindDirection);
+        windDirection = updatedWindDirection;
+        calculateViewsPosition();
+        updateMaxVelocityVMG();
+        windTV.setText(String.valueOf(windDirection));
+        windFrameIV.setRotation(180- windDirection);
+    }
+
+    private void updateMaxVMGByNewWindDirection (int updatedWindDirection) {
+        int deltaWindDirection = Math.abs(windDirection - updatedWindDirection);
+        if (deltaWindDirection > 180) { // обрабатываем возможный переход через 0-360
+            deltaWindDirection = 360 - deltaWindDirection;
+        }
+        if (deltaWindDirection >= 90) {// если слишком крутое изменение курса, обнуляем все ВМГ
+            VMGmin = 0;
+            VMGmax = 0;
+        } else { // если изменение <90 град, обновляем пропорционально изменению ветра
+            double correction = Math.cos(Math.toRadians(deltaWindDirection));
+            VMGmin = (int) (VMGmin * correction);
+            VMGmax = (int) (VMGmax * correction);
+        }
     }
 
     /** обработка вновь полученных геолокации */
@@ -348,10 +371,10 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         int radiusMaxMinDiference = arrowDirectionIV.getHeight(); // максимальная разница между максимальными и минимальным значениями
         int priceGradeSpeed;
         priceGradeSpeed = radiusMaxMinDiference / velocityMax; // цена деления: сколько ед сикбара в ед радиуса
-        deltaBearing = bearing - wind;
+        deltaBearing = bearing - windDirection;
         bearing = CoursesCalculator.setAngleFrom0To360(bearing);
-        courseToWind = CoursesCalculator.calcWindCourseAngle(wind, bearing);
-        wind = CoursesCalculator.setAngleFrom0To360(wind);
+        courseToWind = CoursesCalculator.calcWindCourseAngle(windDirection, bearing);
+        windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
         courseToWindTV.setText(String.valueOf(courseToWind));
 
         // поворот рамы скорости
@@ -393,10 +416,10 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
         maxVelocityTV.setText(String.valueOf(velocityMax));
 
-        if (velocityMadeGood > VMGMax || velocityMadeGood < VMGmin) { // при обновлении зафиксированного максимума VMG
+        if (velocityMadeGood > VMGmax || velocityMadeGood < VMGmin) { // при обновлении зафиксированного максимума VMG
 //            lineVMGIV[2].setVisibility(View.VISIBLE);
-            if (velocityMadeGood > 0) VMGMax = velocityMadeGood;
-            bestUpwindTV.setText(String.valueOf(VMGMax));
+            if (velocityMadeGood > 0) VMGmax = velocityMadeGood;
+            bestUpwindTV.setText(String.valueOf(VMGmax));
             ////////// это все срань, нужно переписывать на canvas
             ////////// проверить центр экрана, приходится подгонять вручную подпорками
 //            if (windCourseAngle > 0) { // курс больше ноля = левый галс

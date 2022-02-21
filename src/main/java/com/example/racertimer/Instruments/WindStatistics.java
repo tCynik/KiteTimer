@@ -67,45 +67,7 @@ public class WindStatistics { // класс для сбора статистик
                 }
             lastWindDirection = windDirection; // обновляем данные по направлению
         }
-
-//            sectorMaximumUpdated(velocity, bearing);
-
-//        ////////////// отсюда и ниже переношу в отельный метод, нужно будет удалить задвоение
-//        Log.i(PROJECT_LOG_TAG, "new loc. bearing =  " + bearing + ", sector = " + numTheSector+", velocity = "+velocity);
-//
-//        if (windDiagram[numTheSector] < velocity) {  // определяем, является ли текущая скорость максимальной для сектора
-//            if (windDiagramIsRepresentable) cutSymmetricalMaximum(bearing, (velocity - windDiagram[numTheSector])); // корректировка симметрии
-//            windDiagram[numTheSector] = velocity; // обновляем максимум
-//
-//            windDirection = calculateWindDirection(); // определяем направление ветра
-//        }
-//
-//        if (windDiagramIsRepresentable)
-//
-//        if (windDiagramIsRepresentable & lastWindDirection != windDirection) { // если есть обновление направления ветра
-//            windChangedHerald.onWindDirectionChanged(windDirection);// отправляем broadcast с новым направлением
-//            lastWindDirection = windDirection; // обновляем данные по направлению
-//        }
     }
-
-//    private void sectorMaximumUpdated (int velocity, int bearing) { // обработка обновления максимума
-//        int numTheSector = calculateNumberOfSector(bearing); // высчитываем номер сектора
-//
-//        windDiagram[numTheSector] = velocity; // обновляем максимум
-//
-//        if (windDiagramIsRepresentable) {
-//            int velocityDifferent = velocity - windDiagram[numTheSector];
-//            cutSymmetricalMaximum(bearing, velocityDifferent);
-//        }
-//
-//        windDirection = calculateWindDirection();
-//
-//        if (windDiagramIsRepresentable)
-//            if (lastWindDirection != windDirection) {
-//                windChangedHerald.onWindDirectionChanged(windDirection);// отправляем broadcast с новым направлением
-//            }
-//        lastWindDirection = windDirection; // обновляем данные по направлению
-//    }
 
     void cutSymmetricalMaximum(int bearing, int velocityDifferent) { // симметрично прибавлению отнимаем
         int symmetryDirection; // направление, симметричное исходному относительно ветра
