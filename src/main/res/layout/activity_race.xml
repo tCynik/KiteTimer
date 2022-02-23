@@ -10,7 +10,7 @@
 
     <fragment
         android:name="com.example.racertimer.ForecastFragment"
-        android:id="@+id/timer_forecast_fr"
+        android:id="@+id/fr_place_timer_forecast"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         app:layout_constraintWidth_percent="0.25"
@@ -396,13 +396,6 @@
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_weight="1"/>
-        <Button
-            android:layout_gravity="end"
-            android:id="@+id/but_start_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="start new timer"/>
 
         <LinearLayout
             android:layout_width="match_parent"

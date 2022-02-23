@@ -2,7 +2,6 @@ package com.example.racertimer;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,7 +26,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 
-public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener { // добавить интерфейс
+public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
@@ -36,9 +35,13 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private ImageView lineUpLeftIV, lineUpRightIV, lineDownLeftTV, lineDownRightTV; // линии отображения курса VMG
     private Space centerScreenSpace;
     private SeekBar windSB, bearingSB, velocitySB;
-    private Button btnReset, btnWindPlus, btnWindMinus, btnStartNewRace;
+    private Button btnReset, btnWindPlus, btnWindMinus;
     private TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
     private ConstraintLayout centralParamsCL, centralUiCL;
+
+    private TimerFragment timerFragment = null;
+    private ForecastFragment forecastFragment = null;
+
 
     private int velocity, bearing, windDirection, velocityMadeGood, velocityMax, VMGmax, VMGmin, windCourseAngle;
 
@@ -93,7 +96,6 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         btnReset = findViewById(R.id.but_reset);
         btnWindPlus = findViewById(R.id.wind_inc);
         btnWindMinus = findViewById(R.id.wind_dec);
-        btnStartNewRace = findViewById(R.id.but_start_timer);
 
         // определим линии отображения исторических показаний VMG
         lineVMGIV = new ImageView[4];
@@ -115,15 +117,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         windTV.setText(String.valueOf(windDirection));
         windFrameIV.setRotation(180 - windDirection);
 
-
-//        timerRace = findViewById(R.id.timer_race);
         textTime = findViewById(R.id.currentTime);
-//        buttonExitToMain = findViewById(R.id.exit_to_main);
-
-//        speedTV = findViewById(R.id.speed);
-//        maxSpeedTV = findViewById(R.id.max_speed);
-//        courseTV = findViewById(R.id.course);
-//        countLocalChangedTV = findViewById(R.id.counter_loc_changed);
 
         thisActivity = this;
 
@@ -143,16 +137,6 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         // обновляем положение вьюшек
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
-        btnStartNewRace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                TimerFragment fragment = new TimerFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace()
-            }
-        });
-
         btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -191,6 +175,22 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
         velocity = 0;
 
+    }
+
+    public void deployTimerFragment() {
+        if (timerFragment == null) timerFragment = new TimerFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fr_place_timer_forecast, timerFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void deployForecastFragment() {
+        if (forecastFragment == null) forecastFragment = new ForecastFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fr_place_timer_forecast, forecastFragment);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -364,16 +364,8 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         if (location.hasSpeed()) {
             tempVelosity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelosity;
-//            velosity = (velosity + (int) tempVelosity) / 2; // усреднение скорости
             bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         } else velosity = 0;
-//        countLocationChanged++;
-//        countLocalChangedTV.setText(String.valueOf(countLocationChanged));
-//        speedTV.setText(String.valueOf(velosity));
-//        if (velosity > maxSpeed) maxSpeed = velosity;
-//        maxSpeedTV.setText(String.valueOf(maxSpeed));
-//        courseTV.setText(String.valueOf(course));
-//        textTime.setText(String.valueOf(location.getTime()));
         velocityTV.setText(String.valueOf(velocity));
         bearingTV.setText(String.valueOf(bearing));
 
@@ -471,5 +463,15 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
         if (velocityMadeGood < VMGmin) VMGmin = velocityMadeGood;
         bestDownwindTV.setText(String.valueOf(VMGmin));
+    }
+
+    @Override
+    public void finishTheTimer() {
+        deployForecastFragment();
+    }
+
+    @Override
+    public void openTimerFragment() {
+        deployTimerFragment();
     }
 }

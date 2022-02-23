@@ -1,14 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/color_primary"
     tools:context=".TimerFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80sp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/set_5min"
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:textSize="10sp"
+            android:layout_weight="1"
+            android:text="5 min"/>
+        <Button
+            android:id="@+id/set_3min"
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:textSize="10sp"
+            android:layout_weight="1"
+            android:text="3 min"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80sp"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/set_2min"
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:textSize="10sp"
+            android:layout_weight="1"
+            android:text="2 min"/>
+        <Button
+            android:id="@+id/set_1min"
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:textSize="10sp"
+            android:layout_weight="1"
+            android:text="1 min"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_weight="1"/>
+    <Button
+        android:id="@+id/cancel_race"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:textSize="10sp"
+        android:text="Cancel race"/>
+    <TextView
+        android:id="@+id/timer_fragment_tv"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:gravity="center"
+        android:textSize="60sp"
+        android:layout_marginBottom="20dp"
+        android:textColor="@color/red"
+        android:text="00:00"/>
 
-</FrameLayout>
+
+</LinearLayout>

@@ -1,10 +1,15 @@
 package com.example.racertimer;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 /**
@@ -13,6 +18,15 @@ import androidx.fragment.app.Fragment;
  * create an instance of this fragment.
  */
 public class ForecastFragment extends Fragment {
+    private final static String PROJECT_LOG_TAG = "racer_timer";
+    private Button btnNewRace;
+    private TextView timekeeperTV; // секундометр
+
+    public interface OpenerTimerInterface {
+        public void openTimerFragment();
+    }
+
+    OpenerTimerInterface openerTimer;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -37,12 +51,23 @@ public class ForecastFragment extends Fragment {
      */
     // TODO: Rename and change types and number of parameters
     public static ForecastFragment newInstance(String param1, String param2) {
+        Log.i(PROJECT_LOG_TAG, " replacing fragment " );
         ForecastFragment fragment = new ForecastFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            openerTimer = (OpenerTimerInterface) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " cast activity to interface is failed in TimerFragment");
+        }
     }
 
     @Override
@@ -57,7 +82,21 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_forecast, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_forecast, null);
+
+        /** кнопка вызова таймера для начала новой гонки */
+        btnNewRace = (Button) view.findViewById(R.id.btn_new_race);
+        btnNewRace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openerTimer.openTimerFragment();
+            }
+        });
+
+        timekeeperTV = view.findViewById(R.id.timekeeper);
+        timekeeperTV.setVisibility(View.INVISIBLE);
+
+        return view;
     }
 }
