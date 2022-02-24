@@ -1,6 +1,7 @@
 package com.example.racertimer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -20,7 +22,10 @@ import androidx.fragment.app.Fragment;
 public class ForecastFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
     private Button btnNewRace;
-    private TextView timekeeperTV; // секундометр
+    private Button btnForecastRunActivity;
+
+    private TextView stopwachTV; // секундометр
+    private double latitude, longitude; // координаты для получения прогноза
 
     public interface OpenerTimerInterface {
         public void openTimerFragment();
@@ -94,9 +99,41 @@ public class ForecastFragment extends Fragment {
             }
         });
 
-        timekeeperTV = view.findViewById(R.id.timekeeper);
-        timekeeperTV.setVisibility(View.INVISIBLE);
+        /** кнопка запуска activity с прогнозом */
+        btnForecastRunActivity = (Button) view.findViewById(R.id.forecast_run_activity);
+        btnForecastRunActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (latitude == 0 & longitude ==0) {
+                    Toast.makeText(getActivity(), "No location data!", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent = new Intent(getActivity(), ActivityForecast.class);
+                    intent.putExtra("latitude", latitude);
+                    intent.putExtra("longitude", longitude);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        stopwachTV = view.findViewById(R.id.timekeeper);
+        stopwachTV.setVisibility(View.INVISIBLE);
+
+        // TODO: мясо для реализации наполнение фрагмента погоды
+/////////// добавляем в пакет Instruments класс thread с мясом для отправки и обработки погодных запросов
+/////////// при наличии геоданных направляем запрос
+/////////// по получении запроса исходя из актуального времени выбираем текущий ветер, выводим в отдельный TV
+/////////// добавляем ImageLayout, вставляем туда шкалу ветра, стрелку скорости
+/////////// исходя из текущего курса поворачиваем шкалу ветра, из скорости стрелку скорости
+/////////// курить по conctrateLayout, порядок прорисовки, наложение, и т.д....
+
 
         return view;
+    }
+
+    public void setCoordinates (double latitude, double longitude) {
+        // TODO: надо разбираться, в forecastActivity приходят нулевые координаты
+        Log.i(PROJECT_LOG_TAG, "Forecast fragment get new coordinates");
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 }

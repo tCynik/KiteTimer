@@ -1,14 +1,16 @@
 package com.example.racertimer;
 
-import android.app.Activity;
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -18,13 +20,16 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
+import com.example.racertimer.Instruments.LocationService;
 
 public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -43,12 +48,9 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private ForecastFragment forecastFragment = null;
 
 
-    private int velocity, bearing, windDirection, velocityMadeGood, velocityMax, VMGmax, VMGmin, windCourseAngle;
+    private int velocity, bearing, windDirection, velocityMadeGood, velocityMax, VMGmax, VMGmin;
 
-    private Activity thisActivity; // эта активность - для простоты перехода между экранами
-    private TextView timerRace; // таймер гонки
     private TextView textTime; // переменная времени в левом вехнем углу
-    private Button buttonExitToMain;
 
     private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
     private int timerHour = 0; // переменная в часах
@@ -64,7 +66,10 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private boolean isFirstIteration = true; // флаг о том, что это первая итерация для выставления первичных цифр
     private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
     int centerScreenX, centerScreenY;
+    private double latitude = 0;
+    private double longitude = 0; // координаты для получения прогноза
 
+    private Intent intentLocationService; // интент для создания сервиса геолокации
     private BroadcastReceiver locationBroadcastReceiver;
     private IntentFilter locationIntentFilter;
 
@@ -97,7 +102,9 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         btnWindPlus = findViewById(R.id.wind_inc);
         btnWindMinus = findViewById(R.id.wind_dec);
 
-        // определим линии отображения исторических показаний VMG
+        // TODO: нужно генерировать линии программно по заданным координатам.
+        // этот костыль надо убирать.
+        // Линии отображения исторических показаний VMG
         lineVMGIV = new ImageView[4];
         lineVMGIV[0] = findViewById(R.id.line_vmg_down_left);
         lineVMGIV[1] = findViewById(R.id.line_vmg_down_right);
@@ -119,18 +126,15 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
         textTime = findViewById(R.id.currentTime);
 
-        thisActivity = this;
-
-/////////// добавляем в пакет Instruments класс thread с мясом для отправки и обработки погодных запросов
-/////////// при наличии геоданных направляем запрос
-/////////// по получении запроса исходя из актуального времени выбираем текущий ветер, выводим в отдельный TV
-/////////// добавляем ImageLayout, вставляем туда шкалу ветра, стрелку скорости
-/////////// исходя из текущего курса поворачиваем шкалу ветра, из скорости стрелку скорости
-/////////// курить по conctrateLayout, порядок прорисовки, наложение, и т.д....
         context = this;
+        forecastFragment = new ForecastFragment();
 
         /** запускаем таймер */
+        // TODO: вот эту срань с таймером переносим во фрагмент прогноза.
         timerRunning(); // запускаем отсчет и обработку таймера
+
+        /** работа с геоданными */
+        createLocationService(); // запускаем сервис для полученич геоданных
 
         initBroadcastListener(); // запускаем слушатель новых геоданных
 
@@ -267,6 +271,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         return bearing;
     }
 
+    // TODO: вот эту срань с таймером переносим во фрагмент прогноза.
     /** Счетчик таймера*/
     private void timerRunning () {
         new CountDownTimer(60000, 1000) {
@@ -306,6 +311,34 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         if (timerMin < 10 ) timerString = "0" + timerString;
         if (timerHour !=0 ) timerString = timerHour + ":" + timerString;
         return timerString;
+    }
+    // TODO: вот эту срань с таймером переносим во фрагмент прогноза.
+
+    /** Настраиваем и запускаем сервис для приема и трансляции данных геолокации */
+    private void createLocationService() {
+        if (checkPermission()) { // если разрешение есть, запускаем сервис
+            Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " permission good, starting service ");
+            intentLocationService = new Intent(this, LocationService.class);
+            intentLocationService.setPackage("com.example.racertimer.Instruments");
+            this.startService(intentLocationService);
+        } // если разрешения нет, выводим тост
+        else Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG);
+    }
+
+    /** Методы для работы с разрешениями на геолокацию */
+    public boolean checkPermission() { // проверяем наличие разрешения на геоданные
+        // если разрешения нет:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) // если разрешения нет, то запускаем запрос разрешения, код ответа 100
+        {
+            return false; // если разрешения нет, возвращаем false
+        } else
+            return true; // в противном случае разрешение есть, возвращаем true
+    }
+    private void askPermission() { // запрос разрешения
+        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
+                Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
     }
 
     /** создаем и регистрируем слушатель геолокации */
@@ -361,6 +394,11 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " Activity race get new location ");
         double tempVelosity;
+        if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
+        }
         if (location.hasSpeed()) {
             tempVelosity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelosity;

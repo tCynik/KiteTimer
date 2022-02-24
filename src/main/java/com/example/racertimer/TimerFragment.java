@@ -42,7 +42,6 @@ public class TimerFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -143,11 +142,6 @@ public class TimerFragment extends Fragment {
                 timerResult.setText(timerString2Print.toString()); // выводим значение на экран
             }
         });
-
-
-
-
-
         return view;
     }
 
@@ -224,10 +218,4 @@ public class TimerFragment extends Fragment {
         if (sec < 10) result = min + ":0" + sec;
         return result;
     }
-
-
-
-
-
-
 }
