@@ -81,6 +81,7 @@ public class TimerFragment extends Fragment {
                 } else { // если таймер идет, ставим на паузу
                     timerPaused = true;
                     timerResult.setTextColor(Color.RED);
+//                    voiceover.playSoundOnce(voiceover.pauseSID);
                     voiceover.makeSound(voiceover.pause);
                 }
             }

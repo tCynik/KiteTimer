@@ -30,6 +30,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
+import com.example.racertimer.multimedia.Voiceover;
 
 public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -74,6 +75,8 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private IntentFilter locationIntentFilter;
 
     private Context context;
+//    public Voiceover voiceover;
+//    private int beepID = 0; // переменная для записи номера потока произрываемых звуков
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +130,8 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         textTime = findViewById(R.id.currentTime);
 
         context = this;
+        //TODO: в будущем сделать единый войсовер, звуки передавать из таймера через интерфейс
+//        voiceover = new Voiceover(context); // создаем озвучку
         forecastFragment = new ForecastFragment();
 
         /** запускаем таймер */
@@ -458,10 +463,13 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         if (velocity > velocityMax) velocityMax = velocity;
         int radiusVMGMin = 40;
         double courseForWindRadians = Math.toRadians(90 + deltaBearing);
-        centerScreenX = centralUiCL.getWidth()/2;
-        centerScreenY = centralUiCL.getHeight()/2;
+        float playbackSpeed;
 
         maxVelocityTV.setText(String.valueOf(velocityMax));
+
+        // выставление меток исторических VMG
+        centerScreenX = centralUiCL.getWidth()/2;
+        centerScreenY = centralUiCL.getHeight()/2;
 
         if (velocityMadeGood > VMGmax || velocityMadeGood < VMGmin) { // при обновлении зафиксированного максимума VMG
 //            lineVMGIV[2].setVisibility(View.VISIBLE);
@@ -501,6 +509,32 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
         if (velocityMadeGood < VMGmin) VMGmin = velocityMadeGood;
         bestDownwindTV.setText(String.valueOf(VMGmin));
+
+        // озвучка высоких значений VMG
+//        if (beepID == 0) {
+//            if (velocityMadeGood > 5) { // если идем против ветра
+//                if (VMGmax > (VMGmax / 3) ) {
+//                    playbackSpeed = velocityMadeGood / (VMGmax - (VMGmax / 3));
+//                    beepID = voiceover.playSoundLoop(voiceover.beepSID, playbackSpeed);
+//                    Log.i(PROJECT_LOG_TAG, "playing beep sound, playbackSpeed = " + playbackSpeed);
+//                }
+//            }
+//            if (velocityMadeGood < -10) { // если идем по ветру
+//                if (VMGmin < (VMGmin/3) ) {
+//                    playbackSpeed = Math.abs(velocityMadeGood / (VMGmax - (VMGmax / 3)));
+//                    beepID = voiceover.playSoundLoop(voiceover.beepSID, playbackSpeed);
+//                    Log.i(PROJECT_LOG_TAG, "playing beep sound, playbackSpeed = " + playbackSpeed);
+//                }
+//            }
+//        } else { // если звук воспроизводится. проверяем условия для его остановки
+//            if (velocityMadeGood < 5 & velocityMadeGood > -10) {
+//                voiceover.stopPlaying(voiceover.beepSID, voiceover.beepSID.getSoundID());
+//                beepID = 0;
+//                Log.i(PROJECT_LOG_TAG, " stop playing beep sound in VMG < 0, soundID = " + beepID);
+//            }
+//        }
+
+
     }
 
     @Override
