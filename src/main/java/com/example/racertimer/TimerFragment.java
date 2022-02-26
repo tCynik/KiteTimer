@@ -76,10 +76,12 @@ public class TimerFragment extends Fragment {
             public void onClick(View view) {
                 if (timerPaused) { // если счетчик остановлен,
                     timerPaused = false; // снимамем счетчик с паузы
+                    runTimerCounter(60); // запускаем счетчик на 1 минуту
+                    //countDownTimer.start();
                     timerResult.setTextColor(Color.WHITE);
-                    Log.i(PROJECT_LOG_TAG, " starting timer counter ");
                 } else { // если таймер идет, ставим на паузу
                     timerPaused = true;
+                    countDownTimer.cancel();
                     timerResult.setTextColor(Color.RED);
 //                    voiceover.playSoundOnce(voiceover.pauseSID);
                     voiceover.makeSound(voiceover.pause);
@@ -92,10 +94,9 @@ public class TimerFragment extends Fragment {
         butCancelRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(PROJECT_LOG_TAG, " button Cancel was pressed " );
-                countDownTimer.onFinish();
-//                timerSec = 60*5;
+                countDownTimer.cancel();
                 closerTimer.finishTheTimer();
+                // TODO: надо протестить остановку таймера и минутные кнопки: не всегда останавливается отсчет.
             }
         });
 
@@ -104,7 +105,6 @@ public class TimerFragment extends Fragment {
         but5Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(PROJECT_LOG_TAG, " button 5 min pressed " );
                 timerSec = 60 * 5;
                 String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
                 timerResult.setText(timerString2Print.toString()); // выводим значение на экран
@@ -115,7 +115,6 @@ public class TimerFragment extends Fragment {
         but3Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(PROJECT_LOG_TAG, " button 3 min pressed " );
                 timerSec = 60 * 3;
                 String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
                 timerResult.setText(timerString2Print.toString()); // выводим значение на экран
@@ -147,7 +146,7 @@ public class TimerFragment extends Fragment {
     }
 
     private void initTimer() {
-        runTimerCounter(60); // запускаем счетчик на 1 минуту
+        //runTimerCounter(60); // запускаем счетчик на 1 минуту
         timerSec = 60 * 5; // устанавливаем таймер на 5 минут
         String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
         timerResult.setText(timerString2Print.toString()); // выводим значение на экран
@@ -176,7 +175,7 @@ public class TimerFragment extends Fragment {
     /** обновление и обработка данных таймера*/
     private void onTimerTicked () { // таймер обновился
         String timerString2Print = "00:00";
-        if (! timerPaused){
+//        if (! timerPaused){
             timerSec -- ;
             switch (timerSec) {
                 case 130: voiceover.makeSound(voiceover.twoMinutesReady); break;
@@ -199,8 +198,10 @@ public class TimerFragment extends Fragment {
                 case 1: voiceover.makeSound(voiceover.one); break;
                 case 0: voiceover.makeSound(voiceover.startSound);
                     closerTimer.finishTheTimer();
+                    countDownTimer.cancel();
+                    timerPaused = true;
                 default: break;
-            }
+           // }
         }
 
         timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера

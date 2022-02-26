@@ -30,7 +30,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
-import com.example.racertimer.multimedia.Voiceover;
 
 public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -123,7 +122,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
         velocityMax = 1;
         //wind = 201;
-        windDirection = 24;
+        windDirection = 202;
         windTV.setText(String.valueOf(windDirection));
         windFrameIV.setRotation(180 - windDirection);
 
