@@ -6,11 +6,19 @@ import android.util.Log;
 public class WindStatistics { // класс для сбора статистики скоростей и рассчета истинного напр ветра
     private final static String PROJECT_LOG_TAG = "racer_timer_windStat";
 
-    private int sizeOfSectors; // размер каждого сектора диаграммы в градусах
-    private int numberOfSectors; // количество секторов
+    private int sizeOfSectors; // размер каждого сектора диаграммы в градусах - определяем в конструкторе
+    private int numberOfSectors; // количество секторов - считаем из numberOfSectors
     private int[] windDiagram; // массив, в котором храним диаграмму
     private int sensitivity; // чувствительность диаграммы к изменениям в %
-    private int maxEmptySector = 120; // наибольший незаполненный сектор в градусах для начала расчетов
+
+    // для определения репрезентативности накопленных данных переменные для расчета:
+    private int maxAllowedEmptyZone = 120; // наибольший разрешенный незаполненный сектор В ГРАДУСАХ
+    private int maxCurrentEmptyZone; // максимальная текущая не заполненная зона В КОЛИЧЕСТВЕ СКТОРОВ
+    // !!!при сравнении переменных не забыть о переводе количества секторо в градусы!!!
+    private int minFilledZones = 150; // минимальная разрешенная полностью заполненная зона диаграммы в градусах
+    private int summVelocity;
+
+    private int maxVelocity;
     // если есть хоть один незаполненный сектора больше этого, выборка считается не репрезентативной.
     private int windDirection, lastWindDirection;
     private float[] sin, cos;
@@ -97,36 +105,60 @@ public class WindStatistics { // класс для сбора статистик
     int calculateWindDirection() { // в этом методе высчитываем направление ветра
         int windDirection = this.windDirection;
         double vectorLength;
-        int summVelocity = 0; // сумма длин всех векторов
+        summVelocity = 0; // сумма длин всех векторов
         double summX = 0; // координата X суммирующего вектора
         double summY = 0; // координата Y суммирующего вектора
 
         int representCounter = 0; // счетчик текущего не заполненного сектора
-        int maxRepresentCounter = 0; // счетчик максимального не заполненного сектора
+        maxCurrentEmptyZone = 0; // счетчик ширины максимального не заполненного сектора
+        maxVelocity = 0; // переменная для определения максимальной завфиксированной скорости
+
         for (int i = 0; i < numberOfSectors; i++) { // перебираем все сектора
             // определяем репрезентативность диаграммы
             if (! windDiagramIsRepresentable) { // считаем длину наибольшего незаполненного сектора
                 if (windDiagram[i] == 0) representCounter ++;
                 else representCounter = 0;
-                if (representCounter > maxRepresentCounter) maxRepresentCounter = representCounter;
+                if (representCounter > maxCurrentEmptyZone) maxCurrentEmptyZone = representCounter;
             }
             // находим координаты конца суммирующего вектора
             summX = summX + sin[i] * windDiagram[i]; // координата вектора X
             summY = summY + cos[i] * windDiagram[i]; // Координата вектора Y
-            // находим сумму длин всех векторов для определения достаточности количества данных
-            summVelocity = summVelocity + windDiagram[i];
-            if (windDiagram[i] != 0) Log.i(PROJECT_LOG_TAG, "calcWindDir: sector = " + i + ", speed = "+ windDiagram[i]+ ", sumX = " + summX+", sumY ="+ summY);
+
+            // считаем промежуточные данные для определения достаточности количества данных
+            summVelocity = summVelocity + windDiagram[i]; // находим сумму длин всех векторов
+            if (windDiagram[i] > maxVelocity) maxVelocity = windDiagram [i]; // находим максимальную скорость
+//            if (windDiagram[i] != 0) Log.i(PROJECT_LOG_TAG, "calcWindDir: sector = " + i + ", speed = "+ windDiagram[i]+ ", sumX = " + summX+", sumY ="+ summY);
         }
 
         // по итогу перебора проверяем массив на репрезентативность
-        if (! windDiagramIsRepresentable & maxRepresentCounter < maxEmptySector / sizeOfSectors) {
-            windDiagramIsRepresentable = true;
-            Log.i(PROJECT_LOG_TAG, "max repres counter = "+maxRepresentCounter+"the wind diagram is being representative now!");
-        }
+        if (! windDiagramIsRepresentable ) windDiagramIsRepresentable = checkRepresentative();
+//        if (! windDiagramIsRepresentable & maxCurrentEmptyZone < maxAllowedEmptyZone / sizeOfSectors) {
+//            windDiagramIsRepresentable = true;
+//            Log.i(PROJECT_LOG_TAG, "max repres counter = "+ maxCurrentEmptyZone +", the wind diagram is being representative now!");
+//        }
 
         windDirection = CoursesCalculator.bearingByCoordinates(summX, summY);
+        windDirection = CoursesCalculator.invertCourse(windDirection);
         Log.i(PROJECT_LOG_TAG, " founded wind direction =  " + windDirection + ", last windDir = " + this.windDirection);
 
         return windDirection;
+    }
+
+    private boolean checkRepresentative() { // метод проверки выборки на репрезентативность
+        boolean checkIsPassed = true;
+        // если ширина максимального незаполненного сектора больше указанной в настройках (перевод из секторов в градусы)
+        if (maxCurrentEmptyZone > maxAllowedEmptyZone / sizeOfSectors) checkIsPassed = false;
+            Log.i(PROJECT_LOG_TAG, "max repres counter = "+ maxCurrentEmptyZone +", the wind diagram is being representative now!");
+
+        // если сумма скоростей всех секторов менее чем в X раз превышает скорость наибольшего вектора
+        // коэффициент требуемого превышения суммы по секторам над наибольшим сектором X = exсeedRatio
+        int exсeedRatio = minFilledZones / (sizeOfSectors * 4);
+        // среднюю скорость примем равную половине максимальной скорости
+        if (summVelocity < maxVelocity * exсeedRatio) checkIsPassed = false;
+
+        Log.i(PROJECT_LOG_TAG, "checking represent: "+checkIsPassed+", maxNotFilledSector = "+ maxCurrentEmptyZone
+                +", sumVelocities = "+ summVelocity +", maxVelocity*ratio = " +(maxVelocity * exсeedRatio));
+
+        return  checkIsPassed;
     }
 }

@@ -60,4 +60,10 @@ public class CoursesCalculator {
     public static double vectorLevgthByCoordinates (double x, double y) {
         return Math.pow((Math.pow(x, 2) + Math.pow(y, 2)), 0.5); // длина вектора
     }
+
+    public static int invertCourse (int course) {
+        int resultCourse = course + 180;
+        if (resultCourse > 360) resultCourse = resultCourse - 360;
+        return resultCourse;
+    }
 }

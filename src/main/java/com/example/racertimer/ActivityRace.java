@@ -137,9 +137,8 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         // TODO: вот эту срань с таймером переносим во фрагмент прогноза.
         timerRunning(); // запускаем отсчет и обработку таймера
 
-        /** работа с геоданными */
+        /** блок работы с геоданными */
         createLocationService(); // запускаем сервис для полученич геоданных
-
         initBroadcastListener(); // запускаем слушатель новых геоданных
 
         // обновляем положение вьюшек
@@ -320,13 +319,16 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
     /** Настраиваем и запускаем сервис для приема и трансляции данных геолокации */
     private void createLocationService() {
-        if (checkPermission()) { // если разрешение есть, запускаем сервис
+        if (! checkPermission()) askPermission(); // если разрешения нет, запрашиваем разрешение
+
+        if (checkPermission()) { // еще раз проверяем: если разрешение есть, запускаем сервис
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " permission good, starting service ");
             intentLocationService = new Intent(this, LocationService.class);
             intentLocationService.setPackage("com.example.racertimer.Instruments");
             this.startService(intentLocationService);
-        } // если разрешения нет, выводим тост
-        else Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG);
+        } else { // если разрешения нет, выводим тост
+            Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG);
+        }
     }
 
     /** Методы для работы с разрешениями на геолокацию */
