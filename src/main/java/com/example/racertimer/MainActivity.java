@@ -66,26 +66,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) { // view - элемент, на который произошло нажатие (его id)
         Context context = this; // создаем контекст относительно текущего активити
-        Class nextActivity = ActivityTimer.class; // активити, в которое будем переходить чаще всего
-        switch (view.getId()) {
-            case R.id.but_5mins:
-                intent = new Intent(context, nextActivity); // по умолчанию 5 минут (ничего не передаем)
-                break;
-            case R.id.but_3mins:
-                intent = new Intent(context, nextActivity); // при трехминутке передаем тайминг 3 мин
-                intent.putExtra("procedureTiming", 3);
-                break;
-            case R.id.but_instant:
-                intent = new Intent(context, ActivityRace.class);
-                break;
-            case R.id.but_forecast:
-                intent = new Intent(context, ActivityForecast.class);
-                intent.putExtra("latitude", latitude);
-                intent.putExtra("longitude", longitude);
-            break;
-            default:
-                break;
-        }
+//        Class nextActivity = ActivityTimer.class; // активити, в которое будем переходить чаще всего
+//        switch (view.getId()) {
+//            case R.id.but_5mins:
+//                intent = new Intent(context, nextActivity); // по умолчанию 5 минут (ничего не передаем)
+//                break;
+//            case R.id.but_3mins:
+//                intent = new Intent(context, nextActivity); // при трехминутке передаем тайминг 3 мин
+//                intent.putExtra("procedureTiming", 3);
+//                break;
+//            case R.id.but_instant:
+//                intent = new Intent(context, ActivityRace.class);
+//                break;
+//            case R.id.but_forecast:
+//                intent = new Intent(context, ActivityForecast.class);
+//                intent.putExtra("latitude", latitude);
+//                intent.putExtra("longitude", longitude);
+//            break;
+//            default:
+//                break;
+//        }
         startActivity(intent);
     }
 

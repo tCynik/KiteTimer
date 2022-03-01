@@ -395,17 +395,6 @@
             android:layout_height="wrap_content"
             android:gravity="end">
 
-            <Button
-                android:id="@+id/wind_inc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="WIND +"/>
-
-            <Button
-                android:id="@+id/wind_dec"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="wind -"/>
 
         </LinearLayout>
     </LinearLayout>

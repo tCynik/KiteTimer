@@ -30,6 +30,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
+import com.example.racertimer.multimedia.Voiceover1;
 
 public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -47,8 +48,9 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private TimerFragment timerFragment = null;
     private ForecastFragment forecastFragment = null;
 
+    private Voiceover1 voiceover1;
 
-    private int velocity, bearing, windDirection, velocityMadeGood, velocityMax, VMGmax, VMGmin;
+    private int velocity, bearing, windDirection, velocityMadeGood, lastVMG, velocityMax, VMGmax, VMGmin;
 
     private TextView textTime; // переменная времени в левом вехнем углу
 
@@ -56,6 +58,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private int timerHour = 0; // переменная в часах
     private int timerMin = 0; // переменная счетчика в минутах
     private int timerSec = 0; // текущее значение таймера в сотых долей секунды
+    private double vmgBeeperSensitivity = 0.2; // чувствительность бипера - с какого % от max ВМГ пищать
 
     private TextView speedTV, maxSpeedTV, courseTV, countLocalChangedTV; // переменные для привызки полей скорости и курса
 
@@ -101,8 +104,6 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         bestDownwindTV = findViewById(R.id.min_vmg);
         courseToWindTV = findViewById(R.id.course_to_wind);
         btnReset = findViewById(R.id.but_reset);
-        btnWindPlus = findViewById(R.id.wind_inc);
-        btnWindMinus = findViewById(R.id.wind_dec);
 
         // TODO: нужно генерировать линии программно по заданным координатам.
         // этот костыль надо убирать.
@@ -141,6 +142,8 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         createLocationService(); // запускаем сервис для полученич геоданных
         initBroadcastListener(); // запускаем слушатель новых геоданных
 
+        voiceover1 = new Voiceover1(context);
+
         // обновляем положение вьюшек
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
@@ -159,29 +162,12 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
             }
         });
 
-        btnWindPlus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                windDirection++;
-                onWindDirectionChanged(windDirection);
-            }
-        });
-
-        btnWindMinus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                windDirection--;
-                onWindDirectionChanged(windDirection);
-            }
-        });
-
         bearing = 0;
         windSB.setOnSeekBarChangeListener(this);
         bearingSB.setOnSeekBarChangeListener(this);
         velocitySB.setOnSeekBarChangeListener(this);
 
         velocity = 0;
-
     }
 
     public void deployTimerFragment() {
@@ -458,60 +444,111 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
     }
 
+    /** обновляем поля VMG и скорости */
     void updateMaxVelocityVMG () {
         int i;
         int imageStartX = lineVMGIV[0].getWidth() / 2;
-        if (velocity > velocityMax) velocityMax = velocity;
         int radiusVMGMin = 40;
         double courseForWindRadians = Math.toRadians(90 + deltaBearing);
         float playbackSpeed;
 
+        if (velocity > velocityMax) velocityMax = velocity;
         maxVelocityTV.setText(String.valueOf(velocityMax));
+
+        vmgBeeper();
 
         // выставление меток исторических VMG
         centerScreenX = centralUiCL.getWidth()/2;
         centerScreenY = centralUiCL.getHeight()/2;
 
-        if (velocityMadeGood > VMGmax || velocityMadeGood < VMGmin) { // при обновлении зафиксированного максимума VMG
-//            lineVMGIV[2].setVisibility(View.VISIBLE);
-            if (velocityMadeGood > 0) VMGmax = velocityMadeGood;
+        // проверяем и обновляем максимальный upwind
+        if (velocityMadeGood > VMGmax) {
+            VMGmax = velocityMadeGood;
+            vmgBeeper();
             bestUpwindTV.setText(String.valueOf(VMGmax));
-            ////////// это все срань, нужно переписывать на canvas
-            ////////// проверить центр экрана, приходится подгонять вручную подпорками
-//            if (windCourseAngle > 0) { // курс больше ноля = левый галс
-//                if (windCourseAngle < 90) { // идем левый в бакштаг
-//                    // ставим метку под левый бакштаг
-//                    lineVMGIV[3].setVisibility(View.VISIBLE);
-//                    lineVMGIV[3].setX((float) (centerScreenX - 50 - (float) (lineVMGIV[0].getHeight()/2 ) * Math.cos(Math.toRadians(90-windCourseAngle))));
-//                    lineVMGIV[3].setY((float) (centerScreenY  - (float) (lineVMGIV[0].getWidth()/2 + 50) * Math.sin(Math.toRadians(windCourseAngle))));
-//                    lineVMGIV[3].setRotation(windCourseAngle-180);
-//                    // ставим метку под левый бейдевинд
-//                    lineVMGIV[2].setVisibility(View.VISIBLE);
-//                } else { // идем в левый бейдевинд
-//                    // ставим метку под левый бейдевинд
-//
-//                    // ставим метку под правый бейдевинд
-//
-//                }
-//            } else { // курс меньше ноля = правый галс
-//                if (windCourseAngle < -90) { // идем правый в бакштаг
-//                    // ставим метку под правый бакштаг
-//
-//                    // ставим метку под левый бакштаг
-//
-//                } else { // идем в правый бейдевинд
-//                    // ставим метку под правый бейдевинд
-//
-//                    // ставим метку под левый бейдевинд
-//
-//                }
-//            }
         }
 
-        if (velocityMadeGood < VMGmin) VMGmin = velocityMadeGood;
-        bestDownwindTV.setText(String.valueOf(VMGmin));
+        // проверяем и обновляем максимальный downwind
+        if (velocityMadeGood < VMGmin) {
+            VMGmin = velocityMadeGood;
+            vmgBeeper();
+            bestDownwindTV.setText(String.valueOf(VMGmin));
+        }
+//        if (velocityMadeGood > VMGmax || velocityMadeGood < VMGmin) { // при обновлении зафиксированного максимума VMG
+////            lineVMGIV[2].setVisibility(View.VISIBLE);
+//            if (velocityMadeGood > 0) VMGmax = velocityMadeGood;
+//            bestUpwindTV.setText(String.valueOf(VMGmax));
+//            ////////// это все срань, нужно переписывать на canvas
+//            ////////// проверить центр экрана, приходится подгонять вручную подпорками
+////            if (windCourseAngle > 0) { // курс больше ноля = левый галс
+////                if (windCourseAngle < 90) { // идем левый в бакштаг
+////                    // ставим метку под левый бакштаг
+////                    lineVMGIV[3].setVisibility(View.VISIBLE);
+////                    lineVMGIV[3].setX((float) (centerScreenX - 50 - (float) (lineVMGIV[0].getHeight()/2 ) * Math.cos(Math.toRadians(90-windCourseAngle))));
+////                    lineVMGIV[3].setY((float) (centerScreenY  - (float) (lineVMGIV[0].getWidth()/2 + 50) * Math.sin(Math.toRadians(windCourseAngle))));
+////                    lineVMGIV[3].setRotation(windCourseAngle-180);
+////                    // ставим метку под левый бейдевинд
+////                    lineVMGIV[2].setVisibility(View.VISIBLE);
+////                } else { // идем в левый бейдевинд
+////                    // ставим метку под левый бейдевинд
+////
+////                    // ставим метку под правый бейдевинд
+////
+////                }
+////            } else { // курс меньше ноля = правый галс
+////                if (windCourseAngle < -90) { // идем правый в бакштаг
+////                    // ставим метку под правый бакштаг
+////
+////                    // ставим метку под левый бакштаг
+////
+////                } else { // идем в правый бейдевинд
+////                    // ставим метку под правый бейдевинд
+////
+////                    // ставим метку под левый бейдевинд
+////
+////                }
+////            }
+//        }
 
-        // озвучка высоких значений VMG
+    }
+
+    /** обновляем поля VMG и скорости */
+    private void vmgBeeper() {
+        if (velocityMadeGood != lastVMG) { // если изменилась VMG, перезапускаем прищалку
+            lastVMG = velocityMadeGood;
+
+            int threshold = (int) (VMGmax * vmgBeeperSensitivity); // порог чувствительности ВМГ
+            if (velocityMadeGood > 0 ) { // если идем в бейдевинд
+                if (velocityMadeGood > threshold) { // если VMG выше порога, начинаем пикать
+                    try {
+                        int percentVMG = ((velocityMadeGood - threshold) / (VMGmax - threshold)) * 100;
+                        Log.i("racer_timer", "threshold = "+threshold+", upwind VMG updated to beeper. PercentVMG = "+ percentVMG );
+                        voiceover1.playRepeatSound(percentVMG);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else
+                    voiceover1.stopRepeatSound();
+            }
+
+            threshold = (int)(VMGmin * vmgBeeperSensitivity); // порог чувствительности ВМГ - отриц.
+            if (velocityMadeGood < 0) { // если идем в бакштаг
+                if (velocityMadeGood < threshold) { // если VMG (отр) ниже порога, начинаем пикать
+                    try {
+                        int percentVMG = ((velocityMadeGood - threshold) / (VMGmax - threshold)) * 100; // получается положительная цифра
+                        Log.i("racer_timer", " downwind VMG updated to beeper. PercentVMG = "+ percentVMG );
+                        voiceover1.playRepeatSound(percentVMG);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else
+                    voiceover1.stopRepeatSound();
+            }
+        }
+
+//                    Log.i(PROJECT_LOG_TAG, "playing beep sound, playbackSpeed = " + playbackSpeed);
+
+
 //        if (beepID == 0) {
 //            if (velocityMadeGood > 5) { // если идем против ветра
 //                if (VMGmax > (VMGmax / 3) ) {
@@ -534,9 +571,8 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 //                Log.i(PROJECT_LOG_TAG, " stop playing beep sound in VMG < 0, soundID = " + beepID);
 //            }
 //        }
-
-
     }
+
 
     @Override
     public void finishTheTimer() {
