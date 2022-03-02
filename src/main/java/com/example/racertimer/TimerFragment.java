@@ -117,7 +117,7 @@ public class TimerFragment extends Fragment {
         butCancelRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                countDownTimer.cancel();
+                if (countDownTimer != null) countDownTimer.cancel();
                 closerTimer.finishTheTimer();
                 // TODO: иногда появляется баг: вылет приложения при работе с таймером.
             }
