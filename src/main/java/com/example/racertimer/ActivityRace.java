@@ -58,7 +58,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private int timerHour = 0; // переменная в часах
     private int timerMin = 0; // переменная счетчика в минутах
     private int timerSec = 0; // текущее значение таймера в сотых долей секунды
-    private double vmgBeeperSensitivity = 0.2; // чувствительность бипера - с какого % от max ВМГ пищать
+    private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от max ВМГ пищать
 
     private TextView speedTV, maxSpeedTV, courseTV, countLocalChangedTV; // переменные для привызки полей скорости и курса
 
@@ -455,8 +455,6 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         if (velocity > velocityMax) velocityMax = velocity;
         maxVelocityTV.setText(String.valueOf(velocityMax));
 
-        vmgBeeper();
-
         // выставление меток исторических VMG
         centerScreenX = centralUiCL.getWidth()/2;
         centerScreenY = centralUiCL.getHeight()/2;
@@ -474,6 +472,9 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
             vmgBeeper();
             bestDownwindTV.setText(String.valueOf(VMGmin));
         }
+
+        vmgBeeper();
+
 //        if (velocityMadeGood > VMGmax || velocityMadeGood < VMGmin) { // при обновлении зафиксированного максимума VMG
 ////            lineVMGIV[2].setVisibility(View.VISIBLE);
 //            if (velocityMadeGood > 0) VMGmax = velocityMadeGood;
@@ -519,28 +520,18 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 
             int threshold = (int) (VMGmax * vmgBeeperSensitivity); // порог чувствительности ВМГ
             if (velocityMadeGood > 0 ) { // если идем в бейдевинд
+                changeBeepingSpeed(threshold);
                 if (velocityMadeGood > threshold) { // если VMG выше порога, начинаем пикать
-                    try {
-                        int percentVMG = ((velocityMadeGood - threshold) / (VMGmax - threshold)) * 100;
-                        Log.i("racer_timer", "threshold = "+threshold+", upwind VMG updated to beeper. PercentVMG = "+ percentVMG );
-                        voiceover1.playRepeatSound(percentVMG);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else
+                    changeBeepingSpeed(threshold);
+                } else { // если ВМГ ниже, отключаем пищалку
                     voiceover1.stopRepeatSound();
+                }
             }
 
             threshold = (int)(VMGmin * vmgBeeperSensitivity); // порог чувствительности ВМГ - отриц.
             if (velocityMadeGood < 0) { // если идем в бакштаг
                 if (velocityMadeGood < threshold) { // если VMG (отр) ниже порога, начинаем пикать
-                    try {
-                        int percentVMG = ((velocityMadeGood - threshold) / (VMGmax - threshold)) * 100; // получается положительная цифра
-                        Log.i("racer_timer", " downwind VMG updated to beeper. PercentVMG = "+ percentVMG );
-                        voiceover1.playRepeatSound(percentVMG);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    changeBeepingSpeed(threshold);
                 } else
                     voiceover1.stopRepeatSound();
             }
@@ -573,6 +564,16 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
 //        }
     }
 
+    private void changeBeepingSpeed (int threshold) {
+        try {   // определяем текущий % ВМГ от максимального за вычетом порога чувствительности
+            int activeVMG = velocityMadeGood - threshold;
+            int activeVMGmax = VMGmax - threshold;
+            int percentVMG = Math.abs(activeVMG * 100 / activeVMGmax);
+            voiceover1.playRepeatSound(percentVMG);
+        } catch (Exception e) { // на случай 0 в знаменателе в начале работы
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void finishTheTimer() {

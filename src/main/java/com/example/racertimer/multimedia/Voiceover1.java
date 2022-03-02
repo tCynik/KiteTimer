@@ -93,12 +93,17 @@ public class Voiceover1 {
     }
 
     public void playRepeatSound (int percentVMG) { // проигрывание циклических звуков - пищалка ВМГ
-        float rate = calculateRateFromPercent(percentVMG);
-        if (repeatSoundId == 0) repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
-        else {
+        if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
             soundPool.stop(repeatSoundId);
             repeatSoundId = 0;
         }
+        // запускаем непосредственно произрывание
+        startPlayingRepeatSound(percentVMG);
+    }
+
+    private void startPlayingRepeatSound (int percentVMG) {
+        float rate = calculateRateFromPercent(percentVMG);
+        if (repeatSoundId == 0) repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
     }
 
     public void stopRepeatSound () { // остановка пищалки
