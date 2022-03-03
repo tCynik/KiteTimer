@@ -15,11 +15,4 @@ to navigation, writing any GPS track, it's displaying, export etc. (Not implemen
   - A timer to provide the starting procedure in the kitesailing races
 
 In project i've learning tecnologies:
-OOP
-working with GPS location
-Fragments
-Illustrator
-sounds
-Canvas
-services
-broadcasts & handlers
+OOP, working with GPS location, Fragments, Illustrator, sounds, Canvas, services, unit testing, broadcasts & handlers
