@@ -1,6 +1,7 @@
 package com.example.racertimer;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,9 +17,11 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Space;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,9 +33,9 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
-import com.example.racertimer.multimedia.Voiceover1;
+import com.example.racertimer.multimedia.Voiceover;
 
-public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
+public class ActivityRace extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
@@ -42,13 +45,15 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     private Space centerScreenSpace;
     private SeekBar windSB, bearingSB, velocitySB;
     private Button btnReset, btnWindPlus, btnWindMinus;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    private Switch muteVmgSeitch;
     private TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
     private ConstraintLayout centralParamsCL, centralUiCL;
 
     private TimerFragment timerFragment = null;
     private ForecastFragment forecastFragment = null;
 
-    private Voiceover1 voiceover1;
+    private Voiceover voiceover;
 
     private int velocity, bearing, windDirection, velocityMadeGood, lastVMG, velocityMax, VMGmax, VMGmin;
 
@@ -104,6 +109,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         bestDownwindTV = findViewById(R.id.min_vmg);
         courseToWindTV = findViewById(R.id.course_to_wind);
         btnReset = findViewById(R.id.but_reset);
+        muteVmgSeitch = findViewById(R.id.mute_vmg);
 
         // TODO: нужно генерировать линии программно по заданным координатам.
         // этот костыль надо убирать.
@@ -142,7 +148,11 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
         createLocationService(); // запускаем сервис для полученич геоданных
         initBroadcastListener(); // запускаем слушатель новых геоданных
 
-        voiceover1 = new Voiceover1(context);
+        voiceover = new Voiceover(context);
+
+        /** обрабатываем свитч mute VMG */
+        muteVmgSeitch.setOnCheckedChangeListener(this);
+
 
         // обновляем положение вьюшек
 
@@ -524,7 +534,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
                 if (velocityMadeGood > threshold) { // если VMG выше порога, начинаем пикать
                     changeBeepingSpeed(threshold);
                 } else { // если ВМГ ниже, отключаем пищалку
-                    voiceover1.stopRepeatSound();
+                    voiceover.stopRepeatSound();
                 }
             }
 
@@ -533,7 +543,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
                 if (velocityMadeGood < threshold) { // если VMG (отр) ниже порога, начинаем пикать
                     changeBeepingSpeed(threshold);
                 } else
-                    voiceover1.stopRepeatSound();
+                    voiceover.stopRepeatSound();
             }
         }
 
@@ -569,7 +579,7 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
             int activeVMG = velocityMadeGood - threshold;
             int activeVMGmax = VMGmax - threshold;
             int percentVMG = Math.abs(activeVMG * 100 / activeVMGmax);
-            voiceover1.playRepeatSound(percentVMG);
+            voiceover.playRepeatSound(percentVMG);
         } catch (Exception e) { // на случай 0 в знаменателе в начале работы
             e.printStackTrace();
         }
@@ -584,4 +594,18 @@ public class ActivityRace extends AppCompatActivity implements SeekBar.OnSeekBar
     public void openTimerFragment() {
         deployTimerFragment();
     }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        if (b) { // если звук выключен
+            voiceover.vmgIsMuted = true;
+            voiceover.stopRepeatSound();
+        } else { // если звук включен
+            voiceover.vmgIsMuted = false;
+            lastVMG = velocityMadeGood - 1; // для выполнени условия пиканья (сравнение наличиия изменений ВМГ)
+            vmgBeeper();
+        }
+    }
 }
+
+// TODO: реализовать принудительный запрос истинного ветра при перезапуске приложения

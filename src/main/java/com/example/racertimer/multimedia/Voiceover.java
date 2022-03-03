@@ -12,7 +12,7 @@ import com.example.racertimer.R;
  * PRIORITY_BEEP = 2 - звуки индикации положения VMG
  * PRIORITY_TIMER = 3 - озвучка таймера */
 
-public class Voiceover1 {
+public class Voiceover {
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
     private static final int PRIORITY_SYSTEM = 1; // системные звуки
@@ -41,12 +41,16 @@ public class Voiceover1 {
     public static int SOUND_ASSET_TWO_MINUTE_READY = 20;
     public static int SOUND_ASSET_PAUSE = 21;
     public static int SOUND_ASSET_BEEP = 22;
+    public static int SOUND_ASSET_BEEP_PATCH = 23;
 
     public SoundPool soundPool;
 
+    private Context context;
+    public boolean vmgIsMuted = false;
+
     int repeatSoundId = 0; // айди текущего повторяющегося звука
 
-    public Voiceover1 (Context context) {
+    public Voiceover(Context context) {
 
         /** блок инициализации SoundPool */
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -82,6 +86,9 @@ public class Voiceover1 {
         soundPool.load(context, R.raw.eng_pause, PRIORITY_TIMER); // 21
 
         soundPool.load(context, R.raw.beep, PRIORITY_BEEP); // 22
+        soundPool.load(context, R.raw.patch_beep, PRIORITY_BEEP +1); // 23
+
+        this.context = context;
     }
 
     public void playSingleTimerSound (int soundAssertId) { // проигрывание одиночных звуков - таймер
@@ -93,12 +100,15 @@ public class Voiceover1 {
     }
 
     public void playRepeatSound (int percentVMG) { // проигрывание циклических звуков - пищалка ВМГ
-        if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
-            soundPool.stop(repeatSoundId);
-            repeatSoundId = 0;
+        if (!vmgIsMuted) {
+            if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
+                soundPool.play(SOUND_ASSET_BEEP_PATCH, 1, 1, PRIORITY_BEEP+1, 0, calculateRateFromPercent(percentVMG));
+                soundPool.stop(repeatSoundId);
+                repeatSoundId = 0;
+            }
+            // запускаем непосредственно проигрывание
+            startPlayingRepeatSound(percentVMG);
         }
-        // запускаем непосредственно произрывание
-        startPlayingRepeatSound(percentVMG);
     }
 
     private void startPlayingRepeatSound (int percentVMG) {
