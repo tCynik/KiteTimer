@@ -141,7 +141,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         forecastFragment = new ForecastFragment();
 
         /** запускаем таймер */
-        // TODO: вот эту срань с таймером переносим во фрагмент прогноза.
         timerRunning(); // запускаем отсчет и обработку таймера
 
         /** блок работы с геоданными */

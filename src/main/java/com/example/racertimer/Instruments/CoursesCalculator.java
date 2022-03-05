@@ -6,11 +6,11 @@ package com.example.racertimer.Instruments;
 
 public class CoursesCalculator {
 
-    /** приведение заданного угла к интервалу от 0 до 360 */
+    /** приведение заданного угла к интервалу от 0 до 359 (360 = 0) */
     public static int setAngleFrom0To360 (int angle) {
         int resultAngle = angle;
         if (angle < 0) resultAngle = angle + 360;
-        if (angle > 360) resultAngle = angle - 360;
+        if (angle >= 360) resultAngle = angle - 360;
         return resultAngle;
     }
 
@@ -38,15 +38,16 @@ public class CoursesCalculator {
         return windCourseAngle;
     }
 
-    // нахождение симметричного к ветру угла
+    // нахождение симметричного к ветру угла - рассчитывается для угла к ветру!!! (не для аимута)
     public static int symmetryAngle (int windDirection, int windCourseAngle) {
         // на вход подается направление ветра (с какого азимута дует) и курс к ветру:
         // от бакштага к бейдевинду увеличение; правый галс отрицательный, левый галс положительный
         int symmetryCourse;
         symmetryCourse = windDirection - windCourseAngle;
-        symmetryCourse = setAngleFrom0To360(symmetryCourse);
+        symmetryCourse = setAngleFrom0To360(symmetryCourse); // приводим в диапазон от 0 до 360
         return symmetryCourse;
     }
+
 
     public static int bearingByCoordinates (double x, double y) { // вычисление азимута вектора по координатам конца (первая точка 0:0)
         double vectorLength = vectorLevgthByCoordinates(x, y);

@@ -1,10 +1,14 @@
 package com.example.racertimer.Instruments;
 
 import android.location.Location;
+import android.os.CountDownTimer;
 import android.util.Log;
 
 public class WindStatistics { // класс для сбора статистики скоростей и рассчета истинного напр ветра
     private final static String PROJECT_LOG_TAG = "racer_timer_windStat";
+
+    private final static int MIN_KMH_TO_STATISTICS = 6; // минимальный порог скорости, который идет в
+    // статистику - для фильтрации пешей хотьбы и случайных всплесков
 
     private int sizeOfSectors; // размер каждого сектора диаграммы в градусах - определяем в конструкторе
     private int numberOfSectors; // количество секторов - считаем из numberOfSectors
@@ -26,6 +30,7 @@ public class WindStatistics { // класс для сбора статистик
     private boolean windDiagramIsRepresentable = false; // флаг того, что статистика набрана достаточная
 
     WindChangedHerald windChangedHerald; // интерфейс для вывода нового значения ветра
+    private CountDownTimer countDownTimer; // таймер для причесывания диаграммы когда не приходят новые данные
 
     public WindStatistics(int sizeOfSectors, WindChangedHerald windChangedHerald) {
         this.sizeOfSectors = sizeOfSectors;
@@ -42,6 +47,17 @@ public class WindStatistics { // класс для сбора статистик
         }
         this.windChangedHerald = windChangedHerald;
         sensitivity = 50; // параметр чувствистельности для настройки
+
+        countDownTimer = new CountDownTimer(60000, 1000) {
+            @Override
+            public void onTick(long l) {
+            }
+            @Override
+            public void onFinish() {
+                combTheDiagram(); // когда таймер закончился, причесываем диаграмму
+                Log.i(PROJECT_LOG_TAG, " combing the diagram... ");
+            }
+        };
     }
 
     public void setSensitivity(int updSensitivity) { // сеттер для возможности настройки на ходу
@@ -56,24 +72,31 @@ public class WindStatistics { // класс для сбора статистик
         int bearing = (int) location.getBearing();
         int numTheSector = calculateNumberOfSector(bearing); // высчитываем номер сектора
 
-        int velocity = (int) location.getSpeed();
+        int velocity = (int) (location.getSpeed() * 3.6); // в километрах в час
 
-        if (velocity > windDiagram[calculateNumberOfSector(bearing)]) { // если новый максимум
-            windDiagram[numTheSector] = velocity; // обновляем максимум
+        // если имеем новый максимум в диагремме, превышающий порог фильтра чувствительности диаграммы
+        if (velocity > MIN_KMH_TO_STATISTICS & velocity > windDiagram[calculateNumberOfSector(bearing)]) {
+            // сначала обновляем максимум в текущем секторе
+            windDiagram[numTheSector] = velocity;
 
-            if (windDiagramIsRepresentable) { // если репрез. - уменьшаем симметричную скорость
+            // если диаграмма репрезентативная, уменьшаем скорость в симметричном секторе
+            if (windDiagramIsRepresentable) {
                 int velocityDifferent = velocity - windDiagram[numTheSector];
                 cutSymmetricalMaximum(bearing, velocityDifferent);
             }
 
-            /////// после тестирования считать только при репрезентативности для экономии  ресурсов - условие ниже
+            // высчитываем новое направление ветра
             windDirection = calculateWindDirection();
+            countDownTimer.cancel();
+            countDownTimer.start();
 
+            // проверяем условия и отправляем бродкаст
             if (windDiagramIsRepresentable) // если репрезент. - отправляем бродкаст с новыми данными
                 if (lastWindDirection != windDirection) {
+                    Log.i(PROJECT_LOG_TAG, "sending wind direction broadcast");
                     windChangedHerald.onWindDirectionChanged(windDirection);// отправляем broadcast с новым направлением
                 }
-            lastWindDirection = windDirection; // обновляем данные по направлению
+            lastWindDirection = windDirection; // обновляем данные по направлению для фиксации изменений
         }
     }
 
@@ -132,13 +155,9 @@ public class WindStatistics { // класс для сбора статистик
 
         // по итогу перебора проверяем массив на репрезентативность
         if (! windDiagramIsRepresentable ) windDiagramIsRepresentable = checkRepresentative();
-//        if (! windDiagramIsRepresentable & maxCurrentEmptyZone < maxAllowedEmptyZone / sizeOfSectors) {
-//            windDiagramIsRepresentable = true;
-//            Log.i(PROJECT_LOG_TAG, "max repres counter = "+ maxCurrentEmptyZone +", the wind diagram is being representative now!");
-//        }
 
-        windDirection = CoursesCalculator.bearingByCoordinates(summX, summY);
-        windDirection = CoursesCalculator.invertCourse(windDirection);
+        windDirection = CoursesCalculator.bearingByCoordinates(summX, summY); // направление ветра - куда дует
+        windDirection = CoursesCalculator.invertCourse(windDirection); // инвертируем: откуда дует
         Log.i(PROJECT_LOG_TAG, " founded wind direction =  " + windDirection + ", last windDir = " + this.windDirection);
 
         return windDirection;
@@ -148,7 +167,6 @@ public class WindStatistics { // класс для сбора статистик
         boolean checkIsPassed = true;
         // если ширина максимального незаполненного сектора больше указанной в настройках (перевод из секторов в градусы)
         if (maxCurrentEmptyZone > maxAllowedEmptyZone / sizeOfSectors) checkIsPassed = false;
-            Log.i(PROJECT_LOG_TAG, "max repres counter = "+ maxCurrentEmptyZone +", the wind diagram is being representative now!");
 
         // если сумма скоростей всех секторов менее чем в X раз превышает скорость наибольшего вектора
         // коэффициент требуемого превышения суммы по секторам над наибольшим сектором X = exсeedRatio
@@ -158,7 +176,47 @@ public class WindStatistics { // класс для сбора статистик
 
         Log.i(PROJECT_LOG_TAG, "checking represent: "+checkIsPassed+", maxNotFilledSector = "+ maxCurrentEmptyZone
                 +", sumVelocities = "+ summVelocity +", maxVelocity*ratio = " +(maxVelocity * exсeedRatio));
+        if (checkIsPassed) Log.i(PROJECT_LOG_TAG, "max repres counter = "+ maxCurrentEmptyZone +", the wind diagram is being representative now!");
 
         return  checkIsPassed;
+    }
+
+    private void combTheDiagram() { // удаление локальных забросов-максимумов
+        // убираем локальные забросы: перебираем диаграмму (половину), сравнивая все симметричные вектора, и
+        // выравниваем больший с меньшим
+//        printDiagram();
+        int currentDirectionToWind, symmetryDirectionToWind; // рабочие переменные для сравнения. Симметричная - относительно ветра
+        for (int i = 0; i < (numberOfSectors / 2); i++) {
+            currentDirectionToWind = ((i * sizeOfSectors) + (sizeOfSectors / 5)); // азимут выбранного сектора
+            // превращаем в курс к ветру
+            currentDirectionToWind = CoursesCalculator.calcWindCourseAngle(windDirection, currentDirectionToWind);
+
+            // симметричный к ветру курс
+            symmetryDirectionToWind = CoursesCalculator.symmetryAngle(windDirection, currentDirectionToWind);
+            // номер сектора, симметричного к заданному
+            int symmetrySector = symmetryDirectionToWind / sizeOfSectors;
+
+            // сравниваем, находим наименьшее значение, большее приравниваем к меньшему
+            if (windDiagram[i] > windDiagram [symmetrySector]) {
+                windDiagram [i] = windDiagram [symmetrySector];
+                // если привели к нулю, выправляем на минималку
+                if (windDiagram [i] == 0) windDiagram [i] = MIN_KMH_TO_STATISTICS;
+            }
+            if (windDiagram[i] < windDiagram [symmetrySector]) {
+                windDiagram [symmetrySector] = windDiagram [i];
+                if (windDiagram [symmetrySector] == 0) windDiagram [symmetrySector] = MIN_KMH_TO_STATISTICS;
+            }
+        }
+//        printDiagram();
+
+    }
+
+    // служебный метод для вывода показаний диаграммы
+    private void printDiagram () {
+        Log.i(PROJECT_LOG_TAG, "Diagram printing: ");
+
+        for (int i = 0; i < numberOfSectors; i++) {
+            Log.i(PROJECT_LOG_TAG, "i = "+ i + ", value = " + windDiagram[i]);
+        }
     }
 }
