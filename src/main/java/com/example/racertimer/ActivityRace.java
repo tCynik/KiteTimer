@@ -128,7 +128,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         }
 
         velocityMax = 1;
-        //wind = 201;
         windDirection = 202;
         windTV.setText(String.valueOf(windDirection));
         windFrameIV.setRotation(180 - windDirection);
@@ -373,15 +372,17 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         windFrameIV.setRotation(180- windDirection);
     }
 
+    // уменьшение исторических максимумов ВМГ при коррекции ветра
     private void updateMaxVMGByNewWindDirection (int updatedWindDirection) {
-        int deltaWindDirection = Math.abs(windDirection - updatedWindDirection);
-        Log.i("racer_timer", "windDir updated, changing VMG stat. delta wind dir = " + deltaWindDirection);
+        int deltaWindDirection = Math.abs(windDirection - updatedWindDirection); // находим разницу в градусах
+        Log.i("racer_timer", "windDir updated. Last dir = "+windDirection+", new dir = "+updatedWindDirection+" delta wind dir = " + deltaWindDirection);
         if (deltaWindDirection > 180) { // обрабатываем возможный переход через 0-360
             deltaWindDirection = 360 - deltaWindDirection;
         }
         if (deltaWindDirection >= 90) {// если слишком крутое изменение курса, обнуляем все ВМГ
             VMGmin = 0;
             VMGmax = 0;
+            Log.i("racer_timer", "windDir changed more than 90 deg. set it 0");
         } else { // если изменение <90 град, обновляем пропорционально изменению ветра
             double correction = Math.cos(Math.toRadians(deltaWindDirection));
             Log.i("racer_timer", "VMGmin1 = "+ VMGmin +", VMGmax1 = "+ VMGmax +", correction = " + correction);
@@ -389,6 +390,8 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             VMGmax = (int) (VMGmax * correction);
             Log.i("racer_timer", " finaly VMG's now: VMGmin2 = "+ VMGmin +", VMGmax2 = "+ VMGmax);
         }
+        bestDownwindTV.setText(String.valueOf(VMGmin));
+        bestUpwindTV.setText(String.valueOf(VMGmax));
     }
 
     /** обработка вновь полученных геолокации */
@@ -450,7 +453,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         courseForWindRadians = Math.toRadians(90 + deltaBearing);
         arrowDirectionIV.setX((float) (centerScreenX - arrowDirectionIV.getWidth()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.cos(courseForWindRadians)));
         arrowDirectionIV.setY((float) (centerScreenY - arrowDirectionIV.getHeight()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.sin(courseForWindRadians)));
-
     }
 
     /** обновляем поля VMG и скорости */
@@ -524,16 +526,19 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     /** обновляем поля VMG и скорости */
     private void vmgBeeper() {
-        if (velocityMadeGood != lastVMG) { // если изменилась VMG, перезапускаем прищалку
+        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG) { // если изменилась VMG, перезапускаем прищалку
             lastVMG = velocityMadeGood;
 
-            int threshold = (int) (VMGmax * vmgBeeperSensitivity); // порог чувствительности ВМГ
+            /** расчет частоты пиканья в зависимости от близости ВМГ к максимуму. ОТдельно для бакштага и бейдевинда */
+            int threshold = (int) (VMGmax * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
             if (velocityMadeGood > 0 ) { // если идем в бейдевинд
-                changeBeepingSpeed(threshold);
+                //changeBeepingSpeed(threshold); // выполняем изменение частоты пиканья
                 if (velocityMadeGood > threshold) { // если VMG выше порога, начинаем пикать
-                    changeBeepingSpeed(threshold);
+                    changeBeepingSpeed(threshold); // выполняем изменение частоты пиканья
+//                    Log.i("racer_timer", " changing beeping speed for vmg = " + velocityMadeGood);
                 } else { // если ВМГ ниже, отключаем пищалку
                     voiceover.stopRepeatSound();
+//                    Log.i("racer_timer", " stop beeping for VMG = "+ velocityMadeGood + ", threshold = " + threshold);
                 }
             }
 
@@ -545,32 +550,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                     voiceover.stopRepeatSound();
             }
         }
-
-//                    Log.i(PROJECT_LOG_TAG, "playing beep sound, playbackSpeed = " + playbackSpeed);
-
-
-//        if (beepID == 0) {
-//            if (velocityMadeGood > 5) { // если идем против ветра
-//                if (VMGmax > (VMGmax / 3) ) {
-//                    playbackSpeed = velocityMadeGood / (VMGmax - (VMGmax / 3));
-//                    beepID = voiceover.playSoundLoop(voiceover.beepSID, playbackSpeed);
-//                    Log.i(PROJECT_LOG_TAG, "playing beep sound, playbackSpeed = " + playbackSpeed);
-//                }
-//            }
-//            if (velocityMadeGood < -10) { // если идем по ветру
-//                if (VMGmin < (VMGmin/3) ) {
-//                    playbackSpeed = Math.abs(velocityMadeGood / (VMGmax - (VMGmax / 3)));
-//                    beepID = voiceover.playSoundLoop(voiceover.beepSID, playbackSpeed);
-//                    Log.i(PROJECT_LOG_TAG, "playing beep sound, playbackSpeed = " + playbackSpeed);
-//                }
-//            }
-//        } else { // если звук воспроизводится. проверяем условия для его остановки
-//            if (velocityMadeGood < 5 & velocityMadeGood > -10) {
-//                voiceover.stopPlaying(voiceover.beepSID, voiceover.beepSID.getSoundID());
-//                beepID = 0;
-//                Log.i(PROJECT_LOG_TAG, " stop playing beep sound in VMG < 0, soundID = " + beepID);
-//            }
-//        }
     }
 
     private void changeBeepingSpeed (int threshold) {

@@ -100,11 +100,13 @@ public class Voiceover {
     }
 
     public void playRepeatSound (int percentVMG) { // проигрывание циклических звуков - пищалка ВМГ
-        if (!vmgIsMuted) {
+        if (!vmgIsMuted) { // если небыло команды об отключении звука
             if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
+                // одиночный патч для маскировки прерывания звука
                 soundPool.play(SOUND_ASSET_BEEP_PATCH, 1, 1, PRIORITY_BEEP+1, 0, calculateRateFromPercent(percentVMG));
-                soundPool.stop(repeatSoundId);
-                repeatSoundId = 0;
+                stopRepeatSound(); // останавливаем воспроизведение
+//                soundPool.stop(repeatSoundId); // останавливаем ранее воспроизводимое пиканьше
+//                repeatSoundId = 0; // обнуляем айдишник воспроизведения
             }
             // запускаем непосредственно проигрывание
             startPlayingRepeatSound(percentVMG);
@@ -112,17 +114,21 @@ public class Voiceover {
     }
 
     private void startPlayingRepeatSound (int percentVMG) {
-        float rate = calculateRateFromPercent(percentVMG);
-        if (repeatSoundId == 0) repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
+        float rate = calculateRateFromPercent(percentVMG); // высчитываем скорость воспроизведения
+        repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
+        while (repeatSoundId == 0) // повторяем запуск звука пока он не запустится
+            repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
+//        Log.i("racer_timer", " beeping started, id = " + repeatSoundId);
     }
 
     public void stopRepeatSound () { // остановка пищалки
-        if (repeatSoundId !=0) soundPool.stop(repeatSoundId);
-        repeatSoundId = 0;
+        if (repeatSoundId !=0) soundPool.stop(repeatSoundId); // останавливаем звук с текущим айдишником
+        repeatSoundId = 0; // обнуляем айдишник
+//        Log.i("racer_timer", " beeping stopped ");
     }
 
-    public static float calculateRateFromPercent (int percentVMG) {
-        float rate = (float) ((float)((percentVMG * 1.5) / 100) + 0.5);
+    public static float calculateRateFromPercent (int percentVMG) { // считаем скорость пищания в зависимости от процента
+        float rate = (float) ((float)((percentVMG * 1.5) / 100) + 0.5); // диапазон скоростей от 0,5 до 2
         return rate;
     }
 }

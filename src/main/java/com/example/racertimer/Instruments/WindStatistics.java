@@ -89,6 +89,7 @@ public class WindStatistics { // класс для сбора статистик
             if (windDiagramIsRepresentable) { //  запускаем/обнуляем таймер причесывания
             }
 
+            // если у нас нет изменений в диаграмме, причесываем ее.
             // проверяем условия и отправляем бродкаст
             if (windDiagramIsRepresentable) {// если выборка репрезентативная, выполянем:
 
@@ -103,6 +104,7 @@ public class WindStatistics { // класс для сбора статистик
                     public void run() {
                         Log.i(PROJECT_LOG_TAG, " combing the diagram... ");
                         combTheDiagram();
+                        timer.cancel();
                     }
                 };
                 timer.schedule(timerTask, 60000, 1000); // запускаем его заново
