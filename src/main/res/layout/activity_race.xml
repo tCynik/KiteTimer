@@ -393,7 +393,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end">
+            android:gravity="end"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/update_wind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:text="update wind dir" />
             <Switch
                 android:id="@+id/mute_vmg"
                 android:layout_width="wrap_content"

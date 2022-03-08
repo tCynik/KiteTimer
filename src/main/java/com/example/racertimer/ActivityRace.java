@@ -4,16 +4,20 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -44,7 +48,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private ImageView lineUpLeftIV, lineUpRightIV, lineDownLeftTV, lineDownRightTV; // линии отображения курса VMG
     private Space centerScreenSpace;
     private SeekBar windSB, bearingSB, velocitySB;
-    private Button btnReset, btnWindPlus, btnWindMinus;
+    private Button btnReset, btnWindPlus, btnWindMinus, btnUpdateWind;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch muteVmgSeitch;
     private TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
@@ -81,6 +85,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private BroadcastReceiver locationBroadcastReceiver;
     private IntentFilter locationIntentFilter;
 
+    private LocationService locationService;
+    private ServiceConnection serviceConnection;
+    private Binder binder;
+
     private Context context;
 //    public Voiceover voiceover;
 //    private int beepID = 0; // переменная для записи номера потока произрываемых звуков
@@ -110,6 +118,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         courseToWindTV = findViewById(R.id.course_to_wind);
         btnReset = findViewById(R.id.but_reset);
         muteVmgSeitch = findViewById(R.id.mute_vmg);
+        btnUpdateWind = findViewById(R.id.update_wind);
 
         // TODO: нужно генерировать линии программно по заданным координатам.
         // этот костыль надо убирать.
@@ -143,10 +152,13 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         timerRunning(); // запускаем отсчет и обработку таймера
 
         /** блок работы с геоданными */
-        createLocationService(); // запускаем сервис для полученич геоданных
+        createLocationService(); // запускаем сервис для получения геоданных
         initBroadcastListener(); // запускаем слушатель новых геоданных
+        bindToLocationService();
 
         voiceover = new Voiceover(context);
+
+
 
         /** обрабатываем свитч mute VMG */
         muteVmgSeitch.setOnCheckedChangeListener(this);
@@ -167,6 +179,14 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                 lineVMGIV[3].setVisibility(View.INVISIBLE);
                 calculateViewsPosition();
                 updateMaxVelocityVMG();
+            }
+        });
+
+        /** обрабатываем кнопку обновления данных по направлени ветра */
+        btnUpdateWind.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                locationService.updateWindDirection();
             }
         });
 
@@ -309,7 +329,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (timerHour !=0 ) timerString = timerHour + ":" + timerString;
         return timerString;
     }
-    // TODO: вот эту срань с таймером переносим во фрагмент прогноза.
 
     /** Настраиваем и запускаем сервис для приема и трансляции данных геолокации */
     private void createLocationService() {
@@ -339,6 +358,27 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private void askPermission() { // запрос разрешения
         requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
                 Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
+    }
+
+    /** биндимся к сервису для управления им */
+    private void bindToLocationService() {
+        Log.i("racer_timer", "Making service connection... " );
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                Log.i("racer_timer", "Location service binded " );
+                binder = (Binder) iBinder;
+                locationService = ((LocationService.MyBinder) binder).getService();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                Log.i("racer_timer", "location service disconnected " );
+
+            }
+        };
+
+        bindService(intentLocationService, serviceConnection, BIND_EXTERNAL_SERVICE);
     }
 
     /** создаем и регистрируем слушатель геолокации */

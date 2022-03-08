@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -39,8 +40,8 @@ public class LocationService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        Log.i("racer_timer", "service: i was binded to something... " );
+        return new Binder();
     }
 
     @Override
@@ -66,6 +67,7 @@ public class LocationService extends Service {
                 Log.i(PROJECT_LOG_TAG, " sending new wind direction into broadcastListener by herald. the win = " + windDirection);
             }
         };
+
         // создаем экземпляр класса для расчета направлений ветра
         windStatistics = new WindStatistics(5, windChangedHerald);
 
@@ -111,6 +113,18 @@ public class LocationService extends Service {
             return false; // если разрешения нет, возвращаем false
         } else
             return true; // в противном случае разрешение есть, возвращаем true
+    }
+
+    public void updateWindDirection () {
+        Log.i("racer_timer", "manually sending actual wind direction " );
+
+    }
+
+    public class MyBinder extends Binder { // содаем кастомный байндер - наследник байндера
+        public LocationService getService() { // добавляем метод, возвращающий обьект сервиса
+            Log.i("racer_timer", "activity getting service instance from MyBinder " );
+            return LocationService.this;
+        }
     }
 }
 
