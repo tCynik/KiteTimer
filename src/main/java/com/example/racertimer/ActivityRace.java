@@ -53,6 +53,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private Switch muteVmgSeitch;
     private TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
     private ConstraintLayout centralParamsCL, centralUiCL;
+    private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
 
     private TimerFragment timerFragment = null;
     private ForecastFragment forecastFragment = null;
@@ -179,6 +180,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                 lineVMGIV[3].setVisibility(View.INVISIBLE);
                 calculateViewsPosition();
                 updateMaxVelocityVMG();
+                Log.i("racer_timer", "reset VMG maximums");
             }
         });
 
@@ -198,6 +200,13 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         velocity = 0;
     }
 
+    @Override
+    protected void onResume() { // при восстановлении окна автоматически запрашиваем данные по ветру
+        super.onResume();
+        if (locationService != null) locationService.updateWindDirection();
+        //if (windDirectionGettedFromService) locationService.updateWindDirection();
+    }
+
     public void deployTimerFragment() {
         if (timerFragment == null) timerFragment = new TimerFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -214,6 +223,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         fragmentTransaction.commit();
     }
 
+    /** бегунки тестирования вьюшки курсов и скоростей */
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         if (seekBar == windSB) {
@@ -367,8 +377,8 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                 Log.i("racer_timer", "Location service binded " );
-                binder = (Binder) iBinder;
-                locationService = ((LocationService.MyBinder) binder).getService();
+                binder = (LocationService.MyBinder) iBinder; // приводим биндер к кастомному биндеру с методом связи
+                locationService = ((LocationService.MyBinder) binder).getService(); // получаем экземпляр нашего сервиса через биндер
             }
 
             @Override
@@ -393,9 +403,13 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                             "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
                 }
                 if (intent.hasExtra("windDirection")) {
-                    onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
-                    windTV.setTextColor(Color.WHITE);
-                    Log.i("ActivityRace", "getted wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+                    int windDirectionFromExtra = (int) intent.getExtras().get("windDirection");
+                    if (windDirectionFromExtra != 10000) {
+                        onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
+                        windDirectionGettedFromService = true;
+                        windTV.setTextColor(Color.WHITE);
+                        Log.i("ActivityRace", "getted wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+                    }
                 }
             }
         };

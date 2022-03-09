@@ -29,7 +29,8 @@ public class WindStatistics { // класс для сбора статистик
 
     private int maxVelocity;
     // если есть хоть один незаполненный сектора больше этого, выборка считается не репрезентативной.
-    private int windDirection, lastWindDirection;
+    private int windDirection = 10000; // 10000 = статистических данных по ветру нет
+    private int lastWindDirection;
     private float[] sin, cos;
 
     private boolean windDiagramIsRepresentable = false; // флаг того, что статистика набрана достаточная
@@ -43,6 +44,7 @@ public class WindStatistics { // класс для сбора статистик
         this.sizeOfSectors = sizeOfSectors;
         numberOfSectors = 360 / sizeOfSectors;
         windDiagram = new int[numberOfSectors];
+        lastWindDirection = windDirection;
         // заполняем таблицу синусов-косинусов для этой длины массива - в цикле
         sin = new float[numberOfSectors];
         cos = new float[numberOfSectors];
@@ -60,6 +62,10 @@ public class WindStatistics { // класс для сбора статистик
 
     public void setSensitivity(int updSensitivity) { // сеттер для возможности настройки на ходу
         this.sensitivity = updSensitivity;
+    }
+
+    public int getWindDirection () {
+        return windDirection;
     }
 
     private int calculateNumberOfSector(int bearing) { // метод определения номера сектора

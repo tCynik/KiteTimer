@@ -30,18 +30,21 @@ public class LocationService extends Service {
     private LocationListener locationListener;
     private int lastWindDirection;
 
-    WindChangedHerald windChangedHerald;
+    WindChangedHerald windChangedHerald; // интерфейс для передачи данных в класс хранения и расчета статистических данных
 
     private Intent intent; // интент для отправки сообщений из данного сервиса
 
     private WindStatistics windStatistics;
+    public MyBinder binder = new MyBinder();
+
     public LocationService() {
     }
+
 
     @Override
     public IBinder onBind(Intent intent) {
         Log.i("racer_timer", "service: i was binded to something... " );
-        return new Binder();
+        return binder; // этот биндер типа MyBinder
     }
 
     @Override
@@ -57,7 +60,7 @@ public class LocationService extends Service {
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is started");
         /** создаем листенер и описываем его действия */
 
-        // создаем экземпляр интерфейса для генерации передачи
+        // создаем экземпляр интерфейса для генерации передачи из сервиса в обьект расчета статистики WindStatistics
         windChangedHerald = new WindChangedHerald() {
             @Override
             public void onWindDirectionChanged(int windDirection) { // если обновляется инфа по направлению ветра
@@ -117,9 +120,12 @@ public class LocationService extends Service {
 
     public void updateWindDirection () {
         Log.i("racer_timer", "manually sending actual wind direction " );
-
+        // TODO: вынеси в отдельный метод отправку интента с ветром, тут и в onWindChanged вызов этого метода
+        // нужно допиливать фрагмент прибора
+        windChangedHerald.onWindDirectionChanged(windStatistics.getWindDirection());
     }
 
+    // организуем получение экземпляра данного сервиса через биндер
     public class MyBinder extends Binder { // содаем кастомный байндер - наследник байндера
         public LocationService getService() { // добавляем метод, возвращающий обьект сервиса
             Log.i("racer_timer", "activity getting service instance from MyBinder " );
