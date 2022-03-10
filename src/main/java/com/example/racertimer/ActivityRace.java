@@ -145,27 +145,22 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         textTime = findViewById(R.id.currentTime);
 
         context = this;
-        //TODO: в будущем сделать единый войсовер, звуки передавать из таймера через интерфейс
-//        voiceover = new Voiceover(context); // создаем озвучку
         forecastFragment = new ForecastFragment();
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
 
         /** блок работы с геоданными */
+        // TODO: походу, при перезапуске приложения создается еще один сервис, может быть коллизия.
+        // нужно запускать сервис в рамках биндера (создание-либо-присоединение)
         createLocationService(); // запускаем сервис для получения геоданных
         initBroadcastListener(); // запускаем слушатель новых геоданных
         bindToLocationService();
 
         voiceover = new Voiceover(context);
 
-
-
         /** обрабатываем свитч mute VMG */
         muteVmgSeitch.setOnCheckedChangeListener(this);
-
-
-        // обновляем положение вьюшек
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
         btnReset.setOnClickListener(new View.OnClickListener() {
@@ -188,7 +183,12 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         btnUpdateWind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                locationService.updateWindDirection();
+                //locationService.updateWindDirection();
+                int wind = locationService.getWindDirection();
+                if (wind != 10000) {
+                    Log.i("racer_timer", "getted actual wind dir");
+                    onWindDirectionChanged(wind);
+                }
             }
         });
 

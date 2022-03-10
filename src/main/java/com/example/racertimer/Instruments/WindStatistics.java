@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.CountDownTimer;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,6 +45,7 @@ public class WindStatistics { // класс для сбора статистик
         this.sizeOfSectors = sizeOfSectors;
         numberOfSectors = 360 / sizeOfSectors;
         windDiagram = new int[numberOfSectors];
+        Arrays.fill(windDiagram, 0); // инициализируем массив нулем
         lastWindDirection = windDirection;
         // заполняем таблицу синусов-косинусов для этой длины массива - в цикле
         sin = new float[numberOfSectors];
@@ -52,8 +54,6 @@ public class WindStatistics { // класс для сбора статистик
             double currentAngle = (i + 0.5) * sizeOfSectors; // берем середину сектора
             sin[i] = (float) Math.sin(Math.toRadians(currentAngle));
             cos[i] = (float) Math.cos(Math.toRadians(currentAngle));
-//            Log.i(PROJECT_LOG_TAG, " sin = " + sin[i] + ", cos = " + cos[i]); // проверено
-
         }
         this.windChangedHerald = windChangedHerald;
         sensitivity = 50; // параметр чувствистельности для настройки
@@ -65,7 +65,9 @@ public class WindStatistics { // класс для сбора статистик
     }
 
     public int getWindDirection () {
-        return windDirection;
+        if (windDiagramIsRepresentable)
+            return windDirection;
+        else return 10000;
     }
 
     private int calculateNumberOfSector(int bearing) { // метод определения номера сектора
@@ -157,21 +159,28 @@ public class WindStatistics { // класс для сбора статистик
         currentFilledSectors = 0;
         double summX = 0; // координата X суммирующего вектора
         double summY = 0; // координата Y суммирующего вектора
-
-        int representCounter = 0; // счетчик текущего не заполненного сектора
+        // счетчик пустых зон
+        int emptyZonesCounter = 0; // счетчик текущего не заполненного сектора
         maxCurrentEmptyZone = 0; // счетчик ширины максимального не заполненного сектора
 
         // TODO: параметр maxVelocity походу не востребован в рамках текущей логики. Подумать - почистить
         maxVelocity = 0; // переменная для определения максимальной завфиксированной скорости
 
         for (int i = 0; i < numberOfSectors; i++) { // перебираем все сектора
+
             // определяем репрезентативность диаграммы
-            if (! windDiagramIsRepresentable) { // считаем длину наибольшего незаполненного сектора
-                if (windDiagram[i] == 0) representCounter ++;
-                else representCounter = 0;
-                if (representCounter > maxCurrentEmptyZone) maxCurrentEmptyZone = representCounter;
-                currentFilledSectors ++; // считаем количество заполненных секторов
+            if (! windDiagramIsRepresentable) { // если диаграмма пока не репрезентативная
+                if (windDiagram[i] == 0) {
+                    emptyZonesCounter ++; // если сектор не равен нулю, считаем длину наибольшего незаполненного сектора
+                    // обновляем параметр максимальной обнаруженной пустой зоны
+                    if (emptyZonesCounter > maxCurrentEmptyZone) maxCurrentEmptyZone = emptyZonesCounter;
+                }
+                else { // иначе (в секторе записана ненулевая скорость):
+                    emptyZonesCounter = 0; // счетчик нулевых секторов сбрасываем
+                    currentFilledSectors ++; // а так же считаем количество заполненных секторов
+                }
             }
+
             // суммируем координаты текущего вектора -> находим координаты конца суммирующего вектора
             summX = summX + sin[i] * windDiagram[i]; // координата вектора X
             summY = summY + cos[i] * windDiagram[i]; // Координата вектора Y

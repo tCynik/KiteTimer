@@ -28,7 +28,6 @@ public class LocationService extends Service {
 
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private int lastWindDirection;
 
     WindChangedHerald windChangedHerald; // интерфейс для передачи данных в класс хранения и расчета статистических данных
 
@@ -99,6 +98,19 @@ public class LocationService extends Service {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locationListener);
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " request location updating ");
         }
+    }
+
+    public int getWindDirection () { // если напр ветра 10000 = значит, пока результатов нет
+        return windStatistics.getWindDirection();
+
+//        int windDirection = windStatistics.getWindDirection();
+//        if (windDirection != 10000) {
+//            intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
+//            intent.putExtra("windDirection", windDirection);
+//            sendBroadcast(intent); // отправляем передачу
+//            Log.i(PROJECT_LOG_TAG, " sending new wind direction into broadcastListener by binded sending method. the win = " + windDirection);
+//        } else
+//            Log.i(PROJECT_LOG_TAG, " wind statistics not ready yet " );
     }
 
     @Override

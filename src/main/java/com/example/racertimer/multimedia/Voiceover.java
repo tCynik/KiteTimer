@@ -92,18 +92,30 @@ public class Voiceover {
     }
 
     public void playSingleTimerSound (int soundAssertId) { // проигрывание одиночных звуков - таймер
-        soundPool.play(soundAssertId, 1, 1, PRIORITY_TIMER, 0, 1);
+        try {
+            soundPool.play(soundAssertId, 1, 1, PRIORITY_TIMER, 0, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void playSingleSystemSound (int soundAssertId) { // проигрывание одиночных звуков - система
-        soundPool.play(soundAssertId, 1, 1, PRIORITY_SYSTEM, 0, 1);
+        try {
+            soundPool.play(soundAssertId, 1, 1, PRIORITY_SYSTEM, 0, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void playRepeatSound (int percentVMG) { // проигрывание циклических звуков - пищалка ВМГ
         if (!vmgIsMuted) { // если небыло команды об отключении звука
             if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
                 // одиночный патч для маскировки прерывания звука
-                soundPool.play(SOUND_ASSET_BEEP_PATCH, 1, 1, PRIORITY_BEEP+1, 0, calculateRateFromPercent(percentVMG));
+                try {
+                    soundPool.play(SOUND_ASSET_BEEP_PATCH, 1, 1, PRIORITY_BEEP+1, 0, calculateRateFromPercent(percentVMG));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 stopRepeatSound(); // останавливаем воспроизведение
 //                soundPool.stop(repeatSoundId); // останавливаем ранее воспроизводимое пиканьше
 //                repeatSoundId = 0; // обнуляем айдишник воспроизведения
@@ -122,7 +134,12 @@ public class Voiceover {
     }
 
     public void stopRepeatSound () { // остановка пищалки
-        if (repeatSoundId !=0) soundPool.stop(repeatSoundId); // останавливаем звук с текущим айдишником
+        if (repeatSoundId !=0)
+            try {
+                soundPool.stop(repeatSoundId); // останавливаем звук с текущим айдишником
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         repeatSoundId = 0; // обнуляем айдишник
 //        Log.i("racer_timer", " beeping stopped ");
     }
