@@ -151,9 +151,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         timerRunning(); // запускаем отсчет и обработку таймера
 
         /** блок работы с геоданными */
-        // TODO: походу, при перезапуске приложения создается еще один сервис, может быть коллизия.
-        // нужно запускать сервис в рамках биндера (создание-либо-присоединение)
-        createLocationService(); // запускаем сервис для получения геоданных
+        createLocationService();
         initBroadcastListener(); // запускаем слушатель новых геоданных
         bindToLocationService();
 
@@ -168,11 +166,13 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             public void onClick(View view) {
                 velocityMax = 1;
                 VMGmax = 0;
+                bestUpwindTV.setText(String.valueOf(0));
                 VMGmin = 0;
-                lineVMGIV[0].setVisibility(View.INVISIBLE);
-                lineVMGIV[1].setVisibility(View.INVISIBLE);
-                lineVMGIV[2].setVisibility(View.INVISIBLE);
-                lineVMGIV[3].setVisibility(View.INVISIBLE);
+                bestDownwindTV.setText(String.valueOf(0));
+//                lineVMGIV[0].setVisibility(View.INVISIBLE);
+//                lineVMGIV[1].setVisibility(View.INVISIBLE);
+//                lineVMGIV[2].setVisibility(View.INVISIBLE);
+//                lineVMGIV[3].setVisibility(View.INVISIBLE);
                 calculateViewsPosition();
                 updateMaxVelocityVMG();
                 Log.i("racer_timer", "reset VMG maximums");
@@ -207,7 +207,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         //if (windDirectionGettedFromService) locationService.updateWindDirection();
     }
 
-    public void deployTimerFragment() {
+    public void deployTimerFragment() { // создание фрагмента для таймера
         if (timerFragment == null) timerFragment = new TimerFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -215,7 +215,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         fragmentTransaction.commit();
     }
 
-    public void deployForecastFragment() {
+    public void deployForecastFragment() { // создание фрагмента для прогноза
         if (forecastFragment == null) forecastFragment = new ForecastFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

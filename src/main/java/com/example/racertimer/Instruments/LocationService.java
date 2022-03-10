@@ -92,7 +92,7 @@ public class LocationService extends Service {
             }
         };
 
-        /** создаем менеджер, проверяем разрешение, и запускаем сервис приема геолокации */
+        /** создаем менеджер, проверяем разрешение, и запускаем прием геолокации */
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (checkPermission()) {// если есть все разрешения, запускаем прием геолокации с передачей в поток листенер
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locationListener);
@@ -102,15 +102,6 @@ public class LocationService extends Service {
 
     public int getWindDirection () { // если напр ветра 10000 = значит, пока результатов нет
         return windStatistics.getWindDirection();
-
-//        int windDirection = windStatistics.getWindDirection();
-//        if (windDirection != 10000) {
-//            intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
-//            intent.putExtra("windDirection", windDirection);
-//            sendBroadcast(intent); // отправляем передачу
-//            Log.i(PROJECT_LOG_TAG, " sending new wind direction into broadcastListener by binded sending method. the win = " + windDirection);
-//        } else
-//            Log.i(PROJECT_LOG_TAG, " wind statistics not ready yet " );
     }
 
     @Override

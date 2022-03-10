@@ -86,7 +86,7 @@ public class Voiceover {
         soundPool.load(context, R.raw.eng_pause, PRIORITY_TIMER); // 21
 
         soundPool.load(context, R.raw.beep, PRIORITY_BEEP); // 22
-        soundPool.load(context, R.raw.patch_beep, PRIORITY_BEEP +1); // 23
+        soundPool.load(context, R.raw.patch_beep, (PRIORITY_BEEP +1)); // 23
 
         this.context = context;
     }
