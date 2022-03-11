@@ -70,7 +70,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private int timerSec = 0; // текущее значение таймера в сотых долей секунды
     private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от max ВМГ пищать
 
-    private TextView speedTV, maxSpeedTV, courseTV, countLocalChangedTV; // переменные для привызки полей скорости и курса
+    private TextView speedTV, maxSpeedTV, courseTV, countLocalChangedTV; // переменные для привязки полей скорости и курса
 
     private int deltaBearing;
     private int courseToWind;
@@ -91,8 +91,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private Binder binder;
 
     private Context context;
-//    public Voiceover voiceover;
-//    private int beepID = 0; // переменная для записи номера потока произрываемых звуков
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
