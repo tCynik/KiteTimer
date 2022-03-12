@@ -148,4 +148,9 @@ public class Voiceover {
         float rate = (float) ((float)((percentVMG * 1.5) / 100) + 0.5); // диапазон скоростей от 0,5 до 2
         return rate;
     }
+
+    public void voiceoverIsBeingMuted () {
+        vmgIsMuted = true;
+        stopRepeatSound();
+    }
 }

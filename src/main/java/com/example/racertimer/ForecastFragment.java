@@ -27,7 +27,7 @@ public class ForecastFragment extends Fragment {
     private TextView stopwachTV; // секундометр
     private double latitude, longitude; // координаты для получения прогноза
 
-    public interface OpenerTimerInterface {
+    public interface OpenerTimerInterface { // интерфейс для вызова другого фрагмента
         public void openTimerFragment();
     }
 
