@@ -1,6 +1,8 @@
 package com.example.racertimer;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +21,9 @@ import com.example.racertimer.multimedia.Voiceover;
 
 public class SailingToolsFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
+    private boolean viewIsCreated = false;
     Voiceover voiceover;
-    ConstraintLayout arrowsLayoutCL, centralParametersCL;
+    ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
     ImageView arrowVelocityIV;
     TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
 
@@ -48,6 +51,7 @@ public class SailingToolsFragment extends Fragment {
 
         arrowsLayoutCL = view.findViewById(R.id.arrows_layout); // вьюшка для стрелок скорости
         centralParametersCL = view.findViewById(R.id.central_params_cl); // вьюшка для ограничения движения стрелок
+        windLayoutCL = view.findViewById(R.id.wind_layout);
         arrowVelocityIV = view.findViewById(R.id.arrow); // стрелка скорости
         velocityTV = view.findViewById(R.id.velocity);
         bearingTV = view.findViewById(R.id.bearing);
@@ -59,9 +63,10 @@ public class SailingToolsFragment extends Fragment {
         courseToWindTV = view.findViewById(R.id.course_to_wind);
 
         //resetAllMaximums(); // выставляем в ноль все вьюшки
-
+        renewWindDirection(202);
         //calculateHeometric(); // рассчитываем значения для перемещения стрелок
-
+        Log.i("racer_timer_tools_fragment", " fragment view was created ");
+        viewIsCreated = true; // разрешаем изменение вьюшек
         return view;
     }
 
@@ -74,23 +79,38 @@ public class SailingToolsFragment extends Fragment {
      */
 
     public void onVelocityChanged(int valueVelocity) { // новые данные по скорости
-        if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
-            renewVelocity(valueVelocity);
-            if (velocity > maxVelocity) { // обновляем максимум
-                maxVelocity = velocity;
-                renewMaxVelocity(maxVelocity);
+        if (viewIsCreated) {
+            Log.i("racer_timer_tools_fragment", " velocity in the tools fragment changed. New one = "+ valueVelocity);
+            if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
+                renewVelocity(valueVelocity);
+                if (velocity > maxVelocity) { // обновляем максимум
+                    maxVelocity = velocity;
+                    renewMaxVelocity(maxVelocity);
+                }
+                updateArrowPosition(velocity);// перемещаем стрелку
+                updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
             }
-            updateArrowPosition(velocity);// перемещаем стрелку
-            updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }
     public void onBearingChanged(int valueBearing) { // новые данные по курсу
-        if (valueBearing != bearing) {// если вновь поступившие цифры отличаются от старых
-            arrowsLayoutCL.setRotation(bearing);// поворачиваем вьюшку
-            updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
+        if (viewIsCreated) {
+            Log.i("racer_timer_tools_fragment", " bearing in the tools fragment changed. New one = "+ valueBearing);
+            if (valueBearing != bearing) {// если вновь поступившие цифры отличаются от старых
+                renewBearing(valueBearing);
+                updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
+            }
         }
     }
     public void onWindDirectionChanged(int valueWindDirection) { // новые данные по направлению ветра
+        if (viewIsCreated) {
+            Log.i("racer_timer_tools_fragment", " wind dir in the tools fragment changed. New one = "+ valueWindDirection);
+            if (valueWindDirection != windDirection) {
+                windTV.setTextColor(Color.WHITE);
+                renewWindDirection(valueWindDirection);
+                updateVmgByNewWindOrVelocity();
+                // TODO: корректировка ВМГ при обновлении ветра
+            }
+        }
         // обновляем цифры
         // поворачиваем компас
         // поворачиваем стрелки
@@ -102,7 +122,7 @@ public class SailingToolsFragment extends Fragment {
      */
 
     public void resetPressed () { // нажата кнопка сброса максимумов
-        resetAllMaximums();
+        if (viewIsCreated) resetAllMaximums();
     }
 
     public void muteChangedStatus (boolean valueMute) { // изменен статус переключателя звука пищалки
@@ -138,6 +158,16 @@ public class SailingToolsFragment extends Fragment {
     private void renewVmg (int value) {
         velocityMadeGood = value;
         velocityMadeGoodTV.setText(String.valueOf(velocityMadeGood));
+    }
+    private void renewBearing (int value) {
+        bearing = value;
+        bearingTV.setText(String.valueOf(bearing));
+        arrowsLayoutCL.setRotation(bearing);// поворачиваем вьюшку
+    }
+    private void renewWindDirection (int value) {
+        windDirection = value;
+        windTV.setText(String.valueOf(windDirection));
+        windLayoutCL.setRotation(-1*CoursesCalculator.invertCourse(windDirection));
     }
 
     /**

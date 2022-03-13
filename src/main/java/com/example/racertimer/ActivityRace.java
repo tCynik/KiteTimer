@@ -248,18 +248,21 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             windDirection = i;
             windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
             onWindDirectionChanged( windDirection);
+            sailingToolsFragment.onWindDirectionChanged(windDirection);
         }
         if (seekBar == bearingSB) {
             bearing = i;
             bearingTV.setText(String.valueOf(bearing));
             calculateViewsPosition();
             updateMaxVelocityVMG();
+            sailingToolsFragment.onBearingChanged(bearing);
         }
         if (seekBar == velocitySB) {
             velocity = i;
             velocityTV.setText(String.valueOf(velocity));
             calculateViewsPosition();
             updateMaxVelocityVMG();
+            sailingToolsFragment.onVelocityChanged(velocity);
         }
     }
 
@@ -416,7 +419,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             public void onReceive(Context context, Intent intent) { // обработка интента
                 if (intent.hasExtra("location")) { // если в сообщении есть геолокация
                     Location location = (Location) intent.getExtras().get("location");
-                    if (sailingToolsFragment != null) processorChangedLocation(location); // отдаем точку на обработку в процессор
+                    processorChangedLocation(location); // отдаем точку на обработку в процессор
                     Log.i("ActivityRace", "getted location broadcast from locationService, " +
                             "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
                 }
@@ -438,6 +441,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private void onWindDirectionChanged (int updatedWindDirection) {
         updateMaxVMGByNewWindDirection (updatedWindDirection);
         windDirection = updatedWindDirection;
+        sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
         calculateViewsPosition();
         updateMaxVelocityVMG();
         windTV.setText(String.valueOf(windDirection));
@@ -632,7 +636,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             int activeVMG = velocityMadeGood - threshold;
             int activeVMGmax = VMGmax - threshold;
             int percentVMG = Math.abs(activeVMG * 100 / activeVMGmax);
-            voiceover.playRepeatSound(percentVMG);
+            //voiceover.playRepeatSound(percentVMG);
         } catch (Exception e) { // на случай 0 в знаменателе в начале работы
             e.printStackTrace();
         }
