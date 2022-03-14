@@ -178,12 +178,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                 bestUpwindTV.setText(String.valueOf(0));
                 VMGmin = 0;
                 bestDownwindTV.setText(String.valueOf(0));
-//                lineVMGIV[0].setVisibility(View.INVISIBLE);
-//                lineVMGIV[1].setVisibility(View.INVISIBLE);
-//                lineVMGIV[2].setVisibility(View.INVISIBLE);
-//                lineVMGIV[3].setVisibility(View.INVISIBLE);
-                calculateViewsPosition();
-                updateMaxVelocityVMG();
                 Log.i("racer_timer", "reset VMG maximums");
             }
         });
@@ -201,12 +195,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             }
         });
 
-        bearing = 0;
         windSB.setOnSeekBarChangeListener(this);
         bearingSB.setOnSeekBarChangeListener(this);
         velocitySB.setOnSeekBarChangeListener(this);
 
-        velocity = 0;
         //sailingToolsFragment.setVelocity(2)
     }
 
@@ -252,16 +244,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         }
         if (seekBar == bearingSB) {
             bearing = i;
-            bearingTV.setText(String.valueOf(bearing));
-            calculateViewsPosition();
-            updateMaxVelocityVMG();
             sailingToolsFragment.onBearingChanged(bearing);
         }
         if (seekBar == velocitySB) {
             velocity = i;
-            velocityTV.setText(String.valueOf(velocity));
-            calculateViewsPosition();
-            updateMaxVelocityVMG();
             sailingToolsFragment.onVelocityChanged(velocity);
         }
     }
@@ -439,35 +425,8 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     }
 
     private void onWindDirectionChanged (int updatedWindDirection) {
-        updateMaxVMGByNewWindDirection (updatedWindDirection);
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
-        calculateViewsPosition();
-        updateMaxVelocityVMG();
-        windTV.setText(String.valueOf(windDirection));
-        windFrameIV.setRotation(180- windDirection);
-    }
-
-    // уменьшение исторических максимумов ВМГ при коррекции ветра
-    private void updateMaxVMGByNewWindDirection (int updatedWindDirection) {
-        int deltaWindDirection = Math.abs(windDirection - updatedWindDirection); // находим разницу в градусах
-        Log.i("racer_timer", "windDir updated. Last dir = "+windDirection+", new dir = "+updatedWindDirection+" delta wind dir = " + deltaWindDirection);
-        if (deltaWindDirection > 180) { // обрабатываем возможный переход через 0-360
-            deltaWindDirection = 360 - deltaWindDirection;
-        }
-        if (deltaWindDirection >= 90) {// если слишком крутое изменение курса, обнуляем все ВМГ
-            VMGmin = 0;
-            VMGmax = 0;
-            Log.i("racer_timer", "windDir changed more than 90 deg. set it 0");
-        } else { // если изменение <90 град, обновляем пропорционально изменению ветра
-            double correction = Math.cos(Math.toRadians(deltaWindDirection));
-            Log.i("racer_timer", "VMGmin1 = "+ VMGmin +", VMGmax1 = "+ VMGmax +", correction = " + correction);
-            VMGmin = (int) (VMGmin * correction);
-            VMGmax = (int) (VMGmax * correction);
-            Log.i("racer_timer", " finaly VMG's now: VMGmin2 = "+ VMGmin +", VMGmax2 = "+ VMGmax);
-        }
-        bestDownwindTV.setText(String.valueOf(VMGmin));
-        bestUpwindTV.setText(String.valueOf(VMGmax));
     }
 
     /** обработка вновь полученных геолокации */
@@ -485,151 +444,49 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             sailingToolsFragment.onVelocityChanged(velocity);
         } else velosity = 0;
         sailingToolsFragment.onVelocityChanged(0);
-        velocityTV.setText(String.valueOf(velocity));
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         sailingToolsFragment.onBearingChanged(bearing);
-        bearingTV.setText(String.valueOf(bearing));
-
-        calculateViewsPosition();
-        updateMaxVelocityVMG();
     }
 
-    void calculateViewsPosition () {
-        arrowDirectionIV.setVisibility(View.VISIBLE);
-        arrowVelocityIV.setVisibility(View.VISIBLE);
-        double radiusSpeedMin = (frameVelocityIV.getWidth() / 2) - frameVelocityIV.getWidth()/4.3; // радиус при нулевой скорости
-        int radiusMaxMinDiference = arrowDirectionIV.getHeight(); // максимальная разница между максимальными и минимальным значениями
-        int priceGradeSpeed;
-        priceGradeSpeed = radiusMaxMinDiference / velocityMax; // цена деления: сколько ед сикбара в ед радиуса
-        deltaBearing = bearing - windDirection;
-        bearing = CoursesCalculator.setAngleFrom0To360(bearing);
-        courseToWind = CoursesCalculator.calcWindCourseAngle(windDirection, bearing);
-        windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
-        courseToWindTV.setText(String.valueOf(courseToWind));
-
-        // поворот рамы скорости
-        frameVelocityIV.setRotation( deltaBearing + 180);
-
-        // разворот стрелки скорости
-        arrowVelocityIV.setRotation( deltaBearing + 225);
-
-        // положение стрелки скорости
-//        centerScreenX = centerScreenSpace.getTop(); // добываем координаты центральной точки.
-//        centerScreenX = centerScreenSpace.getLeft();
-        centerScreenX = windFrameIV.getWidth()/2;
-        centerScreenY = windFrameIV.getHeight()/2;
-        double courseForWindRadians = Math.toRadians(90 + deltaBearing);
-        double radiusVelocityArrow = radiusSpeedMin + velocity * priceGradeSpeed;
-        if (radiusVelocityArrow > (radiusSpeedMin + radiusMaxMinDiference)) radiusVelocityArrow = radiusSpeedMin + radiusMaxMinDiference;
-        arrowVelocityIV.setX((float) (centerScreenX - arrowVelocityIV.getWidth()/2 + radiusVelocityArrow * Math.cos(courseForWindRadians)));
-        arrowVelocityIV.setY((float) (centerScreenY - arrowVelocityIV.getHeight()/2 + radiusVelocityArrow * Math.sin(courseForWindRadians)));
-        velocityMadeGood = (int) (Math.sin(Math.toRadians(90 - Math.abs(deltaBearing))) * velocity);
-        velocityMadeGoodTV.setText(String.valueOf(velocityMadeGood));
-
-        // разворот стрелки направления
-        arrowDirectionIV.setRotation( deltaBearing);
-        // положение стрелки направления
-        courseForWindRadians = Math.toRadians(90 + deltaBearing);
-        arrowDirectionIV.setX((float) (centerScreenX - arrowDirectionIV.getWidth()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.cos(courseForWindRadians)));
-        arrowDirectionIV.setY((float) (centerScreenY - arrowDirectionIV.getHeight()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.sin(courseForWindRadians)));
-    }
-
-    /** обновляем поля VMG и скорости */
-    void updateMaxVelocityVMG () {
-        int i;
-        int imageStartX = lineVMGIV[0].getWidth() / 2;
-        int radiusVMGMin = 40;
-        double courseForWindRadians = Math.toRadians(90 + deltaBearing);
-        float playbackSpeed;
-
-        if (velocity > velocityMax) velocityMax = velocity;
-        maxVelocityTV.setText(String.valueOf(velocityMax));
-
-        // выставление меток исторических VMG
-        centerScreenX = centralUiCL.getWidth()/2;
-        centerScreenY = centralUiCL.getHeight()/2;
-
-        // проверяем и обновляем максимальный upwind
-        if (velocityMadeGood > VMGmax) {
-            VMGmax = velocityMadeGood;
-            vmgBeeper();
-            bestUpwindTV.setText(String.valueOf(VMGmax));
-        }
-
-        // проверяем и обновляем максимальный downwind
-        if (velocityMadeGood < VMGmin) {
-            VMGmin = velocityMadeGood;
-            vmgBeeper();
-            bestDownwindTV.setText(String.valueOf(VMGmin));
-        }
-
-        vmgBeeper();
-
-//        if (velocityMadeGood > VMGmax || velocityMadeGood < VMGmin) { // при обновлении зафиксированного максимума VMG
-////            lineVMGIV[2].setVisibility(View.VISIBLE);
-//            if (velocityMadeGood > 0) VMGmax = velocityMadeGood;
-//            bestUpwindTV.setText(String.valueOf(VMGmax));
-//            ////////// это все срань, нужно переписывать на canvas
-//            ////////// проверить центр экрана, приходится подгонять вручную подпорками
-////            if (windCourseAngle > 0) { // курс больше ноля = левый галс
-////                if (windCourseAngle < 90) { // идем левый в бакштаг
-////                    // ставим метку под левый бакштаг
-////                    lineVMGIV[3].setVisibility(View.VISIBLE);
-////                    lineVMGIV[3].setX((float) (centerScreenX - 50 - (float) (lineVMGIV[0].getHeight()/2 ) * Math.cos(Math.toRadians(90-windCourseAngle))));
-////                    lineVMGIV[3].setY((float) (centerScreenY  - (float) (lineVMGIV[0].getWidth()/2 + 50) * Math.sin(Math.toRadians(windCourseAngle))));
-////                    lineVMGIV[3].setRotation(windCourseAngle-180);
-////                    // ставим метку под левый бейдевинд
-////                    lineVMGIV[2].setVisibility(View.VISIBLE);
-////                } else { // идем в левый бейдевинд
-////                    // ставим метку под левый бейдевинд
-////
-////                    // ставим метку под правый бейдевинд
-////
-////                }
-////            } else { // курс меньше ноля = правый галс
-////                if (windCourseAngle < -90) { // идем правый в бакштаг
-////                    // ставим метку под правый бакштаг
-////
-////                    // ставим метку под левый бакштаг
-////
-////                } else { // идем в правый бейдевинд
-////                    // ставим метку под правый бейдевинд
-////
-////                    // ставим метку под левый бейдевинд
-////
-////                }
-////            }
-//        }
-
-    }
-
-    /** обновляем поля VMG и скорости */
-    private void vmgBeeper() {
-        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG) { // если изменилась VMG, перезапускаем прищалку
-            lastVMG = velocityMadeGood;
-
-            /** расчет частоты пиканья в зависимости от близости ВМГ к максимуму. ОТдельно для бакштага и бейдевинда */
-            int threshold = (int) (VMGmax * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
-            if (velocityMadeGood > 0 ) { // если идем в бейдевинд
-                //changeBeepingSpeed(threshold); // выполняем изменение частоты пиканья
-                if (velocityMadeGood > threshold) { // если VMG выше порога, начинаем пикать
-                    //changeBeepingSpeed(threshold); // выполняем изменение частоты пиканья
-//                    Log.i("racer_timer", " changing beeping speed for vmg = " + velocityMadeGood);
-                } else { // если ВМГ ниже, отключаем пищалку
-                    voiceover.stopRepeatSound();
-//                    Log.i("racer_timer", " stop beeping for VMG = "+ velocityMadeGood + ", threshold = " + threshold);
-                }
-            }
-
-            threshold = (int)(VMGmin * vmgBeeperSensitivity); // порог чувствительности ВМГ - отриц.
-            if (velocityMadeGood < 0) { // если идем в бакштаг
-                if (velocityMadeGood < threshold) { // если VMG (отр) ниже порога, начинаем пикать
-                    //changeBeepingSpeed(threshold);
-                } else
-                    voiceover.stopRepeatSound();
-            }
-        }
-    }
+//    void calculateViewsPosition () {
+//        arrowDirectionIV.setVisibility(View.VISIBLE);
+//        arrowVelocityIV.setVisibility(View.VISIBLE);
+//        double radiusSpeedMin = (frameVelocityIV.getWidth() / 2) - frameVelocityIV.getWidth()/4.3; // радиус при нулевой скорости
+//        int radiusMaxMinDiference = arrowDirectionIV.getHeight(); // максимальная разница между максимальными и минимальным значениями
+//        int priceGradeSpeed;
+//        priceGradeSpeed = radiusMaxMinDiference / velocityMax; // цена деления: сколько ед сикбара в ед радиуса
+//        deltaBearing = bearing - windDirection;
+//        bearing = CoursesCalculator.setAngleFrom0To360(bearing);
+//        courseToWind = CoursesCalculator.calcWindCourseAngle(windDirection, bearing);
+//        windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
+//        courseToWindTV.setText(String.valueOf(courseToWind));
+//
+//        // поворот рамы скорости
+//        frameVelocityIV.setRotation( deltaBearing + 180);
+//
+//        // разворот стрелки скорости
+//        arrowVelocityIV.setRotation( deltaBearing + 225);
+//
+//        // положение стрелки скорости
+////        centerScreenX = centerScreenSpace.getTop(); // добываем координаты центральной точки.
+////        centerScreenX = centerScreenSpace.getLeft();
+//        centerScreenX = windFrameIV.getWidth()/2;
+//        centerScreenY = windFrameIV.getHeight()/2;
+//        double courseForWindRadians = Math.toRadians(90 + deltaBearing);
+//        double radiusVelocityArrow = radiusSpeedMin + velocity * priceGradeSpeed;
+//        if (radiusVelocityArrow > (radiusSpeedMin + radiusMaxMinDiference)) radiusVelocityArrow = radiusSpeedMin + radiusMaxMinDiference;
+//        arrowVelocityIV.setX((float) (centerScreenX - arrowVelocityIV.getWidth()/2 + radiusVelocityArrow * Math.cos(courseForWindRadians)));
+//        arrowVelocityIV.setY((float) (centerScreenY - arrowVelocityIV.getHeight()/2 + radiusVelocityArrow * Math.sin(courseForWindRadians)));
+//        velocityMadeGood = (int) (Math.sin(Math.toRadians(90 - Math.abs(deltaBearing))) * velocity);
+//        velocityMadeGoodTV.setText(String.valueOf(velocityMadeGood));
+//
+//        // разворот стрелки направления
+//        arrowDirectionIV.setRotation( deltaBearing);
+//        // положение стрелки направления
+//        courseForWindRadians = Math.toRadians(90 + deltaBearing);
+//        arrowDirectionIV.setX((float) (centerScreenX - arrowDirectionIV.getWidth()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.cos(courseForWindRadians)));
+//        arrowDirectionIV.setY((float) (centerScreenY - arrowDirectionIV.getHeight()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.sin(courseForWindRadians)));
+//    }
 
     @Override
     public void finishTheTimer() {
