@@ -3,6 +3,7 @@ package com.example.racertimer.multimedia;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
+import android.util.Log;
 
 import com.example.racertimer.R;
 
@@ -108,26 +109,22 @@ public class Voiceover {
     }
 
     public void playRepeatSound (int percentVMG) { // проигрывание циклических звуков - пищалка ВМГ
-        if (!vmgIsMuted) { // если небыло команды об отключении звука
-            if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
-                // одиночный патч для маскировки прерывания звука
-                try {
-                    soundPool.play(SOUND_ASSET_BEEP_PATCH, 1, 1, PRIORITY_BEEP+1, 0, calculateRateFromPercent(percentVMG));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                stopRepeatSound(); // останавливаем воспроизведение
-//                soundPool.stop(repeatSoundId); // останавливаем ранее воспроизводимое пиканьше
-//                repeatSoundId = 0; // обнуляем айдишник воспроизведения
+        Log.i("racer_timer_tools_fragment", " called playRepeatSound with percent = "+percentVMG+", mute = "+vmgIsMuted);
+
+        if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
+            try { // одиночный патч для маскировки прерывания звука
+                soundPool.play(SOUND_ASSET_BEEP_PATCH, 1, 1, PRIORITY_BEEP+1, 0, calculateRateFromPercent(percentVMG));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            // запускаем непосредственно проигрывание
-            startPlayingRepeatSound(percentVMG);
+            stopRepeatSound(); // останавливаем воспроизведение ранее запущенной пищалки
         }
+        if (!vmgIsMuted) startPlayingRepeatSound(percentVMG); // запускаем непосредственно проигрывание
     }
 
     private void startPlayingRepeatSound (int percentVMG) {
         float rate = calculateRateFromPercent(percentVMG); // высчитываем скорость воспроизведения
-        repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
+        Log.i("racer_timer_tools_fragment", " start playing with rate ="+rate);
         while (repeatSoundId == 0) // повторяем запуск звука пока он не запустится
             repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
 //        Log.i("racer_timer", " beeping started, id = " + repeatSoundId);
@@ -141,7 +138,7 @@ public class Voiceover {
                 e.printStackTrace();
             }
         repeatSoundId = 0; // обнуляем айдишник
-//        Log.i("racer_timer", " beeping stopped ");
+        Log.i("racer_timer", " beeping stopped ");
     }
 
     public static float calculateRateFromPercent (int percentVMG) { // считаем скорость пищания в зависимости от процента

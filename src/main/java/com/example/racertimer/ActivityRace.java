@@ -613,7 +613,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             if (velocityMadeGood > 0 ) { // если идем в бейдевинд
                 //changeBeepingSpeed(threshold); // выполняем изменение частоты пиканья
                 if (velocityMadeGood > threshold) { // если VMG выше порога, начинаем пикать
-                    changeBeepingSpeed(threshold); // выполняем изменение частоты пиканья
+                    //changeBeepingSpeed(threshold); // выполняем изменение частоты пиканья
 //                    Log.i("racer_timer", " changing beeping speed for vmg = " + velocityMadeGood);
                 } else { // если ВМГ ниже, отключаем пищалку
                     voiceover.stopRepeatSound();
@@ -624,21 +624,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             threshold = (int)(VMGmin * vmgBeeperSensitivity); // порог чувствительности ВМГ - отриц.
             if (velocityMadeGood < 0) { // если идем в бакштаг
                 if (velocityMadeGood < threshold) { // если VMG (отр) ниже порога, начинаем пикать
-                    changeBeepingSpeed(threshold);
+                    //changeBeepingSpeed(threshold);
                 } else
                     voiceover.stopRepeatSound();
             }
-        }
-    }
-
-    private void changeBeepingSpeed (int threshold) {
-        try {   // определяем текущий % ВМГ от максимального за вычетом порога чувствительности
-            int activeVMG = velocityMadeGood - threshold;
-            int activeVMGmax = VMGmax - threshold;
-            int percentVMG = Math.abs(activeVMG * 100 / activeVMGmax);
-            //voiceover.playRepeatSound(percentVMG);
-        } catch (Exception e) { // на случай 0 в знаменателе в начале работы
-            e.printStackTrace();
         }
     }
 
@@ -654,14 +643,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        if (b) { // если звук выключен
-            voiceover.vmgIsMuted = true;
-            voiceover.stopRepeatSound();
-        } else { // если звук включен
-            voiceover.vmgIsMuted = false;
-            lastVMG = velocityMadeGood - 1; // для выполнени условия пиканья (выполнение условий при сравнение наличиия изменений ВМГ)
-            vmgBeeper();
-        }
+        sailingToolsFragment.muteChangedStatus(b);
     }
 }
 

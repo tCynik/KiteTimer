@@ -30,6 +30,7 @@ public class SailingToolsFragment extends Fragment {
     private int radiusArrowMax; // нулевой радиус положения стрелки, откуда ведем отсчет
     private int radiusArrowMin; // максимальный радиус, на котором может находиться стрелка
     private int velocity, bearing, windDirection, velocityMadeGood, lastVMG, maxVelocity, bestUpwind, bestDownwind;
+    private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от максимального ВМГ начинаем пикать
 
     private boolean voiceoverIsMuted = false; // переменная отключен ли звук пищалки
 
@@ -108,13 +109,9 @@ public class SailingToolsFragment extends Fragment {
                 windTV.setTextColor(Color.WHITE);
                 renewWindDirection(valueWindDirection);
                 updateVmgByNewWindOrVelocity();
-                // TODO: корректировка ВМГ при обновлении ветра
+                // TODO: проверь пиканье при изменении ветра
             }
         }
-        // обновляем цифры
-        // поворачиваем компас
-        // поворачиваем стрелки
-        // считаем ВМГ - > пищим
     }
 
     /**
@@ -127,10 +124,16 @@ public class SailingToolsFragment extends Fragment {
 
     public void muteChangedStatus (boolean valueMute) { // изменен статус переключателя звука пищалки
         voiceoverIsMuted = valueMute;
-        if (voiceoverIsMuted) voiceover.voiceoverIsBeingMuted();
+        Log.i("racer_timer_tools_fragment", " voiceover mute setted = " + voiceoverIsMuted);
+        if (voiceoverIsMuted) {
+            voiceover.voiceoverIsBeingMuted();
+            Log.i("racer_timer_tools_fragment", " voiceover was muted");
+        }
         else {
-            voiceover.vmgIsMuted = true;
-            // пикаем
+            voiceover.vmgIsMuted = valueMute;
+            lastVMG = velocityMadeGood - 1;
+            Log.i("racer_timer_tools_fragment", " voiceover was unmuted, VMG = "+velocityMadeGood+", last VMG = "+lastVMG);
+            makeBeeping();
         }
         // обновляем переменную
         // пищим/не пищим
@@ -188,9 +191,11 @@ public class SailingToolsFragment extends Fragment {
             courseToWindRadians = Math.toRadians( Math.abs(courseToWind) ); // считаем курс в радианах
             vmg = (int)( Math.cos(courseToWindRadians)*velocity); // считаем ВМГ upwind -> положительный
         } else { // если курс тупой, считаем даунвинд
-            courseToWindRadians = Math.toRadians( (Math.abs(courseToWind) - 90) ); // считаем курс в радианах
+            courseToWindRadians = Math.toRadians( 180 - Math.abs(courseToWind) ); // считаем курс в радианах
             vmg = (int)( -1 * Math.cos(courseToWindRadians)*velocity); // считаем ВМГ downwind -> отрицательный
+            Log.i("racer_timer_tools_fragment", " courseToWind = "+ courseToWind + ", degree fot VMG is =" +(Math.abs(courseToWind) - 90)+", cos = "+Math.cos(courseToWindRadians));
         }
+        courseToWindTV.setText(String.valueOf(courseToWind));
         if (velocityMadeGood != vmg) { // если ВМГ изменилось, обновляем поле ВМГ и вьюшку
             velocityMadeGood = vmg;
             renewVmg(velocityMadeGood);
@@ -225,7 +230,34 @@ public class SailingToolsFragment extends Fragment {
     }
 
     private void makeBeeping() {
+        int threshold;
+        int percent;
 
+        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG) { // если изменилась VMG, перезапускаем прищалку
+            Log.i("racer_timer_tools_fragment", " called makeBeeping, voiceoverMute = "+voiceoverIsMuted);
+            lastVMG = velocityMadeGood;
+
+            if (velocityMadeGood > 0) { // обрабатываем апвинд
+                threshold = (int) (bestUpwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
+                if (velocityMadeGood > threshold) { // если ВМГ выше порога,
+                    percent = calculateBeepingPercent(bestUpwind, threshold); // считаем % от максимульной частоты пиков
+                    voiceover.playRepeatSound(percent); // перезапуск пищалки (с автоматической остановкой)
+                } else voiceover.stopRepeatSound();
+
+            } else { // обрабатываем даунвинд
+                threshold = (int) (bestDownwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
+                if (velocityMadeGood < threshold) { // если ВМГ меньше порога (больше по модулю, т.к. и то и то минус)
+                    percent = calculateBeepingPercent(bestDownwind, threshold); // запускаем/меняем пищалку
+                    voiceover.playRepeatSound(percent);
+                } else voiceover.stopRepeatSound();
+            }
+        }
+    }
+
+    private int calculateBeepingPercent(int VMGmax, int threshold) {
+        int activeVMG = velocityMadeGood - threshold;
+        int activeVMGmax = VMGmax - threshold;
+        return Math.abs(activeVMG * 100 / activeVMGmax);
     }
 
 
