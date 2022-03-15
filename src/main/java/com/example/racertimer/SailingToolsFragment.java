@@ -63,7 +63,8 @@ public class SailingToolsFragment extends Fragment {
         bestUpwindTV = view.findViewById(R.id.best_upwind);
         courseToWindTV = view.findViewById(R.id.course_to_wind);
 
-        //resetAllMaximums(); // выставляем в ноль все вьюшки
+        //maxVelocity = 0;
+        resetAllMaximums(); // выставляем в ноль все вьюшки
         renewWindDirection(202);
         //calculateHeometric(); // рассчитываем значения для перемещения стрелок
         Log.i("racer_timer_tools_fragment", " fragment view was created ");
@@ -85,10 +86,10 @@ public class SailingToolsFragment extends Fragment {
             if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
                 renewVelocity(valueVelocity);
                 if (velocity > maxVelocity) { // обновляем максимум
-                    maxVelocity = velocity;
-                    renewMaxVelocity(maxVelocity);
+                    renewMaxVelocity(velocity);
                 }
                 updateArrowPosition(velocity);// перемещаем стрелку
+//                updateMaxVelocity(velocity);
                 updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
             }
         }
@@ -153,6 +154,7 @@ public class SailingToolsFragment extends Fragment {
     private void renewMaxVelocity(int value) {
         maxVelocity = value;
         maxVelocityTV.setText(String.valueOf(maxVelocity));
+        Log.i("racer_timer_tools_fragment", " new max velocity = "+value);
     }
     private void renewVelocity(int value) {
         velocity = value;
@@ -203,6 +205,13 @@ public class SailingToolsFragment extends Fragment {
             makeBeeping();
         }
     }
+
+//    private void updateMaxVelocity(int value) {
+//        if (value > maxVelocity) {
+//            velocity = value;
+//            velocityTV.setText(String.valueOf(velocity));
+//        }
+//    }
 
     private void onVmgUpdated () { // обработка измененного ВМГ
         if (velocityMadeGood > bestUpwind) { // если ВМГ болше максимальной

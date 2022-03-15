@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
@@ -22,15 +21,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Space;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -43,26 +39,19 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
-    private ImageView windFrameIV, arrowVelocityIV, frameVelocityIV, arrowDirectionIV;
-    private ImageView[] lineVMGIV;
-    private ImageView lineUpLeftIV, lineUpRightIV, lineDownLeftTV, lineDownRightTV; // линии отображения курса VMG
-    private Space centerScreenSpace;
     private SeekBar windSB, bearingSB, velocitySB;
-    private Button btnReset, btnWindPlus, btnWindMinus, btnUpdateWind, btnDeployTools;
+    private Button btnReset, btnUpdateWind;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch muteVmgSwitch;
-    private TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
-    private ConstraintLayout centralParamsCL, centralUiCL;
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
 
     private TimerFragment timerFragment = null;
     private ForecastFragment forecastFragment = null;
     private SailingToolsFragment sailingToolsFragment = null;
-    private boolean flagReadyToGetLocation = false; // флаг того, что элементы приложения созданы и готовы принимать геолокацию
 
     private Voiceover voiceover;
 
-    private int velocity, bearing, windDirection, velocityMadeGood, lastVMG, velocityMax, VMGmax, VMGmin;
+    private int velocity, bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
 
     private TextView textTime; // переменная времени в левом вехнем углу
 
@@ -70,17 +59,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private int timerHour = 0; // переменная в часах
     private int timerMin = 0; // переменная счетчика в минутах
     private int timerSec = 0; // текущее значение таймера в сотых долей секунды
-    private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от max ВМГ пищать
 
-    private TextView speedTV, maxSpeedTV, courseTV, countLocalChangedTV; // переменные для привязки полей скорости и курса
-
-    private int deltaBearing;
-    private int courseToWind;
-    private int velosity = 0; // скорость в кмч
-    private int maxSpeed = 0; // максимальная зарегистрированная скорость
-    private boolean isFirstIteration = true; // флаг о том, что это первая итерация для выставления первичных цифр
-    private int countLocationChanged = 0; // счетчик сколько раз изменялось геоположение
-    int centerScreenX, centerScreenY;
     private double latitude = 0;
     private double longitude = 0; // координаты для получения прогноза
 
@@ -99,49 +78,16 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
 ////////// вынеси определение вьюшек в отдельный метод
-        centerScreenSpace = findViewById(R.id.space_center);
-        centralParamsCL = findViewById(R.id.central_params_cl);
-        centralUiCL = findViewById(R.id.central_ui_cl);
-        windFrameIV = findViewById(R.id.wind_frame);
-        arrowVelocityIV = findViewById(R.id.arrow);
-        frameVelocityIV = findViewById(R.id.frame_velocity);
-        arrowDirectionIV = findViewById(R.id.arrow_direction);
         windSB = findViewById(R.id.seekBar_wind);
         bearingSB = findViewById(R.id.seekBar_bearing);
         velocitySB = findViewById(R.id.seekBar_velosity);
-        velocityTV = findViewById(R.id.velocity);
-        bearingTV = findViewById(R.id.bearing);
-        windTV = findViewById(R.id.wind);
-        velocityMadeGoodTV = findViewById(R.id.vmg);
-        maxVelocityTV = findViewById(R.id.max_velocity);
-        bestUpwindTV = findViewById(R.id.best_upwind);
-        bestDownwindTV = findViewById(R.id.best_downwind);
-        courseToWindTV = findViewById(R.id.course_to_wind);
         btnReset = findViewById(R.id.but_reset);
         muteVmgSwitch = findViewById(R.id.mute_vmg);
         btnUpdateWind = findViewById(R.id.update_wind);
-        btnDeployTools = findViewById(R.id.deploy_tools);
 
         // TODO: нужно генерировать линии программно по заданным координатам.
-        // этот костыль надо убирать.
-        // Линии отображения исторических показаний VMG
-        lineVMGIV = new ImageView[4];
-        lineVMGIV[0] = findViewById(R.id.line_vmg_down_left);
-        lineVMGIV[1] = findViewById(R.id.line_vmg_down_right);
-        lineVMGIV[2] = findViewById(R.id.line_vmg_up_right);
-        lineVMGIV[3] = findViewById(R.id.line_vmg_up_left);
 
-        // убираем до поры видимость вьюшек, которые пока не определились с положением.
-        arrowVelocityIV.setVisibility(View.INVISIBLE);
-        arrowDirectionIV.setVisibility(View.INVISIBLE);
-        for (ImageView lineIV: lineVMGIV) {
-            lineIV.setVisibility(View.INVISIBLE);
-        }
-
-        velocityMax = 1;
         windDirection = 202;
-        windTV.setText(String.valueOf(windDirection));
-        windFrameIV.setRotation(180 - windDirection);
 
         textTime = findViewById(R.id.currentTime);
 
@@ -159,25 +105,17 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
         voiceover = new Voiceover(context);
 
+        deploySailingToolsFragment();
+
         /** обрабатываем свитч mute VMG */
         muteVmgSwitch.setOnCheckedChangeListener(this);
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
-        btnDeployTools.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deploySailingToolsFragment();
-            }
-        });
 
         btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                velocityMax = 1;
-                VMGmax = 0;
-                bestUpwindTV.setText(String.valueOf(0));
-                VMGmin = 0;
-                bestDownwindTV.setText(String.valueOf(0));
+                sailingToolsFragment.resetPressed();
                 Log.i("racer_timer", "reset VMG maximums");
             }
         });
@@ -208,6 +146,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (locationService != null) locationService.updateWindDirection();
     }
 
+    /** модуль методов выгрузки фрагментов */
     public void deployTimerFragment() { // создание фрагмента для таймера
         if (timerFragment == null) timerFragment = new TimerFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -229,7 +168,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         sailingToolsFragment.setVoiceover(voiceover); // передаем экземпляр озвучки
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_place_timer_forecast, sailingToolsFragment);
+        fragmentTransaction.replace(R.id.fr_sailing_tools, sailingToolsFragment);
         fragmentTransaction.commit();
     }
 
@@ -239,8 +178,9 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (seekBar == windSB) {
             windDirection = i;
             windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
-            onWindDirectionChanged( windDirection);
+            //onWindDirectionChanged( windDirection);
             sailingToolsFragment.onWindDirectionChanged(windDirection);
+            Log.i("racer_timer", " seekbar: changed wind = "+windDirection);
         }
         if (seekBar == bearingSB) {
             bearing = i;
@@ -414,7 +354,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                     if (windDirectionFromExtra != 10000) {
                         onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
                         windDirectionGettedFromService = true;
-                        windTV.setTextColor(Color.WHITE);
                         Log.i("ActivityRace", "getted wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
                     }
                 }
@@ -442,7 +381,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             tempVelosity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelosity;
             sailingToolsFragment.onVelocityChanged(velocity);
-        } else velosity = 0;
+        } else sailingToolsFragment.onVelocityChanged(0);
         sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         sailingToolsFragment.onBearingChanged(bearing);
