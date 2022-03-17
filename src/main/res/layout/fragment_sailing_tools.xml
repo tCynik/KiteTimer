@@ -28,8 +28,8 @@
 
         <ImageView
             android:id="@+id/frame_stat_wind"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:src="@drawable/ic_frame_stat_wind"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -70,6 +70,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
                 <ImageView
+                    android:visibility="invisible"
                     android:layout_marginBottom="333dp"
                     android:id="@+id/arrow_direction"
                     android:layout_width="wrap_content"

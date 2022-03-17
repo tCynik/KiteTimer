@@ -24,12 +24,10 @@ public class SailingToolsFragment extends Fragment {
     private boolean viewIsCreated = false;
     Voiceover voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
-    ImageView arrowVelocityIV;
+    ImageView arrowVelocityIV, arrowDirectionIV;
     TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
 
-    private int radiusArrowMax; // нулевой радиус положения стрелки, откуда ведем отсчет
-    private int radiusArrowMin; // максимальный радиус, на котором может находиться стрелка
-    private int fullSpeedSize; // максимальный ход стрелки
+    private int fullSpeedSize = 0; // максимальный ход стрелки
     private int velocity, bearing, windDirection, velocityMadeGood, lastVMG, maxVelocity, bestUpwind, bestDownwind;
     private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от максимального ВМГ начинаем пикать
 
@@ -55,6 +53,7 @@ public class SailingToolsFragment extends Fragment {
         centralParametersCL = view.findViewById(R.id.central_params_cl); // вьюшка для ограничения движения стрелок
         windLayoutCL = view.findViewById(R.id.wind_layout);
         arrowVelocityIV = view.findViewById(R.id.arrow); // стрелка скорости
+        arrowDirectionIV = view.findViewById(R.id.arrow_direction); // стрелка направления
         velocityTV = view.findViewById(R.id.velocity);
         bearingTV = view.findViewById(R.id.bearing);
         windTV = view.findViewById(R.id.wind);
@@ -66,7 +65,6 @@ public class SailingToolsFragment extends Fragment {
 
         resetAllMaximums(); // выставляем в ноль все вьюшки
         renewWindDirection(202);
-        calculateHeometric(); // рассчитываем значения для перемещения стрелок
         Log.i("racer_timer_tools_fragment", " fragment view was created ");
         viewIsCreated = true; // разрешаем изменение вьюшек
         return view;
@@ -220,19 +218,26 @@ public class SailingToolsFragment extends Fragment {
      * блок работы с графикой и звуком
      */
     private void updateArrowPosition (int velocity) { // обновление позиции стрелки скорости
-        fullSpeedSize = radiusArrowMax - radiusArrowMin;
+        if (fullSpeedSize == 0) calculateHeometric(); // получаем начальную позицию из размеров вьюшек
         double percentVelocity = 0;
-        //Log.i("racer_timer_tools_fragment", " velocity =" +velocity+", max velocity ="+maxVelocity);
-        if (maxVelocity != 0) percentVelocity = velocity * 100 / maxVelocity; // находим процент скорости от максимальной
-        float position = (float) ( radiusArrowMin + (percentVelocity * fullSpeedSize) ); // находим позицию
-        Log.i("racer_timer_tools_fragment", " percent = "+ percentVelocity + ", pos min = " + radiusArrowMin +", pos = "+position);
+        if (maxVelocity != 0) percentVelocity = 100 - (velocity * 100 / maxVelocity); // находим процент скорости от максимальной
+        float position = (float) ( ( percentVelocity * fullSpeedSize ) / 100 + fullSpeedSize/10);
         arrowVelocityIV.setY(position);
     }
 
-    private void calculateHeometric() { // при создании вьюшки определяемся с размерами окон для последующих расчетов
-        radiusArrowMax = centralParametersCL.getHeight()/2; // максимальный радиус
-        radiusArrowMin = arrowsLayoutCL.getHeight()/2; // минимальный радиус
-        Log.i("racer_timer_tools_fragment", " radius max = "+ radiusArrowMax + ", radius min = " + radiusArrowMin);
+    private void calculateHeometric() { // готовимся к отображению динамических вьюшек
+        int radiusArrowMin = centralParametersCL.getHeight()/2; // максимальный радиус
+        int radiusArrowMax = arrowsLayoutCL.getHeight()/2; // минимальный радиус
+        fullSpeedSize = radiusArrowMax - radiusArrowMin; // диапазон, в котором ходит стрелка
+
+        int heightOfArrow = arrowDirectionIV.getHeight(); // высота стрелки направления
+        float scaleOfArrow = (float) (fullSpeedSize * 100 / heightOfArrow) / 100; // определем масштаб отображения стрелки
+        arrowDirectionIV.setScaleY(scaleOfArrow); // выставляем масштаб
+        int shift = (int) ((heightOfArrow * scaleOfArrow) - heightOfArrow); // смещение для компенсации изменения масштаба
+        arrowDirectionIV.setY((shift / 2) + 6); // устанавливаем на позицию смещения + 6 для устранения разрыва между вьюшками
+        Log.i("racer_timer_tools_fragment", " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow);
+
+        arrowDirectionIV.setVisibility(View.VISIBLE);
     }
 
     private void makeBeeping() {
