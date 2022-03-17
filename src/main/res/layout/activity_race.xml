@@ -20,8 +20,8 @@
     </fragment>
 
     <!-- главное размещение UI элементов -->
-    <fragment
-        android:name="com.example.racertimer.SailingToolsFragment"
+    <FrameLayout
+
         android:id="@+id/fr_sailing_tools"
         android:layout_width="0dp"
         android:layout_height="match_parent"

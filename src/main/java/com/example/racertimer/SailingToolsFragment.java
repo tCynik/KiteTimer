@@ -29,6 +29,7 @@ public class SailingToolsFragment extends Fragment {
 
     private int radiusArrowMax; // нулевой радиус положения стрелки, откуда ведем отсчет
     private int radiusArrowMin; // максимальный радиус, на котором может находиться стрелка
+    private int fullSpeedSize; // максимальный ход стрелки
     private int velocity, bearing, windDirection, velocityMadeGood, lastVMG, maxVelocity, bestUpwind, bestDownwind;
     private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от максимального ВМГ начинаем пикать
 
@@ -63,10 +64,9 @@ public class SailingToolsFragment extends Fragment {
         bestUpwindTV = view.findViewById(R.id.best_upwind);
         courseToWindTV = view.findViewById(R.id.course_to_wind);
 
-        //maxVelocity = 0;
         resetAllMaximums(); // выставляем в ноль все вьюшки
         renewWindDirection(202);
-        //calculateHeometric(); // рассчитываем значения для перемещения стрелок
+        calculateHeometric(); // рассчитываем значения для перемещения стрелок
         Log.i("racer_timer_tools_fragment", " fragment view was created ");
         viewIsCreated = true; // разрешаем изменение вьюшек
         return view;
@@ -85,6 +85,7 @@ public class SailingToolsFragment extends Fragment {
             Log.i("racer_timer_tools_fragment", " velocity in the tools fragment changed. New one = "+ valueVelocity);
             if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
                 renewVelocity(valueVelocity);
+                Log.i("racer_timer_tools_fragment_vel", " got new velocity = "+ valueVelocity+ ", old one = "+velocity);
                 if (velocity > maxVelocity) { // обновляем максимум
                     renewMaxVelocity(velocity);
                 }
@@ -206,13 +207,6 @@ public class SailingToolsFragment extends Fragment {
         }
     }
 
-//    private void updateMaxVelocity(int value) {
-//        if (value > maxVelocity) {
-//            velocity = value;
-//            velocityTV.setText(String.valueOf(velocity));
-//        }
-//    }
-
     private void onVmgUpdated () { // обработка измененного ВМГ
         if (velocityMadeGood > bestUpwind) { // если ВМГ болше максимальной
             renewBestUpwind(velocityMadeGood);
@@ -226,16 +220,19 @@ public class SailingToolsFragment extends Fragment {
      * блок работы с графикой и звуком
      */
     private void updateArrowPosition (int velocity) { // обновление позиции стрелки скорости
-        int fullSpeed = radiusArrowMax - radiusArrowMin;
+        fullSpeedSize = radiusArrowMax - radiusArrowMin;
         double percentVelocity = 0;
-        if (maxVelocity != 0) percentVelocity = maxVelocity / maxVelocity;
-        float position = (float) ( radiusArrowMin + (percentVelocity * fullSpeed) );
+        //Log.i("racer_timer_tools_fragment", " velocity =" +velocity+", max velocity ="+maxVelocity);
+        if (maxVelocity != 0) percentVelocity = velocity * 100 / maxVelocity; // находим процент скорости от максимальной
+        float position = (float) ( radiusArrowMin + (percentVelocity * fullSpeedSize) ); // находим позицию
+        Log.i("racer_timer_tools_fragment", " percent = "+ percentVelocity + ", pos min = " + radiusArrowMin +", pos = "+position);
         arrowVelocityIV.setY(position);
     }
 
     private void calculateHeometric() { // при создании вьюшки определяемся с размерами окон для последующих расчетов
         radiusArrowMax = centralParametersCL.getHeight()/2; // максимальный радиус
         radiusArrowMin = arrowsLayoutCL.getHeight()/2; // минимальный радиус
+        Log.i("racer_timer_tools_fragment", " radius max = "+ radiusArrowMax + ", radius min = " + radiusArrowMin);
     }
 
     private void makeBeeping() {

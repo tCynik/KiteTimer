@@ -93,7 +93,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
         context = this;
         forecastFragment = new ForecastFragment();
-        sailingToolsFragment = new SailingToolsFragment();
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
@@ -371,20 +370,20 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     /** обработка вновь полученных геолокации */
     private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " Activity race get new location ");
-        double tempVelosity;
+        double tempVelocity;
         if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
             latitude = location.getLatitude();
             longitude = location.getLongitude();
             forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
         }
         if (location.hasSpeed()) { // если есть скорость
-            tempVelosity = (double) location.getSpeed()*3.6;
-            velocity = (int) tempVelosity;
-            sailingToolsFragment.onVelocityChanged(velocity);
+            tempVelocity = (double) location.getSpeed()*3.6;
+            velocity = (int) tempVelocity;
+            Log.i("racer_timer", " sending velocity = "+ velocity);
+            if (sailingToolsFragment != null) sailingToolsFragment.onVelocityChanged(velocity);
         } else sailingToolsFragment.onVelocityChanged(0);
-        sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
-        sailingToolsFragment.onBearingChanged(bearing);
+        if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
     }
 
 //    void calculateViewsPosition () {
