@@ -26,6 +26,11 @@ public class LocationService extends Service {
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
+    // блок опций с методами определения направления ветра
+    final static int NO_WIND_CALCULATION = 0; // без подсчета
+    final static int CALCULATE_BY_DIAGRAM = 1; // по диаграмме скоростей
+    final static int CALCULATE_BY_VMG_COMPARE = 2; // по сравнению ВМГ - требует первоначального направления
+
     private LocationManager locationManager;
     private LocationListener locationListener;
 
@@ -33,7 +38,7 @@ public class LocationService extends Service {
 
     private Intent intent; // интент для отправки сообщений из данного сервиса
 
-    private WindStatistics windStatistics;
+    private WindByStatistics windByStatistics;
     public MyBinder binder = new MyBinder();
 
     public LocationService() {
@@ -71,7 +76,7 @@ public class LocationService extends Service {
         };
 
         // создаем экземпляр класса для расчета направлений ветра
-        windStatistics = new WindStatistics(5, windChangedHerald);
+        windByStatistics = new WindByStatistics(5, windChangedHerald);
 
         locationListener = new LocationListener() {
             @Override
@@ -83,7 +88,7 @@ public class LocationService extends Service {
                     sendBroadcast(intent);
 
                     // передаем новые геоданные в расчетчик направления ветра
-                    windStatistics.onLocationChanged(location);
+                    windByStatistics.onLocationChanged(location);
                 }
             }
 
@@ -101,7 +106,7 @@ public class LocationService extends Service {
     }
 
     public int getWindDirection () { // если напр ветра 10000 = значит, пока результатов нет
-        return windStatistics.getWindDirection();
+        return windByStatistics.getWindDirection();
     }
 
     @Override
@@ -125,7 +130,7 @@ public class LocationService extends Service {
         Log.i("racer_timer", "manually sending actual wind direction " );
         // TODO: вынеси в отдельный метод отправку интента с ветром, тут и в onWindChanged вызов этого метода
         // нужно допиливать фрагмент прибора
-        windChangedHerald.onWindDirectionChanged(windStatistics.getWindDirection());
+        windChangedHerald.onWindDirectionChanged(windByStatistics.getWindDirection());
     }
 
     // организуем получение экземпляра данного сервиса через биндер

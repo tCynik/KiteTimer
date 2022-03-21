@@ -185,17 +185,8 @@ public class SailingToolsFragment extends Fragment {
     }
 
     private void updateVmgByNewWindOrVelocity() { // обновление максимумов ВМГ
-        double courseToWindRadians; // обьявляем переменную для расчета курсов в радианах
         int courseToWind = CoursesCalculator.calcWindCourseAngle(windDirection, bearing); // находим курс к ветру
-        int vmg = velocityMadeGood;
-        if (Math.abs(courseToWind) < 90) { // если курс острый, значит считаем апвинд
-            courseToWindRadians = Math.toRadians( Math.abs(courseToWind) ); // считаем курс в радианах
-            vmg = (int)( Math.cos(courseToWindRadians)*velocity); // считаем ВМГ upwind -> положительный
-        } else { // если курс тупой, считаем даунвинд
-            courseToWindRadians = Math.toRadians( 180 - Math.abs(courseToWind) ); // считаем курс в радианах
-            vmg = (int)( -1 * Math.cos(courseToWindRadians)*velocity); // считаем ВМГ downwind -> отрицательный
-            Log.i("racer_timer_tools_fragment", " courseToWind = "+ courseToWind + ", degree fot VMG is =" +(Math.abs(courseToWind) - 90)+", cos = "+Math.cos(courseToWindRadians));
-        }
+        int vmg = CoursesCalculator.VMGByWindBearingVelocity(windDirection, bearing, velocity);
         courseToWindTV.setText(String.valueOf(courseToWind));
         if (velocityMadeGood != vmg) { // если ВМГ изменилось, обновляем поле ВМГ и вьюшку
             velocityMadeGood = vmg;

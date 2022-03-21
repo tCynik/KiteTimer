@@ -8,8 +8,12 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class WindStatistics { // класс для сбора статистики скоростей и рассчета истинного напр ветра
+// в этом классе реализуем способ рассчета истинного курса ветра по статистике скоростей
+// работает в полностью автоматическом режиме, но требует идеальных условий по покрытию и ветру
+public class WindByStatistics {
     private final static String PROJECT_LOG_TAG = "racer_timer_windStat";
+
+    private int windCalculateOption;
 
     private final static int MIN_KMH_TO_STATISTICS = 6; // минимальный порог скорости, который идет в
     // статистику - для фильтрации пешей хотьбы и случайных всплесков
@@ -41,7 +45,7 @@ public class WindStatistics { // класс для сбора статистик
     private Timer timer; // таймер для причесывания диаграммы когда какое-то время не приходят новые данные
     private TimerTask timerTask; // тело задачи, которая выполняется по команде таймера
 
-    public WindStatistics(int sizeOfSectors, WindChangedHerald windChangedHerald) {
+    public WindByStatistics(int sizeOfSectors, WindChangedHerald windChangedHerald) {
         this.sizeOfSectors = sizeOfSectors;
         numberOfSectors = 360 / sizeOfSectors;
         windDiagram = new int[numberOfSectors];
@@ -97,6 +101,7 @@ public class WindStatistics { // класс для сбора статистик
             if (windDiagramIsRepresentable) { //  запускаем/обнуляем таймер причесывания
             }
 
+            // причесывание диаграммы, если какое-то время небыло изменений:
             // если у нас нет изменений в диаграмме, причесываем ее.
             // проверяем условия и отправляем бродкаст
             if (windDiagramIsRepresentable) {// если выборка репрезентативная, выполянем:

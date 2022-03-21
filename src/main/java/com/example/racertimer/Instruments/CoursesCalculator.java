@@ -16,6 +16,8 @@ public class CoursesCalculator {
 
     /** расчет угла к ветру */
     public static int calcWindCourseAngle (int windDir, int bearing) { // расчет курса относительно ветра (позорная срань с ifами)
+        // правый галс - отрицательный, левый галс - положительный
+        // Бейдевинд - модуль меньше 90, бакштаг - модуль больше 90
         int windCourseAngle = 0;
         if (windDir < 180) { // частный случай если напр ветра до 180 градусов
             if (bearing > windDir & bearing < windDir + 180) { // с какой стороны относительно ветра вектор движения
@@ -36,6 +38,30 @@ public class CoursesCalculator {
             }
         }
         return windCourseAngle;
+    }
+
+    public static int numberOfTack (int windDir, int bearing) { // определение номера галса
+        // 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
+        int windCourseAngle = calcWindCourseAngle(windDir, bearing);
+        if (windCourseAngle > 90) return 4; // если больше 90 - левый бакштаг, = 4
+        else if (windCourseAngle > 0) return 3; // если от 0 до 90 - левый бейдевинд, = 3
+            else if (windCourseAngle < -90) return 1; // если меньше -90 - правый бакштаг, = 1
+                else return 2; // в ином случае (не болььше 0 и не меньше -90 - правый бейдевинд, 2
+    }
+
+    // ВМГ по ветру, курсу, и скорости
+    public static int VMGByWindBearingVelocity (int windDir, int bearing, int velocity) {
+        double courseToWindRadians; // обьявляем переменную для расчета курсов в радианах
+        int courseToWind = calcWindCourseAngle(windDir, bearing); // находим курс к ветру
+        int velocityMadeGood;
+        if (Math.abs(courseToWind) < 90) { // если курс острый, значит считаем апвинд
+            courseToWindRadians = Math.toRadians( Math.abs(courseToWind) ); // считаем курс в радианах
+            velocityMadeGood = (int)( Math.cos(courseToWindRadians) * velocity); // считаем ВМГ upwind -> положительный
+        } else { // если курс тупой, считаем даунвинд
+            courseToWindRadians = Math.toRadians( 180 - Math.abs(courseToWind) ); // считаем курс в радианах
+            velocityMadeGood = (int)( -1 * Math.cos(courseToWindRadians) * velocity); // считаем ВМГ downwind -> отрицательный
+        }
+        return velocityMadeGood;
     }
 
     // нахождение симметричного к ветру угла - рассчитывается для угла к ветру!!! (не для аимута)
