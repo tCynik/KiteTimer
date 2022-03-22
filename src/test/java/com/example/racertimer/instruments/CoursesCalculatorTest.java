@@ -1,9 +1,13 @@
 package com.example.racertimer.instruments;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
 import com.example.racertimer.Instruments.CoursesCalculator;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+//import org.junit.Assert;
 
 public class CoursesCalculatorTest {
     CoursesCalculator coursesCalculator = new CoursesCalculator();
@@ -12,22 +16,22 @@ public class CoursesCalculatorTest {
     @Test
     public void setAngleFrom0To360_60Correct () throws Exception {
         int angle = 60;
-        Assert.assertEquals(60, CoursesCalculator.setAngleFrom0To360(angle));
+        assertEquals(60, CoursesCalculator.setAngleFrom0To360(angle));
     }
     @Test
     public void setAngleFrom0To360_Min120Correct () throws Exception {
         int angle = -120;
-        Assert.assertEquals(240, CoursesCalculator.setAngleFrom0To360(angle));
+        assertEquals(240, CoursesCalculator.setAngleFrom0To360(angle));
     }
     @Test
     public void setAngleFrom0To360_510Correct () throws Exception {
         int angle = 510;
-        Assert.assertNotEquals(516 - 360, CoursesCalculator.setAngleFrom0To360(angle));
+        assertNotEquals(516 - 360, CoursesCalculator.setAngleFrom0To360(angle));
     }
     @Test
     public void setAngleFrom0To360_510Incorrect () throws Exception {
         int angle = 510;
-        Assert.assertNotEquals(120, CoursesCalculator.setAngleFrom0To360(angle));
+        assertNotEquals(120, CoursesCalculator.setAngleFrom0To360(angle));
     }
 
     /** Разница курсов между направлением ветра и направлением движения*/
@@ -36,28 +40,28 @@ public class CoursesCalculatorTest {
         int wind = 60;
         int course = 30;
         int caseCorrect = 30 - 60; // курс справа, острый
-        Assert.assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
+        assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
     }
     @Test
     public void windCourseAngle_170_280Correct () throws Exception{
         int wind = 170;
         int course = 280;
         int caseCorrect = 280 - 170; // курс слева, полный 110град
-        Assert.assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
+        assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
     }
     @Test
     public void windCourseAngle_30_330Correct () throws Exception{
         int wind = 30;
         int course = 330;
         int caseCorrect = -1 * ((360 - 330) + 30); // курс справа, острый -60град, переход через 0
-        Assert.assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
+        assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
     }
     @Test
     public void windCourseAngle_300_10Correct () throws Exception{
         int wind = 300;
         int course = 10;
         int caseCorrect = (360 - 300) + 10; // курс слева, острый 70 град, переход через 0
-        Assert.assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
+        assertEquals(caseCorrect, CoursesCalculator.calcWindCourseAngle(wind, course));
     }
 
     /** симметричный к ветру курс*/
@@ -66,7 +70,7 @@ public class CoursesCalculatorTest {
         int windDir = 0;
         int courseToWind = -30;
         int symmetryCorrect = 30;
-        Assert.assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
+        assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
     }
 
     @Test
@@ -74,7 +78,7 @@ public class CoursesCalculatorTest {
         int windDir = 45;
         int courseToWind = 15;
         int symmetryCorrect = 30;
-        Assert.assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
+        assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
     }
 
     @Test
@@ -82,7 +86,7 @@ public class CoursesCalculatorTest {
         int windDir = 45;
         int courseToWind = - 15;
         int symmetryCorrect = 60;
-        Assert.assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
+        assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
     }
 
     @Test
@@ -90,7 +94,7 @@ public class CoursesCalculatorTest {
         int windDir = 315;
         int courseToWind = 60;
         int symmetryCorrect = 255;
-        Assert.assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
+        assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
     }
 
     @Test
@@ -98,7 +102,7 @@ public class CoursesCalculatorTest {
         int windDir = 45;
         int courseToWind = -60;
         int symmetryCorrect = 105;
-        Assert.assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
+        assertEquals(symmetryCorrect, CoursesCalculator.symmetryAngle(windDir, courseToWind));
     }
 
     /** находим направление вектора по координатам */
@@ -107,7 +111,7 @@ public class CoursesCalculatorTest {
         int x = 5;
         int y = 5;
         int resultCorrect = 45;
-        Assert.assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
+        assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
     }
 
     @Test
@@ -115,7 +119,7 @@ public class CoursesCalculatorTest {
         int x = -5;
         int y = 5;
         int resultCorrect = 315;
-        Assert.assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
+        assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
     }
 
     @Test
@@ -123,7 +127,7 @@ public class CoursesCalculatorTest {
         int x = 5;
         int y = -5;
         int resultCorrect = 135;
-        Assert.assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
+        assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
     }
 
     @Test
@@ -131,12 +135,8 @@ public class CoursesCalculatorTest {
         int x = -5;
         int y = -5;
         int resultCorrect = 225;
-        Assert.assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
+        assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
     }
 
-
-
-
-
-
+    // TODO: сделать юнит тесты метода dissAngles
 }

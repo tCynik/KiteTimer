@@ -40,6 +40,7 @@ public class CoursesCalculator {
         return windCourseAngle;
     }
 
+    /** расчет номера галса по четвертям */
     public static int numberOfTack (int windDir, int bearing) { // определение номера галса
         // 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
         int windCourseAngle = calcWindCourseAngle(windDir, bearing);
@@ -49,7 +50,7 @@ public class CoursesCalculator {
                 else return 2; // в ином случае (не болььше 0 и не меньше -90 - правый бейдевинд, 2
     }
 
-    // ВМГ по ветру, курсу, и скорости
+    /** расчет ВМГ по ветру, курсу, и скорости */
     public static int VMGByWindBearingVelocity (int windDir, int bearing, int velocity) {
         double courseToWindRadians; // обьявляем переменную для расчета курсов в радианах
         int courseToWind = calcWindCourseAngle(windDir, bearing); // находим курс к ветру
@@ -64,7 +65,7 @@ public class CoursesCalculator {
         return velocityMadeGood;
     }
 
-    // нахождение симметричного к ветру угла - рассчитывается для угла к ветру!!! (не для аимута)
+    /** нахождение симметричного к ветру угла - рассчитывается для угла к ветру!!! (не для аимута) */
     public static int symmetryAngle (int windDirection, int windCourseAngle) {
         // на вход подается направление ветра (с какого азимута дует) и курс к ветру:
         // от бакштага к бейдевинду увеличение; правый галс отрицательный, левый галс положительный
@@ -75,7 +76,8 @@ public class CoursesCalculator {
     }
 
 
-    public static int bearingByCoordinates (double x, double y) { // вычисление азимута вектора по координатам конца (первая точка 0:0)
+    /** вычисление азимута вектора по координатам конца (первая точка 0:0) */
+    public static int bearingByCoordinates (double x, double y) {
         double vectorLength = vectorLevgthByCoordinates(x, y);
         int direction = (int) Math.toDegrees(Math.acos(y / vectorLength)); // симметрично нулевой оси 0Y
         if (x < 0) // если левее оси, симметрично переносим
@@ -84,13 +86,25 @@ public class CoursesCalculator {
         return direction;
     }
 
+    /** вычисление длины вектора по координатам конца (первая точка 0:0) */
     public static double vectorLevgthByCoordinates (double x, double y) {
         return Math.pow((Math.pow(x, 2) + Math.pow(y, 2)), 0.5); // длина вектора
     }
 
+    /** переворот курса на 180 градусов */
     public static int invertCourse (int course) {
         int resultCourse = course + 180;
         if (resultCourse > 360) resultCourse = resultCourse - 360;
         return resultCourse;
     }
+
+    /** вычисление наименьшего угла между двумы лучами с учотом возможного перехода через 0
+     * Считаем по часовой стрелке от 1 ко 2. положительная разница - по часовой, отрицательная - против часовой */
+    public static int diffAngles (int angleFirst, int angleSecond) {
+        int directDiff = angleSecond - angleFirst; // прямая разница
+        if (directDiff > 180) directDiff = directDiff - 180;
+        if (directDiff < -180) directDiff = directDiff + 180;
+        return directDiff;
+    }
+
 }
