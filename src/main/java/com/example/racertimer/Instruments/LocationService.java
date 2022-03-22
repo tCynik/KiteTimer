@@ -39,6 +39,7 @@ public class LocationService extends Service {
     private Intent intent; // интент для отправки сообщений из данного сервиса
 
     private WindByStatistics windByStatistics;
+    private WindByCompare windByCompare;
     public MyBinder binder = new MyBinder();
 
     public LocationService() {
@@ -75,8 +76,9 @@ public class LocationService extends Service {
             }
         };
 
-        // создаем экземпляр класса для расчета направлений ветра
+        // создаем экземпляры классов для расчета направлений ветра
         windByStatistics = new WindByStatistics(5, windChangedHerald);
+        windByCompare = new WindByCompare(10000, windChangedHerald);
 
         locationListener = new LocationListener() {
             @Override

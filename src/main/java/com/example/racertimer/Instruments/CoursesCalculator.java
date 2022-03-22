@@ -75,10 +75,9 @@ public class CoursesCalculator {
         return symmetryCourse;
     }
 
-
     /** вычисление азимута вектора по координатам конца (первая точка 0:0) */
     public static int bearingByCoordinates (double x, double y) {
-        double vectorLength = vectorLevgthByCoordinates(x, y);
+        double vectorLength = vectorLengthByCoordinates(x, y);
         int direction = (int) Math.toDegrees(Math.acos(y / vectorLength)); // симметрично нулевой оси 0Y
         if (x < 0) // если левее оси, симметрично переносим
             direction = 180 + (180 - direction);
@@ -87,7 +86,7 @@ public class CoursesCalculator {
     }
 
     /** вычисление длины вектора по координатам конца (первая точка 0:0) */
-    public static double vectorLevgthByCoordinates (double x, double y) {
+    public static double vectorLengthByCoordinates(double x, double y) {
         return Math.pow((Math.pow(x, 2) + Math.pow(y, 2)), 0.5); // длина вектора
     }
 
@@ -102,8 +101,11 @@ public class CoursesCalculator {
      * Считаем по часовой стрелке от 1 ко 2. положительная разница - по часовой, отрицательная - против часовой */
     public static int diffAngles (int angleFirst, int angleSecond) {
         int directDiff = angleSecond - angleFirst; // прямая разница
-        if (directDiff > 180) directDiff = directDiff - 180;
-        if (directDiff < -180) directDiff = directDiff + 180;
+        if (directDiff > 180) { // если разница больше 180, то есть переход через 0 и второй угол больше первого
+            directDiff = -1 * (angleFirst + (360 - angleSecond));// получаем отрицательное значение
+        } else if (directDiff < -180) { // если разница меньше -180, то есть переход но первый больше второго
+            directDiff = angleSecond + (360 - angleFirst); // получаем положительное значение
+        }
         return directDiff;
     }
 

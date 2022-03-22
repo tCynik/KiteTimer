@@ -109,7 +109,6 @@ public class SailingToolsFragment extends Fragment {
                 windTV.setTextColor(Color.WHITE);
                 renewWindDirection(valueWindDirection);
                 updateVmgByNewWindOrVelocity();
-                // TODO: проверь пиканье при изменении ветра
             }
         }
     }

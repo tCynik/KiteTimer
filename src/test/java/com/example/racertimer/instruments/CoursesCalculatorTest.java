@@ -138,5 +138,37 @@ public class CoursesCalculatorTest {
         assertEquals(resultCorrect, CoursesCalculator.bearingByCoordinates(x, y));
     }
 
-    // TODO: сделать юнит тесты метода dissAngles
+    @Test
+    public void diffAnglesSecondMore () throws Exception {
+        int angleFirst = 30;
+        int angleSecond = 90;
+        int result = 60;
+        assertEquals(result, CoursesCalculator.diffAngles(angleFirst, angleSecond));
+    }
+
+    @Test
+    public void diffAnglesFirstMore () throws Exception {
+        int angleFirst = 90;
+        int angleSecond = 30;
+        int result = -60;
+        assertEquals(result, CoursesCalculator.diffAngles(angleFirst, angleSecond));
+    }
+
+    @Test
+    public void diffAnglesSecondMoreCross360 () throws Exception {
+        int angleFirst = 330;
+        int angleSecond = 30;
+        int result = 60;
+        assertEquals(result, CoursesCalculator.diffAngles(angleFirst, angleSecond));
+    }
+
+    @Test
+    public void diffAnglesFirstMoreCross360 () {
+        int angleFirst = 30;
+        int angleSecond = 330;
+        int result = -60;
+        assertEquals(result, CoursesCalculator.diffAngles(angleFirst, angleSecond));
+    }
+
+
 }
