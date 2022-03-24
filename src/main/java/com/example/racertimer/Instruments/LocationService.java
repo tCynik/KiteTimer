@@ -78,7 +78,8 @@ public class LocationService extends Service {
 
         // создаем экземпляры классов для расчета направлений ветра
         windByStatistics = new WindByStatistics(5, windChangedHerald);
-        windByCompare = new WindByCompare(10000, windChangedHerald);
+        // TODO: создать механизм первоначальноц настройки направления ветра
+        windByCompare = new WindByCompare(202, windChangedHerald);
 
         locationListener = new LocationListener() {
             @Override
@@ -90,7 +91,9 @@ public class LocationService extends Service {
                     sendBroadcast(intent);
 
                     // передаем новые геоданные в расчетчик направления ветра
-                    windByStatistics.onLocationChanged(location);
+                    // TODO: реализовать управление обработкой геоданных и получения результата в зависимости от выбранного типа расчета
+                    //windByStatistics.onLocationChanged(location);
+                    windByCompare.onLocationChanged(location);
                 }
             }
 
