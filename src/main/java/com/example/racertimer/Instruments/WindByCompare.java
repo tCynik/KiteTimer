@@ -32,6 +32,8 @@ public class WindByCompare {
 
     public void setWindDirection (int windDirection) {
         this.windDirection = windDirection;
+        upwindTackCounter = 0;
+        Arrays.fill(maxTackVMG, 0);
     }
 
     // TODO: добавить уменьшение максималок через время для
@@ -78,24 +80,23 @@ public class WindByCompare {
                 // в таком случае напр ветра нужно сместить против часовой (уменьшить)
                 int rateVMGs = maxTackVMG[1] * 100 / maxTackVMG[0]; // соотношение ВМГ меньшего к большему
                 int windDirCorrection = (int) angleDiffs * rateVMGs / 100; // насколько корректируем напр ветра
-                Log.i("racer_timer_wind_compare", " wind correction: rate = "+rateVMGs+", windDirCirrection = "+windDirCorrection+", wind dir = "+windDirection);
-                updatedWindDirection = windDirection - windDirCorrection; // уменьшаем направление ветра
+                Log.i("racer_timer_wind_compare", " max VMG right = "+maxTackVMG[0]+", max VMG left = "+maxTackVMG[1]);
+                Log.i("racer_timer_wind_compare", " wind correction1: rate = "+rateVMGs+", windDirCirrection = "+windDirCorrection+", wind dir = "+windDirection);
+                updatedWindDirection = tackVMGsBearings[0] + windDirCorrection; // уменьшаем направление ветра
             } else { // если ВМГ в левом бакштаге больше чем в правом
                 // напр ветра нужно сместить по часовой (увеличить)
                 int rateVMGs = maxTackVMG[0] * 100 / maxTackVMG[1]; // соотношение ВМГ большего к меньшему
                 int windDirCorrection = (int) angleDiffs * rateVMGs / 100; // насколько корректируем напр ветра
-                Log.i("racer_timer_wind_compare", " wind correction: rate = "+rateVMGs+", windDirCirrection = "+windDirCorrection+", wind dir = "+windDirection);
-                updatedWindDirection = windDirection + windDirCorrection; // увеличиваем направление ветра
+                Log.i("racer_timer_wind_compare", " max VMG right = "+maxTackVMG[0]+", max VMG left = "+maxTackVMG[1]);
+                Log.i("racer_timer_wind_compare", " wind correction2: rate = "+rateVMGs+", windDirCirrection = "+windDirCorrection+", wind dir = "+windDirection);
+                updatedWindDirection = tackVMGsBearings[1] + windDirCorrection; // увеличиваем направление ветра
             }
-            readyToNextTack();
 
-            // обрабатываем изменение ветра
+            // обрабатываем изменение ветра если оно есть
             if (updatedWindDirection != windDirection) { // если есть значительные изменения направления ветра
                 Log.i("racer_timer_wind_compare", " wind dir is changed. New = "+updatedWindDirection+", old = "+windDirection);
                 Log.i("racer_timer_wind_compare", " max VMG right = "+maxTackVMG[0]+", bearing = "+tackVMGsBearings[0]+". left = "+maxTackVMG[1]+", bearing = "+tackVMGsBearings[1]);
-                int middleVMG = (int) ( (maxTackVMG[0] + maxTackVMG[1]) / 2 ); // находим среднее ВМГ
-                //maxTackVMG[0] = middleVMG; // оба ВМГ = среднее
-                //maxTackVMG[1] = middleVMG;
+                readyToNextTack();
                 windDirection = updatedWindDirection; // обновляем текущее значение ветра
                 windChangedHerald.onWindDirectionChanged(windDirection); // отправляем сообщение с новым значением
             }
@@ -116,5 +117,9 @@ public class WindByCompare {
     }
 }
 
+// TODO: - Как будет считаться ветер в случае если он не находится между двумя галсами? (пока косячно)
+//       - диалоговое меню с настройкой исходного направления ветра
+//       - меню с вариантами выбора методов расчета ветра
+//       - запуск расчета ветра вручную либо во время гонки (после окончания таймера)
 
 

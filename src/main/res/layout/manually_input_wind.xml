@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/input_wind_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter new wind direction"
+        />
+
+    <EditText
+        android:id="@+id/edit_wind"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="new wind direction, deg."
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        tools:ignore="InvalidId" >
+        <requestFocus/>
+    </EditText>
+
+</LinearLayout>

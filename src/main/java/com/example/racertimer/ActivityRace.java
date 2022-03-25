@@ -207,7 +207,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     public void onBackPressed() { // в случае нажатия кнопки назад диалег по переходу в главное меню
         AlertDialog.Builder confurmingRaceEnd = new AlertDialog.Builder(this); // строитель диалога
         confurmingRaceEnd.setMessage("End the race?")
-                .setCancelable(false) // не отменяемый (без крестика вверху)
+                .setCancelable(false) // не отменяемый (при нажатии вне поля диалога не закрывается)
                 // назначаем кнопки взаимодействия
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
