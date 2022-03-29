@@ -1,7 +1,5 @@
 package com.example.racertimer;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -74,31 +72,18 @@ public class SailingToolsFragment extends Fragment {
         Log.i("racer_timer_tools_fragment", " fragment view was created ");
         viewIsCreated = true; // разрешаем изменение вьюшек
 
+        /** установка направления ветра вручную нажатием на поле "ветер" */
+
         windTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder setWindDialogBuilder = new AlertDialog.Builder(getActivity()); // строитель диалога
-                setWindDialogBuilder.setView(windDialogView);
-                setWindDialogBuilder
-                //setWindDialogBuilder.setMessage("Enter approx. wind direction")
-                        .setCancelable(true) // отменяемый (при нажатии вне поля диалога закрывается)
-                        // назначаем кнопки взаимодействия
-                        .setPositiveButton("set", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                //stopRace();
-                                //finish(); // закрываем эту активити
-                            }
-                        })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.cancel();
-                            }
-                        });
-                AlertDialog alertDialog = setWindDialogBuilder.create(); // создание диалога
-                alertDialog.setTitle("Set wind direction"); // заголовок
-                alertDialog.show(); // отображение диалога
+                try {
+                    ActivityRace activityRace = (ActivityRace) getActivity();
+                    activityRace.manuallyWindManager();
+                    Log.i("racer_timer_tools_fragment", " windManager in fragment pressed ");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         return view;

@@ -33,6 +33,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
+import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.multimedia.Voiceover;
 
 public class ActivityRace extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
@@ -227,6 +228,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         alertDialog.show(); // отображение диалога
     }
 
+//    private void onWindDirectionChanged (int updatedWindDirection) {
+
+//    }
+
     private void stopRace() { // остановка гонки
         super.onBackPressed();
     }
@@ -238,8 +243,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (deltaCourse < -180) deltaCourse = 360 + deltaCourse;
 
         bearing = (int) (bearing + (deltaCourse * 0.75)) ; // усреднение - приращиваем на 75% от разницы
-        if (bearing > 360) bearing = bearing - 360;
-        if (bearing < 0) bearing = bearing + 360;
+        bearing = CoursesCalculator.setAngleFrom0To360(bearing);
         Log.i("ActivityRace", "averageCourse = " + bearing);
         return bearing;
     }
@@ -362,9 +366,15 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
-    private void onWindDirectionChanged (int updatedWindDirection) {
+    public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
+    }
+
+    public void manuallyWindManager () { // установка направления ветра вручную
+        Log.i("racer_timer_activity_race", " starting manually setting wind  ");
+        ManuallyWind manuallyWind = new ManuallyWind(this, windDirection);
+        manuallyWind.showView();
     }
 
     /** обработка вновь полученных геолокации */
@@ -442,4 +452,16 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     }
 }
 
-// TODO: реализовать принудительный запрос истинного ветра при перезапуске приложения
+// TODO: убрать сикбар напавления ветра
+//       показываем направление ветра в диалоге
+//       сделать кастомный лайаут диалога с вьюшкой-компасом
+//       добавить кнопки ветер + ветер -, добавить сикбар
+//       добавить чек поле "запуск сравнения"
+
+// TODO: организовать управление нахождения ветра:
+//       если началась гонка, включаем запуск сравнения, если нет данных по ручному ветру -
+// исходим из того, что у нас правый бейдевинд
+//       либо запускаем если выбран чек поле "запуск сравнения"
+
+// TODO: сделать главное меню, где назначаем варианты определения ветра:
+//       установка только вручную; установка по сравнению; установка по статистике

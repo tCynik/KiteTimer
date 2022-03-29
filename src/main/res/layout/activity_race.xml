@@ -94,12 +94,7 @@
             android:layout_height="wrap_content"
             android:gravity="end"
             android:orientation="vertical">
-            <Button
-                android:id="@+id/deploy_tools"
-                android:layout_marginBottom="20dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="deploy tools"/>
+
             <Button
                 android:id="@+id/update_wind"
                 android:layout_width="wrap_content"

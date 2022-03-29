@@ -16,7 +16,6 @@
         android:id="@+id/edit_wind"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="new wind direction, deg."
         android:textAppearance="@style/TextAppearance.AppCompat.Button"
         tools:ignore="InvalidId" >
         <requestFocus/>
