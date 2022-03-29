@@ -40,7 +40,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
-    private SeekBar windSB, bearingSB, velocitySB;
+    private SeekBar bearingSB, velocitySB;
     private Button btnReset, btnUpdateWind;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch muteVmgSwitch;
@@ -79,7 +79,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
 ////////// вынеси определение вьюшек в отдельный метод
-        windSB = findViewById(R.id.seekBar_wind);
         bearingSB = findViewById(R.id.seekBar_bearing);
         velocitySB = findViewById(R.id.seekBar_velosity);
         btnReset = findViewById(R.id.but_reset);
@@ -133,7 +132,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             }
         });
 
-        windSB.setOnSeekBarChangeListener(this);
         bearingSB.setOnSeekBarChangeListener(this);
         velocitySB.setOnSeekBarChangeListener(this);
 
@@ -175,13 +173,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     /** бегунки тестирования вьюшки курсов и скоростей */
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (seekBar == windSB) {
-            windDirection = i;
-            windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
-            //onWindDirectionChanged( windDirection);
-            sailingToolsFragment.onWindDirectionChanged(windDirection);
-            Log.i("racer_timer", " seekbar: changed wind = "+windDirection);
-        }
         if (seekBar == bearingSB) {
             bearing = i;
             sailingToolsFragment.onBearingChanged(bearing);
@@ -452,10 +443,8 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     }
 }
 
-// TODO: убрать сикбар напавления ветра
-//       показываем направление ветра в диалоге
+// TODO: реализовать кнопки ветер + ветер -
 //       сделать кастомный лайаут диалога с вьюшкой-компасом
-//       добавить кнопки ветер + ветер -, добавить сикбар
 //       добавить чек поле "запуск сравнения"
 
 // TODO: организовать управление нахождения ветра:

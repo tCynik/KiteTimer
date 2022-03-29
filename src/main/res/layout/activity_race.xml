@@ -43,21 +43,6 @@
             android:layout_height="wrap_content"
             android:text="text"
             android:textSize="20sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="wind degree"/>
-
-        <SeekBar
-            android:id="@+id/seekBar_wind"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="720"
-            android:progress="0"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="20dp"/>
 
         <TextView
             android:layout_width="match_parent"
