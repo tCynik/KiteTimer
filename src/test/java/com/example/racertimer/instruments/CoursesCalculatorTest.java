@@ -16,22 +16,22 @@ public class CoursesCalculatorTest {
     @Test
     public void setAngleFrom0To360_60Correct () throws Exception {
         int angle = 60;
-        assertEquals(60, CoursesCalculator.setAngleFrom0To360(angle));
+        assertEquals(60, CoursesCalculator.convertAngleFrom0To360(angle));
     }
     @Test
     public void setAngleFrom0To360_Min120Correct () throws Exception {
         int angle = -120;
-        assertEquals(240, CoursesCalculator.setAngleFrom0To360(angle));
+        assertEquals(240, CoursesCalculator.convertAngleFrom0To360(angle));
     }
     @Test
     public void setAngleFrom0To360_510Correct () throws Exception {
         int angle = 510;
-        assertNotEquals(516 - 360, CoursesCalculator.setAngleFrom0To360(angle));
+        assertNotEquals(516 - 360, CoursesCalculator.convertAngleFrom0To360(angle));
     }
     @Test
     public void setAngleFrom0To360_510Incorrect () throws Exception {
         int angle = 510;
-        assertNotEquals(120, CoursesCalculator.setAngleFrom0To360(angle));
+        assertNotEquals(120, CoursesCalculator.convertAngleFrom0To360(angle));
     }
 
     /** Разница курсов между направлением ветра и направлением движения*/

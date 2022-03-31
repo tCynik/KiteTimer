@@ -15,14 +15,14 @@ import com.example.racertimer.ActivityRace;
 import com.example.racertimer.R;
 
 /** класс ручного ввода направления ветра через диалоговое окно */
-public class ManuallyWind implements SeekBar.OnSeekBarChangeListener{
+public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
     Context context;
     private int windDirection;
     private LayoutInflater windDialogLayoutInflater;
     private View windDialogView; // наш лайаут
 
     private EditText inputText; // поле ввода
-    private SeekBar seekbar_wind; // бар настройки ветра
+    private SeekBar seekbarWind; // бар настройки ветра
     private Button buttonIncrease, buttonDecrease;
 
 
@@ -32,14 +32,39 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener{
         windDialogLayoutInflater = LayoutInflater.from(context);
         windDialogView = windDialogLayoutInflater.inflate(R.layout.manually_input_wind, null);
         inputText = windDialogView.findViewById(R.id.edit_wind);
-        seekbar_wind = windDialogView.findViewById(R.id.sb_direction);
+        seekbarWind = windDialogView.findViewById(R.id.sb_direction);
+        buttonIncrease = windDialogView.findViewById(R.id.increase_btn);
+        buttonDecrease = windDialogView.findViewById(R.id.decrease_btn);
+
+        seekbarWind.setProgress(windDirection); // устанавливаем бегунок на текущую позицию
     }
 
     public void showView () { // метод вывода вью для настройки направления ветра
         AlertDialog.Builder windDialogBuilder = new AlertDialog.Builder(context); // строитель диалога
         windDialogBuilder.setView(windDialogView);
         inputText.setHint(String.valueOf(windDirection));
-        seekbar_wind.setOnSeekBarChangeListener((SeekBar.OnSeekBarChangeListener) this);
+        seekbarWind.setOnSeekBarChangeListener((SeekBar.OnSeekBarChangeListener) this);
+
+        View.OnClickListener increaseButtonListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int updatedWindDirection = CoursesCalculator.convertAngleFrom0To360(windDirection + 1);
+                onWindChanged(updatedWindDirection);
+                seekbarWind.setProgress(updatedWindDirection);
+            }
+        };
+
+        View.OnClickListener decreaseButtonListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int updatedWindDirection = CoursesCalculator.convertAngleFrom0To360(windDirection - 1);
+                onWindChanged(updatedWindDirection);
+                seekbarWind.setProgress(updatedWindDirection);
+            }
+        };
+
+        buttonIncrease.setOnClickListener(increaseButtonListener);
+        buttonDecrease.setOnClickListener(decreaseButtonListener);
 
         windDialogBuilder
                 .setCancelable(true) // отменяемый (при нажатии вне поля диалога закрывается)
@@ -60,8 +85,6 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener{
                             ActivityRace activityRace = (ActivityRace) context;
                             activityRace.onWindDirectionChanged(windDirection);
                         }
-                        //stopRace();
-                        //finish(); // закрываем эту активити
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -82,7 +105,7 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener{
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (seekBar == seekbar_wind) {
+        if (seekBar == seekbarWind) {
             Log.i("racer_timer_tools_fragment", " seekbar wind = " + i );
             onWindChanged(i);
         }
@@ -98,3 +121,5 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener{
 
     }
 }
+
+// TODO: для вылизывания: сделать синхронизацию прогрессбара при изменении значения в inputText вводом

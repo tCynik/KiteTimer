@@ -144,7 +144,7 @@ public class WindByStatistics {
         Log.i(PROJECT_LOG_TAG, "first symmetrical dir = "+ symmetryDirection+", bearing = "+ bearing + ", wind = " + windDirection);
 
         // приводим направление к диапазону от 0 до 360 для подсчета сектора в пределах массива
-        symmetryDirection = CoursesCalculator.setAngleFrom0To360(symmetryDirection);
+        symmetryDirection = CoursesCalculator.convertAngleFrom0To360(symmetryDirection);
 
         sectorSymmetry = calculateNumberOfSector(symmetryDirection); // высчитываем симметричный сектор
         Log.i(PROJECT_LOG_TAG, "wind = "+ windDirection+", bearing = "+ bearing+", symmetry direction =  " + symmetryDirection + ", sector = "+ sectorSymmetry);

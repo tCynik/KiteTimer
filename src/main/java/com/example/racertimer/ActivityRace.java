@@ -234,7 +234,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (deltaCourse < -180) deltaCourse = 360 + deltaCourse;
 
         bearing = (int) (bearing + (deltaCourse * 0.75)) ; // усреднение - приращиваем на 75% от разницы
-        bearing = CoursesCalculator.setAngleFrom0To360(bearing);
+        bearing = CoursesCalculator.convertAngleFrom0To360(bearing);
         Log.i("ActivityRace", "averageCourse = " + bearing);
         return bearing;
     }
@@ -442,10 +442,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         sailingToolsFragment.muteChangedStatus(b);
     }
 }
-
-// TODO: реализовать кнопки ветер + ветер -
-//       сделать кастомный лайаут диалога с вьюшкой-компасом
-//       добавить чек поле "запуск сравнения"
 
 // TODO: организовать управление нахождения ветра:
 //       если началась гонка, включаем запуск сравнения, если нет данных по ручному ветру -

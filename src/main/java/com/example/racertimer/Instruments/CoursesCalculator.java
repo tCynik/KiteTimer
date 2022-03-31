@@ -7,7 +7,7 @@ package com.example.racertimer.Instruments;
 public class CoursesCalculator {
 
     /** приведение заданного угла к интервалу от 0 до 359 (360 = 0) */
-    public static int setAngleFrom0To360 (int angle) {
+    public static int convertAngleFrom0To360(int angle) {
         int resultAngle = angle;
         if (angle < 0) resultAngle = angle + 360;
         if (angle >= 360) resultAngle = angle - 360;
@@ -71,7 +71,7 @@ public class CoursesCalculator {
         // от бакштага к бейдевинду увеличение; правый галс отрицательный, левый галс положительный
         int symmetryCourse;
         symmetryCourse = windDirection - windCourseAngle;
-        symmetryCourse = setAngleFrom0To360(symmetryCourse); // приводим в диапазон от 0 до 360
+        symmetryCourse = convertAngleFrom0To360(symmetryCourse); // приводим в диапазон от 0 до 360
         return symmetryCourse;
     }
 
