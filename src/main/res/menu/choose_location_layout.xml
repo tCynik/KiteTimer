@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/current"
+        android:title="current location by GPS"/>
+
+    <item android:id="@+id/location_krsk"
+        android:title="Krasnoyarsk"/>
+
+    <item android:id="@+id/location_shumiha"
+        android:title="Shumiha"/>
+
+    <item android:id="@+id/location_obskoe"
+        android:title="Obskoe sea"/>
+
+</menu>

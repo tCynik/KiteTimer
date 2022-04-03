@@ -18,6 +18,8 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -26,6 +28,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
@@ -41,7 +44,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
     private SeekBar bearingSB, velocitySB;
-    private Button btnReset, btnUpdateWind;
+    private Button btnReset, btnUpdateWind, btnMenu;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch muteVmgSwitch;
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
@@ -63,6 +66,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     private double latitude = 0;
     private double longitude = 0; // координаты для получения прогноза
+    private Location location; // текущее положение
 
     private Intent intentLocationService; // интент для создания сервиса геолокации
     private BroadcastReceiver locationBroadcastReceiver;
@@ -84,8 +88,9 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         btnReset = findViewById(R.id.but_reset);
         muteVmgSwitch = findViewById(R.id.mute_vmg);
         btnUpdateWind = findViewById(R.id.update_wind);
+        btnMenu = findViewById(R.id.btn_menu);
 
-        // TODO: нужно генерировать линии программно по заданным координатам.
+        // TODO: нужно генерировать линии best VMG программно по заданным координатам.
 
         windDirection = 202;
 
@@ -110,6 +115,14 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         muteVmgSwitch.setOnCheckedChangeListener(this);
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
+        btnMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i("racer_timer", "btn menu1 was pressed ");
+
+                openOptionsMenu();
+            }
+        });
 
         btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -170,6 +183,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         fragmentTransaction.commit();
     }
 
+    public Location getCurrentLocation () {
+        return location;
+    }
+
     /** бегунки тестирования вьюшки курсов и скоростей */
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -219,9 +236,19 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         alertDialog.show(); // отображение диалога
     }
 
-//    private void onWindDirectionChanged (int updatedWindDirection) {
+    /** блок меню */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.i("racer_timer", "starting menu1... ");
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+        //return super.onCreateOptionsMenu(menu1);
+    }
 
-//    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
 
     private void stopRace() { // остановка гонки
         super.onBackPressed();
@@ -340,7 +367,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                 if (intent.hasExtra("location")) { // если в сообщении есть геолокация
                     Location location = (Location) intent.getExtras().get("location");
                     processorChangedLocation(location); // отдаем точку на обработку в процессор
-                    Log.i("ActivityRace", "getted location broadcast from locationService, " +
+                    Log.i("racer_timer", "getted location broadcast from locationService, " +
                             "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
                 }
                 if (intent.hasExtra("windDirection")) {
@@ -348,7 +375,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                     if (windDirectionFromExtra != 10000) {
                         onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
                         windDirectionGettedFromService = true;
-                        Log.i("ActivityRace", "getted wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+                        Log.i("racer_timer", "getted wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
                     }
                 }
             }
@@ -373,6 +400,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " Activity race get new location ");
         double tempVelocity;
         if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
+            this.location = location;
             latitude = location.getLatitude();
             longitude = location.getLongitude();
             forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
@@ -386,46 +414,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
     }
-
-//    void calculateViewsPosition () {
-//        arrowDirectionIV.setVisibility(View.VISIBLE);
-//        arrowVelocityIV.setVisibility(View.VISIBLE);
-//        double radiusSpeedMin = (frameVelocityIV.getWidth() / 2) - frameVelocityIV.getWidth()/4.3; // радиус при нулевой скорости
-//        int radiusMaxMinDiference = arrowDirectionIV.getHeight(); // максимальная разница между максимальными и минимальным значениями
-//        int priceGradeSpeed;
-//        priceGradeSpeed = radiusMaxMinDiference / velocityMax; // цена деления: сколько ед сикбара в ед радиуса
-//        deltaBearing = bearing - windDirection;
-//        bearing = CoursesCalculator.setAngleFrom0To360(bearing);
-//        courseToWind = CoursesCalculator.calcWindCourseAngle(windDirection, bearing);
-//        windDirection = CoursesCalculator.setAngleFrom0To360(windDirection);
-//        courseToWindTV.setText(String.valueOf(courseToWind));
-//
-//        // поворот рамы скорости
-//        frameVelocityIV.setRotation( deltaBearing + 180);
-//
-//        // разворот стрелки скорости
-//        arrowVelocityIV.setRotation( deltaBearing + 225);
-//
-//        // положение стрелки скорости
-////        centerScreenX = centerScreenSpace.getTop(); // добываем координаты центральной точки.
-////        centerScreenX = centerScreenSpace.getLeft();
-//        centerScreenX = windFrameIV.getWidth()/2;
-//        centerScreenY = windFrameIV.getHeight()/2;
-//        double courseForWindRadians = Math.toRadians(90 + deltaBearing);
-//        double radiusVelocityArrow = radiusSpeedMin + velocity * priceGradeSpeed;
-//        if (radiusVelocityArrow > (radiusSpeedMin + radiusMaxMinDiference)) radiusVelocityArrow = radiusSpeedMin + radiusMaxMinDiference;
-//        arrowVelocityIV.setX((float) (centerScreenX - arrowVelocityIV.getWidth()/2 + radiusVelocityArrow * Math.cos(courseForWindRadians)));
-//        arrowVelocityIV.setY((float) (centerScreenY - arrowVelocityIV.getHeight()/2 + radiusVelocityArrow * Math.sin(courseForWindRadians)));
-//        velocityMadeGood = (int) (Math.sin(Math.toRadians(90 - Math.abs(deltaBearing))) * velocity);
-//        velocityMadeGoodTV.setText(String.valueOf(velocityMadeGood));
-//
-//        // разворот стрелки направления
-//        arrowDirectionIV.setRotation( deltaBearing);
-//        // положение стрелки направления
-//        courseForWindRadians = Math.toRadians(90 + deltaBearing);
-//        arrowDirectionIV.setX((float) (centerScreenX - arrowDirectionIV.getWidth()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.cos(courseForWindRadians)));
-//        arrowDirectionIV.setY((float) (centerScreenY - arrowDirectionIV.getHeight()/2 + ( radiusSpeedMin + arrowDirectionIV.getHeight()/2 + 40) * Math.sin(courseForWindRadians)));
-//    }
 
     @Override
     public void finishTheTimer() {
@@ -441,12 +429,15 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
         sailingToolsFragment.muteChangedStatus(b);
     }
+
 }
+
+
+// TODO: сделать главное меню, где назначаем варианты определения ветра:
+//       установка только вручную; установка по сравнению; установка по статистике
 
 // TODO: организовать управление нахождения ветра:
 //       если началась гонка, включаем запуск сравнения, если нет данных по ручному ветру -
 // исходим из того, что у нас правый бейдевинд
 //       либо запускаем если выбран чек поле "запуск сравнения"
 
-// TODO: сделать главное меню, где назначаем варианты определения ветра:
-//       установка только вручную; установка по сравнению; установка по статистике

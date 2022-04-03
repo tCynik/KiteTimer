@@ -11,9 +11,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 // для простоты обработки одинаковых данных табличные TextView обьявляем как массивы
-public class ActivityForecast extends AppCompatActivity {
+public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     private final static String PROJECT_LOG_TAG = "racer_timer, ActivityForecast";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
     private Context context;
@@ -129,8 +131,34 @@ public class ActivityForecast extends AppCompatActivity {
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
+    /** выбор точки, для которой смотрим прогноз */
+    public void selectLocation(View view) {
+        PopupMenu popup = new PopupMenu(context, view);
+        popup.setOnMenuItemClickListener(this);
+        popup.inflate(R.menu.choose_location_layout);
+        popup.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.current:
+                Toast.makeText(this, "selected current location", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.location_krsk:
+                Toast.makeText(this, "selected Krasnoyarsk", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.location_shumiha:
+                Toast.makeText(this, "selected Shumiha", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.location_obskoe:
+                Toast.makeText(this, "selected Obskoe sea", Toast.LENGTH_SHORT).show();
+                return true;
+            default: return false;
+        }
+    }
+
     private void onJSONUpdated (JSONObject jsonObject) throws JSONException { // обработка полученного обьекта
-////////////////// вот сюда дописать обработку Json со всеми вытекающими.
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", Json is updated" );
         int numberForecastPeriods = 40; // переменная о количестве периодов прогноза (8 раз в сут * 5 сут)
         long time;
@@ -178,7 +206,7 @@ public class ActivityForecast extends AppCompatActivity {
             windGustTV.setText(String.valueOf(windGust));
 
             layoutToBeFulled.addView(item);
-
         }
     }
+
 }

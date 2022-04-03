@@ -2,6 +2,7 @@ package com.example.racertimer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,7 +21,7 @@ import androidx.fragment.app.Fragment;
  * create an instance of this fragment.
  */
 public class ForecastFragment extends Fragment {
-    private final static String PROJECT_LOG_TAG = "racer_timer";
+    private final static String PROJECT_LOG_TAG = "racer_timer_forecast_fragment";
     private Button btnNewRace;
     private Button btnForecastRunActivity;
 
@@ -104,7 +105,14 @@ public class ForecastFragment extends Fragment {
         btnForecastRunActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (latitude == 0 & longitude ==0) {
+                if (latitude == 0 & longitude ==0) { // если нет координат, запрашиваем их
+                    ActivityRace activityRace = (ActivityRace) getActivity();
+                    Location location = activityRace.getCurrentLocation();
+                    longitude = location.getLongitude();
+                    latitude = location.getLatitude();
+                }
+
+                if (latitude == 0 & longitude ==0) { // проверяем, получили ли координаты
                     Toast.makeText(getActivity(), "No location data!", Toast.LENGTH_LONG).show();
                 } else {
                     Intent intent = new Intent(getActivity(), ActivityForecast.class);
@@ -131,9 +139,10 @@ public class ForecastFragment extends Fragment {
     }
 
     public void setCoordinates (double latitude, double longitude) {
-        // TODO: надо разбираться, в forecastActivity приходят нулевые координаты
         Log.i(PROJECT_LOG_TAG, "Forecast fragment get new coordinates");
         this.latitude = latitude;
         this.longitude = longitude;
     }
 }
+
+// TODO: сделать сериализованную позицию (Крск), и каждый раз подгружать ее?
