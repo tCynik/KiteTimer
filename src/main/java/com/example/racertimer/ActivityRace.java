@@ -66,7 +66,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     private double latitude = 0;
     private double longitude = 0; // координаты для получения прогноза
-    private Location location; // текущее положение
+    private Location location = null; // текущее положение
 
     private Intent intentLocationService; // интент для создания сервиса геолокации
     private BroadcastReceiver locationBroadcastReceiver;
@@ -104,8 +104,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
         /** блок работы с геоданными */
         createLocationService();
-        initBroadcastListener(); // запускаем слушатель новых геоданных
-        bindToLocationService();
 
         voiceover = new Voiceover(context);
 
@@ -154,6 +152,11 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     @Override
     protected void onResume() { // при восстановлении окна автоматически запрашиваем данные по ветру
         super.onResume();
+        if (location == null) {
+            initBroadcastListener(); // запускаем слушатель новых геоданных
+            bindToLocationService();
+        }
+
         if (locationService != null) locationService.updateWindDirection();
     }
 
@@ -403,8 +406,16 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             this.location = location;
             latitude = location.getLatitude();
             longitude = location.getLongitude();
+
+            Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
             forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
         }
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
+        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
+
+
         if (location.hasSpeed()) { // если есть скорость
             tempVelocity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelocity;

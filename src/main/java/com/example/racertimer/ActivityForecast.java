@@ -23,12 +23,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.racertimer.Instruments.ForecastManager;
+import com.example.racertimer.Instruments.geoLocation.LocationForecast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 // для простоты обработки одинаковых данных табличные TextView обьявляем как массивы
@@ -46,6 +48,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
     private BroadcastReceiver locationBroadcastReceiver;
     private IntentFilter locationIntentFilter;
     private Location location = null;
+    private ArrayList<LocationForecast> listLocationForecast;
     private double latitude, longitude;
     private boolean flagForecastIsAlreadyUpdated = false;
 
@@ -92,6 +95,17 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
                 }
             });
         }
+        // загружаем из сериализации файл locations_forecast.bin
+
+        // TODO: здесь и далее - создание листа точек для геолокации. Псоле сериализации - удалить!
+        LocationForecast krasnoyarsk = new LocationForecast("Krasnoyarsk", 56.02698, 92.94564833333334);
+        LocationForecast shumiha = new LocationForecast("Shumiha", 55.91477, 92.27641999999999);
+        LocationForecast obskoe = new LocationForecast("Obskoe Sea", 54.82607500000001, 83.02941833333334);
+        listLocationForecast.add(krasnoyarsk);
+        listLocationForecast.add(shumiha);
+        listLocationForecast.add(obskoe);
+        // дальше сериализуем наш лист в файл locations_forecast.bin
+
     }
 
     private void createHandler() {
