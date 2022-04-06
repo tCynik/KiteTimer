@@ -407,13 +407,13 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             latitude = location.getLatitude();
             longitude = location.getLongitude();
 
-            Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
-            forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
+//            Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
+//            forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
         }
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
-
-        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
+//        latitude = location.getLatitude();
+//        longitude = location.getLongitude();
+//
+//        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 
 
         if (location.hasSpeed()) { // если есть скорость

@@ -23,14 +23,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.racertimer.Instruments.ForecastManager;
+import com.example.racertimer.Instruments.geoLocation.ListForecastLocations;
 import com.example.racertimer.Instruments.geoLocation.LocationForecast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 // для простоты обработки одинаковых данных табличные TextView обьявляем как массивы
@@ -48,7 +54,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
     private BroadcastReceiver locationBroadcastReceiver;
     private IntentFilter locationIntentFilter;
     private Location location = null;
-    private ArrayList<LocationForecast> listLocationForecast;
+    private ListForecastLocations listLocationForecast; // сериализуемый список наследованный от ArrayList<>
     private double latitude, longitude;
     private boolean flagForecastIsAlreadyUpdated = false;
 
@@ -98,15 +104,62 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         // загружаем из сериализации файл locations_forecast.bin
 
         // TODO: здесь и далее - создание листа точек для геолокации. Псоле сериализации - удалить!
+        listLocationForecast = new ListForecastLocations();
+
         LocationForecast krasnoyarsk = new LocationForecast("Krasnoyarsk", 56.02698, 92.94564833333334);
         LocationForecast shumiha = new LocationForecast("Shumiha", 55.91477, 92.27641999999999);
         LocationForecast obskoe = new LocationForecast("Obskoe Sea", 54.82607500000001, 83.02941833333334);
         listLocationForecast.add(krasnoyarsk);
         listLocationForecast.add(shumiha);
         listLocationForecast.add(obskoe);
-        // дальше сериализуем наш лист в файл locations_forecast.bin
+        listNames(listLocationForecast);
+
+        uploadListForecastLocations(listLocationForecast); // записываем список локаций в бинарный файл
+        listLocationForecast.clear();
+        listLocationForecast = downloadListForecastLocations(); // загружаем список локаций из бинарного файла
 
     }
+
+    /** сериализация списка локаций для прогноза */
+    private void uploadListForecastLocations (ListForecastLocations listLocationForecast) {
+        Log.i("racer_timer, loc list serialization", " started uploading ");
+        try { // записываем обьект список локаций в файл
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream( new FileOutputStream("locations_list.bin"));
+            Log.i("racer_timer, loc list serialization", " uploading stream is launched ");
+            objectOutputStream.writeObject(listLocationForecast);
+            Log.i("racer_timer, loc list serialization", " object was writed ");
+            objectOutputStream.close();
+            Log.i("racer_timer, loc list serialization", " location saved ");
+        } catch (IOException e) {
+            Log.i("racer_timer, loc list serialization", " location was not saved = "+e);
+            e.printStackTrace();
+        }
+    }
+
+    private ListForecastLocations downloadListForecastLocations () {
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("locations_list.bin"));
+            listLocationForecast = (ListForecastLocations) objectInputStream.readObject();
+            objectInputStream.close();
+            Log.i("racer_timer, loc list serialization", " location downloaded ");
+        } catch (FileNotFoundException e) {
+            Toast.makeText(this, "No saved locations", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Toast.makeText(this, "Error while reading locations list", Toast.LENGTH_LONG).show();
+        } catch (ClassNotFoundException e) {
+            Toast.makeText(this, "Saved locations list read error", Toast.LENGTH_LONG).show();
+        }
+        return listLocationForecast;
+    }
+    
+    private void listNames (ListForecastLocations arrayList) {
+        for (LocationForecast locationForecst: arrayList
+             ) {
+            String name = locationForecst.getName();
+            Log.i("racer_timer, loc list serialization", " the name of location is "+name);
+        }
+    }
+
 
     private void createHandler() {
         handler = new Handler(){

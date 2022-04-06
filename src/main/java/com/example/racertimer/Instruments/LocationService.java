@@ -117,7 +117,7 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " the service eas destroyed ");
+        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " the service was destroyed ");
     }
 
     public boolean checkPermission() { // проверяем наличие разрешения на геоданные
