@@ -47,7 +47,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
 
     private TextView timeTV, tempTV, windDirTV, windSpeedTV, windGustTV;
 
-    private Button updateButton;
+    private Button updateButton, selectLocationButton;
 
     private ForecastManager forecastManager;
 
@@ -58,6 +58,8 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
     private double latitude, longitude;
     private boolean flagForecastIsAlreadyUpdated = false;
 
+    private LinearLayout layoutToBeFilled;
+
     private Handler handler;
 
     @Override
@@ -65,6 +67,10 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
         context = this;
+
+        // строчка для последующего заполнения при получении прогноза
+        layoutToBeFilled = (LinearLayout) findViewById(R.id.listView); // пустая линия, в которой будем надувать таблицу
+        selectLocationButton = findViewById(R.id.btn_select_location);
 
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", ForecastActivity is working " );
 
@@ -101,8 +107,9 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
                 }
             });
         }
-        // загружаем из сериализации файл locations_forecast.bin из папки saved
+        fillForecastLine("day time", "temp", "wing", "gust", "w.dir");
 
+        // загружаем из сериализации файл locations_forecast.bin из папки saved
 // TODO: здесь и далее - создание листа точек для геолокации. Псоле сериализации - удалить!
 //        listLocationForecast = new ListForecastLocations();
 //        LocationForecast krasnoyarsk = new LocationForecast("Krasnoyarsk", 56.02698, 92.94564833333334);
@@ -229,28 +236,19 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
             for (int i = 0; i < listLocationForecast.size(); i++) { // перебираем все варианты и сравниваем
                 if (i == menuItem.getItemId()) {
                     Toast.makeText(this, "selected current location is " + listLocationForecast.get(i).getName(), Toast.LENGTH_SHORT).show();
+                    layoutToBeFilled.removeAllViewsInLayout();
+                    selectLocationButton.setText(listLocationForecast.get(i).getName());
+                    latitude = listLocationForecast.get(i).getLatitude();
+                    longitude = listLocationForecast.get(i).getLongitude();
+                    forecastManager.updateForecast(latitude, longitude);
                     flagReturn = true;
                 }
             }
         }
         return flagReturn;
-
-//        switch (menuItem.getItemId()) {
-//
-//            case R.id.current:
-//                Toast.makeText(this, "selected current location", Toast.LENGTH_SHORT).show();
-//                return true;
-//            case R.id.location_krsk:
-//                Toast.makeText(this, "selected Krasnoyarsk", Toast.LENGTH_SHORT).show();
-//                return true;
-//            case R.id.location_shumiha:
-//                Toast.makeText(this, "selected Shumiha", Toast.LENGTH_SHORT).show();
-//                return true;
-//            case R.id.location_obskoe:
-//                Toast.makeText(this, "selected Obskoe sea", Toast.LENGTH_SHORT).show();
-//                return true;
-//            default: return false;
-//        }
+        // TODO: сделать реализацию вызова прогноза для выбранного варианта
+        // показывать прогноз только после выбора одного из вариантов
+        // на будущее: длинный тап - создание либо удаление локации из памяти. Создание для текущей позиции
     }
 
     private void onJSONUpdated (JSONObject jsonObject) throws JSONException { // обработка полученного обьекта
@@ -266,8 +264,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         // сначала вытаскиваем массив прогноза из Json
         JSONArray jsonArray = jsonObject.getJSONArray("list");
 
-        LinearLayout layoutToBeFulled = (LinearLayout) findViewById(R.id.listView); // пустая линия, в которой будем надувать таблицу
-        LayoutInflater layoutInflater = getLayoutInflater();
+//        LayoutInflater layoutInflater = getLayoutInflater();
 
         SimpleDateFormat timeFormat = new SimpleDateFormat("d MMM HH:mm"); // определяем формат отображения времени
 
@@ -280,28 +277,44 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
             windDirection = jsonArray.getJSONObject(i).getJSONObject("wind").getInt("deg");
             windSpeed = jsonArray.getJSONObject(i).getJSONObject("wind").getInt("speed");
             windGust = jsonArray.getJSONObject(i).getJSONObject("wind").getDouble("gust");
-            // заполняем arrayList, создавая конструктором новый экземпляр с полученными полями
 
-            // из нашго XML файла готовим VIEW, используем его как образец.
-            View item = layoutInflater.inflate(R.layout.forecast_string, layoutToBeFulled, false);
+            // преобразуем все поля в String
+            String timeString = timeFormat.format(new Date (time));
+            String tempString = String.valueOf(temperature);
+            String windDirString = String.valueOf(windDirection);
+            String windSpeedString = String.valueOf(windSpeed);
+            String windGustString = String.valueOf(windGust);
 
-            timeTV = (TextView) item.findViewById(R.id.forecast_string_time);
-            timeTV.setText(timeFormat.format(new Date (time)));
+            fillForecastLine(timeString, tempString, windSpeedString, windGustString, windDirString);
 
-            tempTV = (TextView) item.findViewById(R.id.forecast_string_temp);
-            tempTV.setText(String.valueOf(temperature));
-
-            windDirTV = (TextView) item.findViewById(R.id.forecast_string_dir);
-            windDirTV.setText(String.valueOf(windDirection));
-
-            windSpeedTV = (TextView) item.findViewById(R.id.forecast_string_wind);
-            windSpeedTV.setText(String.valueOf(windSpeed));
-
-            windGustTV = (TextView) item.findViewById(R.id.forecast_string_gust);
-            windGustTV.setText(String.valueOf(windGust));
-
-            layoutToBeFulled.addView(item);
         }
     }
 
+    private void fillForecastLine (String time, String temp, String windSpeed, String windGust, String windDir) {
+        LayoutInflater layoutInflater = getLayoutInflater();
+
+        // из нашго XML файла готовим VIEW, используем его как образец.
+        View item = layoutInflater.inflate(R.layout.forecast_string, layoutToBeFilled, false);
+
+        // заполняем arrayList, создавая конструктором новый экземпляр с полученными полями
+        timeTV = (TextView) item.findViewById(R.id.forecast_string_time);
+        timeTV.setText(time);
+
+        tempTV = (TextView) item.findViewById(R.id.forecast_string_temp);
+        tempTV.setText(temp);
+
+        windSpeedTV = (TextView) item.findViewById(R.id.forecast_string_wind);
+        windSpeedTV.setText(windSpeed);
+
+        windGustTV = (TextView) item.findViewById(R.id.forecast_string_gust);
+        windGustTV.setText(windGust);
+
+        windDirTV = (TextView) item.findViewById(R.id.forecast_string_dir);
+        windDirTV.setText(windDir);
+
+        layoutToBeFilled.addView(item);
+    }
+// TODO: выделить цветом ночные часы
+//  реализовать отработку поворота экрана
 }
+
