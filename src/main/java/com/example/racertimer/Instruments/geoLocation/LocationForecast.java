@@ -1,8 +1,10 @@
 package com.example.racertimer.Instruments.geoLocation;
 
+import java.io.Serializable;
+
 /** Класс геоточки для хранения сохраненных локаций прогноза */
 
-public class LocationForecast {
+public class LocationForecast implements Serializable {
     private String name;
     private double latitude, longitude;
 

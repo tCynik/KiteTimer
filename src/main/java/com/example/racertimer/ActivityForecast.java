@@ -68,7 +68,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
 
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", ForecastActivity is working " );
 
-        // создаем хендер для получения Jsonа и направления его на исполнение при получении ответа
+        // создаем хенлдер для получения Jsonа и направления его на исполнение при получении ответа
         createHandler(); // для простоты выненсен в отдельный метод
         // экземпляр класса, создающего и отправляющего запрос
         forecastManager = new ForecastManager(handler); // присваиваем экземпляру forecastManager'а наш хендлер
@@ -101,22 +101,22 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
                 }
             });
         }
-        // загружаем из сериализации файл locations_forecast.bin
+        // загружаем из сериализации файл locations_forecast.bin из папки saved
 
-        // TODO: здесь и далее - создание листа точек для геолокации. Псоле сериализации - удалить!
-        listLocationForecast = new ListForecastLocations();
+// TODO: здесь и далее - создание листа точек для геолокации. Псоле сериализации - удалить!
+//        listLocationForecast = new ListForecastLocations();
+//        LocationForecast krasnoyarsk = new LocationForecast("Krasnoyarsk", 56.02698, 92.94564833333334);
+//        LocationForecast shumiha = new LocationForecast("Shumiha", 55.91477, 92.27641999999999);
+//        LocationForecast obskoe = new LocationForecast("Obskoe Sea", 54.82607500000001, 83.02941833333334);
+//        listLocationForecast.add(krasnoyarsk);
+//        listLocationForecast.add(shumiha);
+//        listLocationForecast.add(obskoe);
+//        listNames(listLocationForecast);
+//        uploadListForecastLocations(listLocationForecast); // записываем список локаций в бинарный файл
+//        listLocationForecast.clear();
 
-        LocationForecast krasnoyarsk = new LocationForecast("Krasnoyarsk", 56.02698, 92.94564833333334);
-        LocationForecast shumiha = new LocationForecast("Shumiha", 55.91477, 92.27641999999999);
-        LocationForecast obskoe = new LocationForecast("Obskoe Sea", 54.82607500000001, 83.02941833333334);
-        listLocationForecast.add(krasnoyarsk);
-        listLocationForecast.add(shumiha);
-        listLocationForecast.add(obskoe);
-        listNames(listLocationForecast);
-
-        uploadListForecastLocations(listLocationForecast); // записываем список локаций в бинарный файл
-        listLocationForecast.clear();
         listLocationForecast = downloadListForecastLocations(); // загружаем список локаций из бинарного файла
+//        listNames(listLocationForecast);
 
     }
 
@@ -124,11 +124,13 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
     private void uploadListForecastLocations (ListForecastLocations listLocationForecast) {
         Log.i("racer_timer, loc list serialization", " started uploading ");
         try { // записываем обьект список локаций в файл
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream( new FileOutputStream("locations_list.bin"));
+            FileOutputStream fileOutputStream = context.openFileOutput("saved.locations_list.bin", Context.MODE_PRIVATE);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream( fileOutputStream);
             Log.i("racer_timer, loc list serialization", " uploading stream is launched ");
             objectOutputStream.writeObject(listLocationForecast);
             Log.i("racer_timer, loc list serialization", " object was writed ");
             objectOutputStream.close();
+            fileOutputStream.close();
             Log.i("racer_timer, loc list serialization", " location saved ");
         } catch (IOException e) {
             Log.i("racer_timer, loc list serialization", " location was not saved = "+e);
@@ -138,9 +140,12 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
 
     private ListForecastLocations downloadListForecastLocations () {
         try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("locations_list.bin"));
+            FileInputStream fileInputStream = context.openFileInput("saved.locations_list.bin");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             listLocationForecast = (ListForecastLocations) objectInputStream.readObject();
             objectInputStream.close();
+            fileInputStream.close();
+
             Log.i("racer_timer, loc list serialization", " location downloaded ");
         } catch (FileNotFoundException e) {
             Toast.makeText(this, "No saved locations", Toast.LENGTH_LONG).show();
@@ -203,26 +208,49 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         PopupMenu popup = new PopupMenu(context, view);
         popup.setOnMenuItemClickListener(this);
         popup.inflate(R.menu.choose_location_layout);
+
+        // модуль инфлейтора для создания попап меню по загруженному содерданию
+        LayoutInflater layoutInflater = getLayoutInflater(); // создаем инфлейтор
+        for (int i = 0; i < listLocationForecast.size(); i++) { // перебираем все загруженные локации
+            LocationForecast locationForecast = listLocationForecast.get(i);
+            String name = locationForecast.getName();
+            popup.getMenu().add(0, i, 0, name); // добавлям пункт в меню: 0, id, 0, имя
+        }
         popup.show();
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.current:
-                Toast.makeText(this, "selected current location", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.location_krsk:
-                Toast.makeText(this, "selected Krasnoyarsk", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.location_shumiha:
-                Toast.makeText(this, "selected Shumiha", Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.location_obskoe:
-                Toast.makeText(this, "selected Obskoe sea", Toast.LENGTH_SHORT).show();
-                return true;
-            default: return false;
+        boolean flagReturn = false;
+        if (menuItem.getItemId() == R.id.current) { // если выбрана текущая локация
+            Toast.makeText(this, "selected current location is current", Toast.LENGTH_SHORT).show();
+            flagReturn = true;
+        } else { // если выбрана не текущая локация, а другая
+            for (int i = 0; i < listLocationForecast.size(); i++) { // перебираем все варианты и сравниваем
+                if (i == menuItem.getItemId()) {
+                    Toast.makeText(this, "selected current location is " + listLocationForecast.get(i).getName(), Toast.LENGTH_SHORT).show();
+                    flagReturn = true;
+                }
+            }
         }
+        return flagReturn;
+
+//        switch (menuItem.getItemId()) {
+//
+//            case R.id.current:
+//                Toast.makeText(this, "selected current location", Toast.LENGTH_SHORT).show();
+//                return true;
+//            case R.id.location_krsk:
+//                Toast.makeText(this, "selected Krasnoyarsk", Toast.LENGTH_SHORT).show();
+//                return true;
+//            case R.id.location_shumiha:
+//                Toast.makeText(this, "selected Shumiha", Toast.LENGTH_SHORT).show();
+//                return true;
+//            case R.id.location_obskoe:
+//                Toast.makeText(this, "selected Obskoe sea", Toast.LENGTH_SHORT).show();
+//                return true;
+//            default: return false;
+//        }
     }
 
     private void onJSONUpdated (JSONObject jsonObject) throws JSONException { // обработка полученного обьекта
@@ -238,7 +266,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         // сначала вытаскиваем массив прогноза из Json
         JSONArray jsonArray = jsonObject.getJSONArray("list");
 
-        LinearLayout layoutToBeFulled = (LinearLayout) findViewById(R.id.listView);
+        LinearLayout layoutToBeFulled = (LinearLayout) findViewById(R.id.listView); // пустая линия, в которой будем надувать таблицу
         LayoutInflater layoutInflater = getLayoutInflater();
 
         SimpleDateFormat timeFormat = new SimpleDateFormat("d MMM HH:mm"); // определяем формат отображения времени
