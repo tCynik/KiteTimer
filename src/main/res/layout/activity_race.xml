@@ -9,15 +9,24 @@
     android:gravity="center">
 
     <fragment
-        android:name="com.example.racertimer.ForecastFragment"
         android:id="@+id/fr_place_timer_forecast"
+        android:name="com.example.racertimer.ForecastFragment"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        app:layout_constraintWidth_percent="0.25"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/button_menu"
+        app:layout_constraintWidth_percent="0.25">
 
     </fragment>
+
+    <ImageButton
+        android:id="@+id/button_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_menu_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <!-- главное размещение UI элементов -->
     <FrameLayout
@@ -80,12 +89,6 @@
             android:gravity="end"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btn_menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="MENU"
-                android:layout_marginBottom="10dp"/>
             <Button
                 android:id="@+id/update_wind"
                 android:layout_width="wrap_content"

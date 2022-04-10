@@ -23,9 +23,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,12 +39,16 @@ import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.multimedia.Voiceover;
 
-public class ActivityRace extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface, TimerFragment.CloserTimerInterface { // добавить интерфейс
+public class ActivityRace extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener,
+        SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface,
+        TimerFragment.CloserTimerInterface {
+
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
     private SeekBar bearingSB, velocitySB;
-    private Button btnReset, btnUpdateWind, btnMenu;
+    private Button btnReset, btnUpdateWind;
+    private ImageButton btnMenu;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private Switch muteVmgSwitch;
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
@@ -52,12 +56,11 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private TimerFragment timerFragment = null;
     private ForecastFragment forecastFragment = null;
     private SailingToolsFragment sailingToolsFragment = null;
+    private MenuFragment menuFragment = null;
 
     private Voiceover voiceover;
 
     private int velocity, bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
-
-    private TextView textTime; // переменная времени в левом вехнем углу
 
     private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
     private int timerHour = 0; // переменная в часах
@@ -88,13 +91,11 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         btnReset = findViewById(R.id.but_reset);
         muteVmgSwitch = findViewById(R.id.mute_vmg);
         btnUpdateWind = findViewById(R.id.update_wind);
-        btnMenu = findViewById(R.id.btn_menu);
+        btnMenu = findViewById(R.id.button_menu);
 
         // TODO: нужно генерировать линии best VMG программно по заданным координатам.
 
         windDirection = 202;
-
-        textTime = findViewById(R.id.currentTime);
 
         context = this;
         forecastFragment = new ForecastFragment();
@@ -113,14 +114,14 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         muteVmgSwitch.setOnCheckedChangeListener(this);
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
-        btnMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i("racer_timer", "btn menu1 was pressed ");
-
-                openOptionsMenu();
-            }
-        });
+//        btnMenu.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Log.i("racer_timer", "btn menu1 was pressed ");
+//
+//                openOptionsMenu();
+//            }
+//        });
 
         btnReset.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,6 +141,13 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                     Log.i("racer_timer", "getted actual wind dir");
                     onWindDirectionChanged(wind);
                 }
+            }
+        });
+
+        btnMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deployMenuFragment();
             }
         });
 
@@ -183,6 +191,14 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_sailing_tools, sailingToolsFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void deployMenuFragment () { // выгрузка фрагмена меню
+        if (menuFragment == null) menuFragment = new MenuFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fr_place_timer_forecast, menuFragment);
         fragmentTransaction.commit();
     }
 
@@ -441,6 +457,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         sailingToolsFragment.muteChangedStatus(b);
     }
 
+//    @Override
+//    public void MenuOpenerInterface() {
+//        deployMenuFragment();
+//    }
 }
 
 

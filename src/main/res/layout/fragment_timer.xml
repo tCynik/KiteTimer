@@ -1,36 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@color/color_primary"
     tools:context=".TimerFragment">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="80sp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
         <Button
             android:id="@+id/set_5min"
             android:layout_width="10dp"
             android:layout_height="match_parent"
-            android:textSize="10sp"
             android:layout_weight="1"
-            android:text="5 min"/>
+            android:text="5 min"
+            android:textSize="10sp" />
+
         <Button
             android:id="@+id/set_3min"
             android:layout_width="10dp"
             android:layout_height="match_parent"
-            android:textSize="10sp"
             android:layout_weight="1"
-            android:text="3 min"/>
+            android:text="3 min"
+            android:textSize="10sp" />
 
     </LinearLayout>
     <LinearLayout
+        android:id="@+id/linear_2"
         android:layout_width="match_parent"
         android:layout_height="80sp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linearLayout">
         <Button
             android:id="@+id/set_2min"
             android:layout_width="10dp"
@@ -48,26 +57,26 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
     <Button
         android:id="@+id/cancel_race"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
         android:textSize="10sp"
-        android:text="Cancel race"/>
+        android:text="Cancel race"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/linear_2"
+        app:layout_constraintBottom_toTopOf="@id/timer_fragment_tv"/>
     <TextView
         android:id="@+id/timer_fragment_tv"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:textSize="60sp"
-        android:layout_marginBottom="20dp"
         android:textColor="@color/red"
-        android:text="00:00"/>
+        android:text="00:00"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

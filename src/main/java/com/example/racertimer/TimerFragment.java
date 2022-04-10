@@ -67,7 +67,7 @@ public class TimerFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
-            closerTimer = (CloserTimerInterface) context;
+            closerTimer = (CloserTimerInterface) context; // получаем интерфейс закрытия таймера
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " cast activity to interface is failed in TimerFragment");
         }
