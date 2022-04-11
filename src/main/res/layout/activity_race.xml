@@ -8,25 +8,7 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <fragment
-        android:id="@+id/fr_place_timer_forecast"
-        android:name="com.example.racertimer.ForecastFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_menu"
-        app:layout_constraintWidth_percent="0.25">
 
-    </fragment>
-
-    <ImageButton
-        android:id="@+id/button_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_menu_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
 
     <!-- главное размещение UI элементов -->
     <FrameLayout
@@ -103,6 +85,43 @@
                 tools:ignore="UseSwitchCompatOrMaterialXml"/>
 
         </LinearLayout>
+
+
     </LinearLayout>
+    <fragment
+        android:id="@+id/fr_place_timer_forecast"
+        android:name="com.example.racertimer.ForecastFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/half_bar"
+        app:layout_constraintWidth_percent="0.25">
+
+    </fragment>
+
+    <LinearLayout
+        android:id="@+id/half_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <ImageButton
+            android:id="@+id/button_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_menu_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fr_menu_place"
+        android:layout_width="250dp"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="invisible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

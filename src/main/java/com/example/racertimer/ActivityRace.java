@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -195,10 +196,12 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     }
 
     public void deployMenuFragment () { // выгрузка фрагмена меню
+        ConstraintLayout constraintLayout = findViewById(R.id.fr_menu_place);
+        constraintLayout.setVisibility(View.VISIBLE);
         if (menuFragment == null) menuFragment = new MenuFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_place_timer_forecast, menuFragment);
+        fragmentTransaction.replace(R.id.fr_menu_place, menuFragment);
         fragmentTransaction.commit();
     }
 
@@ -256,6 +259,11 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     }
 
     /** блок меню */
+    public void closeMenu() {
+        menuFragment.setMenuVisibility(false);
+    }
+
+    //TODO: все что ниже - к прежнему меню. Сейчас перешел на кастомное, надо все будет убрать
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i("racer_timer", "starting menu1... ");
