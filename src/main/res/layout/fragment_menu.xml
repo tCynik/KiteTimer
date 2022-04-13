@@ -44,6 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <Button
+
                     android:id="@+id/menu_forecast"
                     android:layout_width="180dp"
                     android:layout_height="wrap_content"

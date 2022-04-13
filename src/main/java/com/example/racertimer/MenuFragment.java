@@ -1,6 +1,8 @@
 package com.example.racertimer;
 
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,14 +36,55 @@ public class MenuFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_menu, container, false);
-        btnClose = view.findViewById(R.id.btn_close_menu);
 
-        btnClose.setOnClickListener(new View.OnClickListener() {
+        btnClose = view.findViewById(R.id.btn_close_menu);
+        btnForecast = view.findViewById(R.id.menu_forecast);
+        btnDeveloper = view.findViewById(R.id.developer);
+
+        /** обработчики кнопок */
+        btnClose.setOnClickListener(new View.OnClickListener() { // кнопка закрытия меню
             @Override
             public void onClick(View view) {
                 activityRace.closeMenu();
             }
         });
+
+        btnForecast.setOnClickListener(new View.OnClickListener() { // кнопка запуска прогноза
+            @Override
+            public void onClick(View view) {
+                runForecast();
+            }
+        });
+
+        btnDeveloper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activityRace.deployDeveloperTools();
+                //deployDeveloperTools();
+            }
+        });
+
         return view;
+
     }
+
+    private void runForecast () { // обработка запуска активити прогноза
+        activityRace.closeMenu();
+
+        Location location = activityRace.getCurrentLocation();
+        double longitude = location.getLongitude();
+        double latitude = location.getLatitude();
+        Intent intent = new Intent(getActivity(), ActivityForecast.class);
+        intent.putExtra("latitude", latitude);
+        intent.putExtra("longitude", longitude);
+        startActivity(intent);
+    }
+
+//    public void deployDeveloperTools () { // выгрузка фрагмена меню
+//        FragmentManager fragmentManager = activityRace.getSupportFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        fragmentTransaction.replace(R.id.fr_menu_place, activityRace.menuFragment);
+//        fragmentTransaction.commit();
+//    }
+
 }

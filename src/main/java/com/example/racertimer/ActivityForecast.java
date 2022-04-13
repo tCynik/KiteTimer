@@ -107,7 +107,6 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
                 }
             });
         }
-        fillForecastLine("day time", "temp", "wing", "gust", "w.dir");
 
         // загружаем из сериализации файл locations_forecast.bin из папки saved
 // TODO: здесь и далее - создание листа точек для геолокации. Псоле сериализации - удалить!
@@ -267,6 +266,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
 //        LayoutInflater layoutInflater = getLayoutInflater();
 
         SimpleDateFormat timeFormat = new SimpleDateFormat("d MMM HH:mm"); // определяем формат отображения времени
+        fillForecastLine("day time", "temp", "wing", "gust", "w.dir"); // шапка
 
         // перебираем строчки прогноза и вытаскиваем конкретные данные для каждой текущей строчки
         for (int i = 0; i < numberForecastPeriods; i ++ ) {

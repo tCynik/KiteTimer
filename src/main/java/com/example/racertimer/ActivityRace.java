@@ -56,8 +56,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     private TimerFragment timerFragment = null;
     private ForecastFragment forecastFragment = null;
-    private SailingToolsFragment sailingToolsFragment = null;
-    private MenuFragment menuFragment = null;
+    public SailingToolsFragment sailingToolsFragment = null;
+    public MenuFragment menuFragment = null;
+    public DeveloperFragment developerFragment = null;
+    public ConstraintLayout menuPlace; // место, в котором возникает меню
 
     private Voiceover voiceover;
 
@@ -196,12 +198,20 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     }
 
     public void deployMenuFragment () { // выгрузка фрагмена меню
-        ConstraintLayout constraintLayout = findViewById(R.id.fr_menu_place);
-        constraintLayout.setVisibility(View.VISIBLE);
+        menuPlace = findViewById(R.id.fr_menu_place);
+        menuPlace.setVisibility(View.VISIBLE);
         if (menuFragment == null) menuFragment = new MenuFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_menu_place, menuFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void deployDeveloperTools () { // выгрузка фрагмена меню
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        developerFragment = new DeveloperFragment();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fr_menu_place, developerFragment);
         fragmentTransaction.commit();
     }
 
@@ -260,7 +270,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     /** блок меню */
     public void closeMenu() {
-        menuFragment.setMenuVisibility(false);
+        menuPlace.setVisibility(View.INVISIBLE);
     }
 
     //TODO: все что ниже - к прежнему меню. Сейчас перешел на кастомное, надо все будет убрать
@@ -465,10 +475,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         sailingToolsFragment.muteChangedStatus(b);
     }
 
-//    @Override
-//    public void MenuOpenerInterface() {
-//        deployMenuFragment();
-//    }
 }
 
 
