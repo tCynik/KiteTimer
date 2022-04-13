@@ -30,8 +30,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -59,7 +59,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
     public DeveloperFragment developerFragment = null;
-    public ConstraintLayout menuPlace; // место, в котором возникает меню
+    public FragmentContainerView menuPlace; // место, в котором возникает меню
 
     private Voiceover voiceover;
 
@@ -95,6 +95,8 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         muteVmgSwitch = findViewById(R.id.mute_vmg);
         btnUpdateWind = findViewById(R.id.update_wind);
         btnMenu = findViewById(R.id.button_menu);
+
+        menuPlace = findViewById(R.id.fr_menu_place); // находим контейнер для дальнейшего размещения вьюшек
 
         // TODO: нужно генерировать линии best VMG программно по заданным координатам.
 
@@ -168,7 +170,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             bindToLocationService();
         }
 
-        if (locationService != null) locationService.updateWindDirection();
+        updateWindDirection();
     }
 
     /** модуль методов выгрузки фрагментов */
@@ -198,7 +200,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     }
 
     public void deployMenuFragment () { // выгрузка фрагмена меню
-        menuPlace = findViewById(R.id.fr_menu_place);
         menuPlace.setVisibility(View.VISIBLE);
         if (menuFragment == null) menuFragment = new MenuFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -253,6 +254,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        Log.i("racer_timer", "app is closing by user... ");
                         stopRace();
                         finish(); // закрываем эту активити
                     }
@@ -285,6 +287,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         return super.onOptionsItemSelected(item);
+    }
+
+    public void updateWindDirection() { // получение ветра для событий, требующих этого
+        if (locationService != null) locationService.updateWindDirection();
     }
 
     private void stopRace() { // остановка гонки
@@ -472,6 +478,10 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        sailingToolsFragment.muteChangedStatus(b);
+    }
+
+    public void muteChangedStatus(boolean b) {
         sailingToolsFragment.muteChangedStatus(b);
     }
 

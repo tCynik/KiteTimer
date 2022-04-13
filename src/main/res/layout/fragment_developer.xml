@@ -39,13 +39,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="16sp"
         android:text="bearing"/>
 
     <SeekBar
         android:id="@+id/seekBar_bearing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/black"
+        android:progressBackgroundTint="@color/black"
         android:max="360"
         android:progress="0"/>
 
@@ -53,14 +55,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="velocity"/>
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:text="Velocity"/>
 
     <SeekBar
         android:id="@+id/seekBar_velosity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/black"
+        android:progressBackgroundTint="@color/black"
         android:max="60"
         android:progress="0"/>
+
+    <Button
+        android:id="@+id/btn_update_wind"
+        android:layout_marginTop="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:text="update wind"/>
 
 </LinearLayout>

@@ -93,6 +93,17 @@
 
             </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_mute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mute VMG"
+                android:textSize="18sp"
+                android:textColor="@color/black"/>
+        </LinearLayout>
 
         </LinearLayout>
 
