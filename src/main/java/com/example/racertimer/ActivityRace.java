@@ -22,10 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,18 +37,15 @@ import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.multimedia.Voiceover;
 
-public class ActivityRace extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener,
-        SeekBar.OnSeekBarChangeListener, ForecastFragment.OpenerTimerInterface,
+public class ActivityRace extends AppCompatActivity implements ForecastFragment.OpenerTimerInterface,
         TimerFragment.CloserTimerInterface {
 
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
-    private SeekBar bearingSB, velocitySB;
-    private Button btnReset, btnUpdateWind;
+    private Button btnReset, btnStopwach;
     private ImageButton btnMenu;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private Switch muteVmgSwitch;
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
 
     private TimerFragment timerFragment = null;
@@ -74,6 +68,8 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
     private double longitude = 0; // координаты для получения прогноза
     private Location location = null; // текущее положение
 
+    private boolean isRaceStarted = false; // флаг того то, происходит сейчас гонка
+
     private Intent intentLocationService; // интент для создания сервиса геолокации
     private BroadcastReceiver locationBroadcastReceiver;
     private IntentFilter locationIntentFilter;
@@ -89,12 +85,9 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
 ////////// вынеси определение вьюшек в отдельный метод
-        bearingSB = findViewById(R.id.seekBar_bearing);
-        velocitySB = findViewById(R.id.seekBar_velosity);
         btnReset = findViewById(R.id.but_reset);
-        muteVmgSwitch = findViewById(R.id.mute_vmg);
-        btnUpdateWind = findViewById(R.id.update_wind);
         btnMenu = findViewById(R.id.button_menu);
+        btnStopwach = findViewById(R.id.stopwach);
 
         menuPlace = findViewById(R.id.fr_menu_place); // находим контейнер для дальнейшего размещения вьюшек
 
@@ -115,9 +108,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
         deploySailingToolsFragment();
 
-        /** обрабатываем свитч mute VMG */
-        muteVmgSwitch.setOnCheckedChangeListener(this);
-
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
 //        btnMenu.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -136,19 +126,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             }
         });
 
-        /** обрабатываем кнопку обновления данных по направлени ветра */
-        btnUpdateWind.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //locationService.updateWindDirection();
-                int wind = locationService.getWindDirection();
-                if (wind != 10000) {
-                    Log.i("racer_timer", "getted actual wind dir");
-                    onWindDirectionChanged(wind);
-                }
-            }
-        });
-
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -156,8 +133,16 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
             }
         });
 
-        bearingSB.setOnSeekBarChangeListener(this);
-        velocitySB.setOnSeekBarChangeListener(this);
+        btnStopwach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isRaceStarted) { // если гонка идет, выводим диалоговое меню об остановке
+                    // TODO: диалоговое меню "остановить гонку? да/нет"
+                } else { // если гонка не идет, вызываем таймер
+                    deployTimerFragment();
+                }
+            }
+        });
 
         //sailingToolsFragment.setVelocity(2)
     }
@@ -178,7 +163,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (timerFragment == null) timerFragment = new TimerFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_place_timer_forecast, timerFragment);
+        fragmentTransaction.replace(R.id.fr_place_map, timerFragment);
         fragmentTransaction.commit();
     }
 
@@ -186,7 +171,7 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (forecastFragment == null) forecastFragment = new ForecastFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_place_timer_forecast, forecastFragment);
+        fragmentTransaction.replace(R.id.fr_place_map, forecastFragment);
         fragmentTransaction.commit();
     }
 
@@ -218,30 +203,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 
     public Location getCurrentLocation () {
         return location;
-    }
-
-    /** бегунки тестирования вьюшки курсов и скоростей */
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (seekBar == bearingSB) {
-            bearing = i;
-            sailingToolsFragment.onBearingChanged(bearing);
-        }
-        if (seekBar == velocitySB) {
-            velocity = i;
-            sailingToolsFragment.onVelocityChanged(velocity);
-        }
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-//        Log.i(PROJECT_LOG_TAG, "heigh = " + constraintLayout.getHeight() + ", widht = "+ constraintLayout.getWidth());
-
     }
 
     /** Отработка нажатия кнопки "Назад" */
@@ -466,6 +427,23 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
     }
 
+    public void muteChangedStatus(boolean b) { // выключение звука пищалки
+        sailingToolsFragment.muteChangedStatus(b);
+    }
+
+    public void startRace () { // изменение статуса, идет ли гонка
+        this.isRaceStarted = true;
+    }
+
+    public void endRace () {
+        this.isRaceStarted = false;
+    }
+
+    public void resetAllMaximums() {
+        sailingToolsFragment.resetPressed();
+        Log.i("racer_timer", "reset VMG maximums");
+    }
+
     @Override
     public void finishTheTimer() {
         deployForecastFragment();
@@ -476,14 +454,6 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
         deployTimerFragment();
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        sailingToolsFragment.muteChangedStatus(b);
-    }
-
-    public void muteChangedStatus(boolean b) {
-        sailingToolsFragment.muteChangedStatus(b);
-    }
 
 }
 
@@ -496,3 +466,8 @@ public class ActivityRace extends AppCompatActivity implements CompoundButton.On
 // исходим из того, что у нас правый бейдевинд
 //       либо запускаем если выбран чек поле "запуск сравнения"
 
+// TODO: при первом открытии по умолчанию загружаем фрагмент карты
+//   обработка запуска гонки (по окончании таймера)
+//  обработка остановки гонки (из таймера)
+//  cancelRace - кнопка вверху
+//  нужна кнопка моментального старта гонки

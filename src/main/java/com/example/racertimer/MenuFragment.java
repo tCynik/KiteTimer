@@ -43,9 +43,11 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
         btnClose = view.findViewById(R.id.btn_close_menu);
         btnForecast = view.findViewById(R.id.menu_forecast);
         btnDeveloper = view.findViewById(R.id.developer);
+        btnResetMax = view.findViewById(R.id.reset);
         switchMuteVMG = view.findViewById(R.id.switch_mute);
 
         switchMuteVMG.setOnCheckedChangeListener(this);
+
         /** обработчики кнопок */
         btnClose.setOnClickListener(new View.OnClickListener() { // кнопка закрытия меню
             @Override
@@ -66,6 +68,13 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
             public void onClick(View view) {
                 activityRace.deployDeveloperTools();
                 //deployDeveloperTools();
+            }
+        });
+
+        btnResetMax.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activityRace.resetAllMaximums();
             }
         });
 
