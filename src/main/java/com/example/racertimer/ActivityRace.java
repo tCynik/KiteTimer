@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
@@ -36,6 +37,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
+import com.example.racertimer.map.MapUITools;
 import com.example.racertimer.multimedia.Voiceover;
 
 public class ActivityRace extends AppCompatActivity implements
@@ -51,6 +53,7 @@ public class ActivityRace extends AppCompatActivity implements
 
     private TimerFragment timerFragment = null;
     private MapFragment mapFragment = null;
+    public MapUITools mapUITools;
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
     public DeveloperFragment developerFragment = null;
@@ -61,6 +64,8 @@ public class ActivityRace extends AppCompatActivity implements
     private Voiceover voiceover;
 
     private int velocity, bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
+
+    private int defaultMapScale = 1;
 
     private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
     private int timerHour = 0; // переменная в часах
@@ -148,6 +153,7 @@ public class ActivityRace extends AppCompatActivity implements
             initBroadcastListener(); // запускаем слушатель новых геоданных
             bindToLocationService();
         }
+        activateMapFragment();
 
         updateWindDirection();
     }
@@ -161,8 +167,8 @@ public class ActivityRace extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    public void deployForecastFragment() { // создание фрагмента для прогноза
-        if (mapFragment == null) mapFragment = new MapFragment();
+    public void deployMapFragment() { // создание фрагмента для прогноза
+        if (mapFragment == null) activateMapFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_place_map, mapFragment);
@@ -197,6 +203,19 @@ public class ActivityRace extends AppCompatActivity implements
 
     public Location getCurrentLocation () {
         return location;
+    }
+
+    private void activateMapFragment () {
+        //mapFragment = new MapFragment();
+        // получаем вью элементы для дальнейшего управления
+        ConstraintLayout tracksLayout = mapFragment.getTracksLayout();
+        arrowDirectionOnMap = mapFragment.getArrowDirection();
+        arrowWindOnMap = mapFragment.getArrowWind();
+        Button btnIncMapScale = mapFragment.getBtnIncScale();
+        Button btnDecMapScale = mapFragment.getBtnDecScale();
+        // передаем их в управляющий класс
+        mapUITools = new MapUITools(tracksLayout, defaultMapScale, arrowDirectionOnMap,
+                arrowWindOnMap, btnIncMapScale, btnDecMapScale);
     }
 
     /** Отработка нажатия кнопки "Назад" */
@@ -393,7 +412,12 @@ public class ActivityRace extends AppCompatActivity implements
     public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
-        arrowWindOnMap.setRotation(CoursesCalculator.invertCourse(updatedWindDirection)); // поворот стрелки на карте
+        Log.i(PROJECT_LOG_TAG, "111changing the wind in the map to "+windDirection);
+        if (mapUITools != null) {
+            Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
+            mapUITools.onWindChanged(updatedWindDirection);
+        }
+        //arrowWindOnMap.setRotation(CoursesCalculator.invertCourse(updatedWindDirection)); // поворот стрелки на карте
     }
 
     public void manuallyWindManager () { // установка направления ветра вручную
@@ -430,7 +454,8 @@ public class ActivityRace extends AppCompatActivity implements
         } else sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
-        arrowDirectionOnMap.setRotation(bearing);
+        if (mapUITools != null) mapUITools.onBearingChanged(bearing);
+        //arrowDirectionOnMap.setRotation(bearing);
     }
 
     public void muteChangedStatus(boolean b) { // выключение звука пищалки
@@ -452,7 +477,7 @@ public class ActivityRace extends AppCompatActivity implements
 
     @Override
     public void finishTheTimer() {
-        deployForecastFragment();
+        deployMapFragment();
     }
 
 }

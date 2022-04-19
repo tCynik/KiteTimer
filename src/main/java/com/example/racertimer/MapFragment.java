@@ -7,9 +7,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 public class MapFragment extends Fragment {
@@ -18,7 +20,10 @@ public class MapFragment extends Fragment {
     private MapFragment context;
     private View view;
 
+    private ConstraintLayout tracksLayout;
     private ImageView arrowDirection, arrowWind;
+
+    private Button btnIncScale, btnDecScale;
 
     private double latitude, longitude; // координаты для получения прогноза
     private Location currentLocation;
@@ -53,9 +58,16 @@ public class MapFragment extends Fragment {
         this.view = view;
         context = this;
 
+        tracksLayout = view.findViewById(R.id.tracks_layout);
+
         arrowDirection = view.findViewById(R.id.arrow_position_on_map); // стрелка метка курса
         arrowWind = view.findViewById(R.id.wind_direction_arrow_on_map); // стрелка ветра
         exportArrowsToMain(arrowDirection, arrowWind);
+
+        btnIncScale = view.findViewById(R.id.btn_inc_scale);
+        btnDecScale = view.findViewById(R.id.btn_dec_scale);
+
+
 
 
         return view;
@@ -68,6 +80,26 @@ public class MapFragment extends Fragment {
         activityRace.setArrowWindOnMap(windArrow);
     }
 
+    /** Блок передачи компонентов UI вовне */
+    public ConstraintLayout getTracksLayout() {
+        return tracksLayout;
+    }
+
+    public ImageView getArrowDirection() {
+        return arrowDirection;
+    }
+
+    public ImageView getArrowWind() {
+        return arrowWind;
+    }
+
+    public Button getBtnIncScale() {
+        return btnIncScale;
+    }
+
+    public Button getBtnDecScale() {
+        return btnDecScale;
+    }
 
     /** Публичные методы для связи с внешним миром */
     public void locationIsChanged (Location location) {
