@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -37,7 +38,7 @@ import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.multimedia.Voiceover;
 
-public class ActivityRace extends AppCompatActivity implements ForecastFragment.OpenerTimerInterface,
+public class ActivityRace extends AppCompatActivity implements
         TimerFragment.CloserTimerInterface {
 
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -49,11 +50,13 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
 
     private TimerFragment timerFragment = null;
-    private ForecastFragment forecastFragment = null;
+    private MapFragment mapFragment = null;
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
+
+    private ImageView arrowDirectionOnMap, arrowWindOnMap;
 
     private Voiceover voiceover;
 
@@ -85,7 +88,6 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
 ////////// вынеси определение вьюшек в отдельный метод
-        btnReset = findViewById(R.id.but_reset);
         btnMenu = findViewById(R.id.button_menu);
         btnStopwach = findViewById(R.id.stopwach);
 
@@ -96,7 +98,7 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
         windDirection = 202;
 
         context = this;
-        forecastFragment = new ForecastFragment();
+        mapFragment = new MapFragment();
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
@@ -117,14 +119,6 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
 //                openOptionsMenu();
 //            }
 //        });
-
-        btnReset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sailingToolsFragment.resetPressed();
-                Log.i("racer_timer", "reset VMG maximums");
-            }
-        });
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,10 +162,10 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
     }
 
     public void deployForecastFragment() { // создание фрагмента для прогноза
-        if (forecastFragment == null) forecastFragment = new ForecastFragment();
+        if (mapFragment == null) mapFragment = new MapFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_place_map, forecastFragment);
+        fragmentTransaction.replace(R.id.fr_place_map, mapFragment);
         fragmentTransaction.commit();
     }
 
@@ -388,9 +382,18 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
+    public void setArrowDirectionOnMap(ImageView imageView) {
+        arrowDirectionOnMap = imageView;
+    }
+
+    public void setArrowWindOnMap (ImageView imageView) {
+        arrowWindOnMap = imageView;
+    }
+
     public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
+        arrowWindOnMap.setRotation(CoursesCalculator.invertCourse(updatedWindDirection)); // поворот стрелки на карте
     }
 
     public void manuallyWindManager () { // установка направления ветра вручную
@@ -410,6 +413,7 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
 
 //            Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 //            forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
+            // TODO: прогноз открывается после получения локации? Может, сериализация?
         }
 //        latitude = location.getLatitude();
 //        longitude = location.getLongitude();
@@ -422,9 +426,11 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
             velocity = (int) tempVelocity;
             Log.i("racer_timer", " sending velocity = "+ velocity);
             if (sailingToolsFragment != null) sailingToolsFragment.onVelocityChanged(velocity);
+            //mapFragment.locationIsChanged(location);
         } else sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
+        arrowDirectionOnMap.setRotation(bearing);
     }
 
     public void muteChangedStatus(boolean b) { // выключение звука пищалки
@@ -448,12 +454,6 @@ public class ActivityRace extends AppCompatActivity implements ForecastFragment.
     public void finishTheTimer() {
         deployForecastFragment();
     }
-
-    @Override
-    public void openTimerFragment() {
-        deployTimerFragment();
-    }
-
 
 }
 

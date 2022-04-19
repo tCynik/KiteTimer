@@ -20,7 +20,7 @@
 
     <fragment
         android:id="@+id/fr_place_map"
-        android:name="com.example.racertimer.ForecastFragment"
+        android:name="com.example.racertimer.MapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -53,9 +53,9 @@
 
         <Button
             android:id="@+id/stopwach"
-            android:layout_width="wrap_content"
+            android:layout_width="180dp"
             android:layout_height="match_parent"
-            android:textSize="36sp"
+            android:textSize="20sp"
             android:text="new race"/>
 
     </LinearLayout>
