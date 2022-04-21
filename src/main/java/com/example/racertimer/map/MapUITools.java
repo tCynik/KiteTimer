@@ -1,6 +1,7 @@
 package com.example.racertimer.map;
 
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -26,13 +27,27 @@ public class MapUITools {
 
     public void setUIViews (ConstraintLayout trackLayout,
                             ImageView directionArrow, ImageView windArrow,
-                            Button btnDecScale, Button btnIncScale) {
+                            Button btnIncScale, Button btnDecScale) {
         this.trackLayout = trackLayout;
         onScaleChanged(mapScale);
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
-        this.btnDecScale = btnDecScale;
         this.btnIncScale = btnIncScale;
+        this.btnDecScale = btnDecScale;
+
+        btnIncScale.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onScaleIncreased();
+            }
+        });
+
+        btnDecScale.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onScaleDecreased();
+            }
+        });
     }
 
     public void onBearingChanged (int bearing) {

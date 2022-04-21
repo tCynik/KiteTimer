@@ -161,7 +161,6 @@ public class ActivityRace extends AppCompatActivity implements
 
     public void uploadMapUIIntoTools (ConstraintLayout tracksLayout, ImageView arrowDirection, ImageView arrowWind, Button btnIncScale, Button btnDecScale) {
         mapUITools = new MapUITools(defaultMapScale);
-        Log.i(PROJECT_LOG_TAG, "!!!uploading views! ");
         mapUITools.setUIViews(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
         mapUITools.onWindChanged(CoursesCalculator.invertCourse(windDirection));
     }
@@ -369,7 +368,7 @@ public class ActivityRace extends AppCompatActivity implements
         bindService(intentLocationService, serviceConnection, BIND_EXTERNAL_SERVICE);
     }
 
-    /** создаем и регистрируем слушатель геолокации */
+    /** блок работы со слушателем геолокации  */
     private void initBroadcastListener() {
         locationBroadcastReceiver = new BroadcastReceiver() { // создаем broadcastlistener
             @Override
@@ -425,15 +424,16 @@ public class ActivityRace extends AppCompatActivity implements
             this.location = location;
             latitude = location.getLatitude();
             longitude = location.getLongitude();
-
 //            Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 //            forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
-            // TODO: прогноз открывается после получения локации? Может, сериализация?
+            // TODO: прогноз открывается после получения локации? Нужно реализовать такой принцип, что
+            //  если нет кординат, прогноз открывается для ранее использованной точки, а при
+            //  попытке выбрать current location выходит тост, что нет связи со спутником
         }
-//        latitude = location.getLatitude();
-//        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
 //
-//        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
+        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 
 
         if (location.hasSpeed()) { // если есть скорость
