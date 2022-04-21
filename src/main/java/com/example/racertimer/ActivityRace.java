@@ -103,6 +103,7 @@ public class ActivityRace extends AppCompatActivity implements
         windDirection = 202;
 
         context = this;
+
         mapFragment = new MapFragment();
 
         /** запускаем таймер */
@@ -153,9 +154,16 @@ public class ActivityRace extends AppCompatActivity implements
             initBroadcastListener(); // запускаем слушатель новых геоданных
             bindToLocationService();
         }
-        activateMapFragment();
+        //activateMapFragment();
 
         updateWindDirection();
+    }
+
+    public void uploadMapUIIntoTools (ConstraintLayout tracksLayout, ImageView arrowDirection, ImageView arrowWind, Button btnIncScale, Button btnDecScale) {
+        mapUITools = new MapUITools(defaultMapScale);
+        Log.i(PROJECT_LOG_TAG, "!!!uploading views! ");
+        mapUITools.setUIViews(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
+        mapUITools.onWindChanged(CoursesCalculator.invertCourse(windDirection));
     }
 
     /** модуль методов выгрузки фрагментов */
@@ -168,7 +176,6 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void deployMapFragment() { // создание фрагмента для прогноза
-        if (mapFragment == null) activateMapFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_place_map, mapFragment);
@@ -203,19 +210,6 @@ public class ActivityRace extends AppCompatActivity implements
 
     public Location getCurrentLocation () {
         return location;
-    }
-
-    private void activateMapFragment () {
-        //mapFragment = new MapFragment();
-        // получаем вью элементы для дальнейшего управления
-        ConstraintLayout tracksLayout = mapFragment.getTracksLayout();
-        arrowDirectionOnMap = mapFragment.getArrowDirection();
-        arrowWindOnMap = mapFragment.getArrowWind();
-        Button btnIncMapScale = mapFragment.getBtnIncScale();
-        Button btnDecMapScale = mapFragment.getBtnDecScale();
-        // передаем их в управляющий класс
-        mapUITools = new MapUITools(tracksLayout, defaultMapScale, arrowDirectionOnMap,
-                arrowWindOnMap, btnIncMapScale, btnDecMapScale);
     }
 
     /** Отработка нажатия кнопки "Назад" */
@@ -255,7 +249,6 @@ public class ActivityRace extends AppCompatActivity implements
         Log.i("racer_timer", "starting menu1... ");
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
-        //return super.onCreateOptionsMenu(menu1);
     }
 
     @Override
@@ -412,12 +405,10 @@ public class ActivityRace extends AppCompatActivity implements
     public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
-        Log.i(PROJECT_LOG_TAG, "111changing the wind in the map to "+windDirection);
         if (mapUITools != null) {
             Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
             mapUITools.onWindChanged(updatedWindDirection);
         }
-        //arrowWindOnMap.setRotation(CoursesCalculator.invertCourse(updatedWindDirection)); // поворот стрелки на карте
     }
 
     public void manuallyWindManager () { // установка направления ветра вручную
@@ -455,7 +446,6 @@ public class ActivityRace extends AppCompatActivity implements
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
         if (mapUITools != null) mapUITools.onBearingChanged(bearing);
-        //arrowDirectionOnMap.setRotation(bearing);
     }
 
     public void muteChangedStatus(boolean b) { // выключение звука пищалки

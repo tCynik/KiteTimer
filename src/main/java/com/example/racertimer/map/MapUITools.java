@@ -20,13 +20,15 @@ public class MapUITools {
     private float maxScale = 10f;
     private double stepScale = 0.5;
 
-    public MapUITools (ConstraintLayout trackLayout,
-                       float mapScale,
-                       ImageView directionArrow, ImageView windArrow,
-                       Button btnDecScale, Button btnIncScale) {
+    public MapUITools (float defaultMapScale) {
+        this.mapScale = defaultMapScale;
+    }
+
+    public void setUIViews (ConstraintLayout trackLayout,
+                            ImageView directionArrow, ImageView windArrow,
+                            Button btnDecScale, Button btnIncScale) {
         this.trackLayout = trackLayout;
-        this.mapScale = mapScale;
-        //onScaleChanged(mapScale);
+        onScaleChanged(mapScale);
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
         this.btnDecScale = btnDecScale;
@@ -35,7 +37,7 @@ public class MapUITools {
 
     public void onBearingChanged (int bearing) {
         Log.i(PROJECT_LOG_TAG, "bearing on map was changed to "+bearing);
-        directionArrow.setRotation(bearing);
+        if (directionArrow != null) directionArrow.setRotation(bearing);
     }
 
     public void onWindChanged (int windDirection) {

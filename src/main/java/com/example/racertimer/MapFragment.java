@@ -21,7 +21,7 @@ public class MapFragment extends Fragment {
     private View view;
 
     private ConstraintLayout tracksLayout;
-    private ImageView arrowDirection, arrowWind;
+    public ImageView arrowDirection, arrowWind;
 
     private Button btnIncScale, btnDecScale;
 
@@ -62,15 +62,22 @@ public class MapFragment extends Fragment {
 
         arrowDirection = view.findViewById(R.id.arrow_position_on_map); // стрелка метка курса
         arrowWind = view.findViewById(R.id.wind_direction_arrow_on_map); // стрелка ветра
-        exportArrowsToMain(arrowDirection, arrowWind);
+        //exportArrowsToMain(arrowDirection, arrowWind);
 
         btnIncScale = view.findViewById(R.id.btn_inc_scale);
         btnDecScale = view.findViewById(R.id.btn_dec_scale);
 
-
+        exportViewsIntoTools();
 
 
         return view;
+    }
+
+    private void exportViewsIntoTools () {
+        ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
+        //activityRace.mapUITools.setUIViews(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
+        assert activityRace != null;
+        activityRace.uploadMapUIIntoTools(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
     }
 
     private void exportArrowsToMain(ImageView directionArrow, ImageView windArrow) {
