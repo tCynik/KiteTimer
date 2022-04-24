@@ -109,7 +109,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         }
 
         // загружаем из сериализации файл locations_forecast.bin из папки saved
-// TODO: здесь и далее - создание листа точек для геолокации. Псоле сериализации - удалить!
+// TODO: здесь и далее - создание листа точек для геолокации. После сериализации - удалить!
 //        listLocationForecast = new ListForecastLocations();
 //        LocationForecast krasnoyarsk = new LocationForecast("Krasnoyarsk", 56.02698, 92.94564833333334);
 //        LocationForecast shumiha = new LocationForecast("Shumiha", 55.91477, 92.27641999999999);

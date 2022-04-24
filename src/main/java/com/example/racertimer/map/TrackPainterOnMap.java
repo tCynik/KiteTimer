@@ -7,6 +7,7 @@ public class TrackPainterOnMap {
 
     private int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
+    private Location lastLocation = null;
     private double startPointLongitude; // точка начала трека принимается как начало отсчета карты...
     private double startPointLatitude;  // т.е. Х=0 У=0 в локальной системе отсчета
 
@@ -16,6 +17,12 @@ public class TrackPainterOnMap {
     }
 
     public void addLocationIntoTrack (Location location) {
+        if (lastLocation == null) {
+            lastLocation = location;
+        } else {
+            int actualPointX = calculateLocalX(location);
+            int actualPointY = calculateLocalY(location);
+        }
         // TODO: обработка появления новой локации для отрисовки трека
     }
 
