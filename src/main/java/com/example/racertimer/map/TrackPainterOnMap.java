@@ -1,13 +1,9 @@
 package com.example.racertimer.map;
 
 import android.app.Activity;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -22,57 +18,18 @@ public class TrackPainterOnMap extends Activity {
     private double startPointLatitude;  // т.е. Х=0 У=0 в локальной системе отсчета
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         drawView = new DrawView(this);
         setContentView(drawView);
+        // TODO: сейчас новая вьюшка рисоваия трека создается при создании класса TrackPainterMap.
+        //  требуется создавать новый экземпляр вьюшки по команде (при начале гонки). Каждый экземпляр -
+        //  отдельный рисунок трека. При этом можно реализовать раздельное управление треками (удаление, перекраска, и т.д.)
     }
 
-    class DrawView extends View {
-
-        Paint paint;
-
-        float prevCoordinateX;
-        float prevCoordinateY;
-
-        float currentCoordinateX;
-        float currentCoordinateY;
-
-        public DrawView (Context context) {
-            super (context);
-            paint = new Paint();
-            prevCoordinateX = 0;
-            prevCoordinateY = 0; // начинаем рисовать с нуля (центр экрана)
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            //canvas.drawColor(Color.WHITE);
-
-            paint.setColor(Color.WHITE);
-            paint.setStrokeWidth(5);
-
-            canvas.drawLine (prevCoordinateX, currentCoordinateY, currentCoordinateX, currentCoordinateY, paint);
-
-        }
-
-        public void setStartPoint (int prevCoordinateX, int prevCoordinateY) {
-            this.prevCoordinateX = prevCoordinateX;
-            this.prevCoordinateY = prevCoordinateY;
-            //TODO: пока начало рисования в нулевой точке (грубо, где создается карта) При рисовании со старта норм,
-            // но если запускаем не сразу (через стартовую процедуру), будем связыватсья с 0? Или при импорте трека для прорисовки
-            // нужно в первую точку линию не рисовать! И при этом обойти частный случае если посреди трека появятся координаты 0, 0
-        }
-
-        public void drawNextPoint (int currentCoordinateX, int currentCoordinateY) {
-            this.currentCoordinateX = currentCoordinateX;
-            this.currentCoordinateY = currentCoordinateY;
-
-            invalidate();
-
-            prevCoordinateX = currentCoordinateX;
-            prevCoordinateY = currentCoordinateY;
-        }
+    public DrawView getDrawView() {
+        Log.i(PROJECT_LOG_TAG, "sending drawView from TrackPainter");
+        return drawView;
     }
 
     public void beginNewTrack (Location location) {
@@ -114,4 +71,6 @@ public class TrackPainterOnMap extends Activity {
     }
 }
 
-// TODO: найти привязку канвы или окружения к конкретной вьюшке; залогировать код и дальше рестить всё
+
+
+// TODO: найти привязку канвы или окружения к конкретной вьюшке; залогировать код и дальше тестить всё
