@@ -33,7 +33,7 @@ public class DrawView extends View {
 
     }
 
-    public void setStartPoint (int prevCoordinateX, int prevCoordinateY) {
+    public void setStartCoordinates(int prevCoordinateX, int prevCoordinateY) {
         this.prevCoordinateX = prevCoordinateX;
         this.prevCoordinateY = prevCoordinateY;
         //TODO: пока начало рисования в нулевой точке (грубо, где создается карта) При рисовании со старта норм,

@@ -15,23 +15,19 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
-import com.example.racertimer.map.DrawView;
-import com.example.racertimer.map.TrackPainterOnMap;
-
 public class MapFragment extends Fragment {
-    private final static String PROJECT_LOG_TAG = "racer_timer_forecast_fragment";
+    private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
 
-    private MapFragment context;
+    //private Context context;
+    private Context context;
     private View view;
-
-    private TrackPainterOnMap trackPainterOnMap;
-    private DrawView trackDrawerView;
 
     private ConstraintLayout tracksLayout;
     private LinearLayout trackLinear;
     public ImageView arrowDirection, arrowWind;
 
     private Button btnIncScale, btnDecScale;
+    Button btnStartRecordTrack;
 
     private double latitude, longitude; // координаты для получения прогноза
     private Location currentLocation;
@@ -58,7 +54,7 @@ public class MapFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_map, null);
         this.view = view;
-        context = this;
+        context = getActivity();
 
         tracksLayout = view.findViewById(R.id.tracks_layout);
 
@@ -68,8 +64,23 @@ public class MapFragment extends Fragment {
         btnIncScale = view.findViewById(R.id.btn_inc_scale);
         btnDecScale = view.findViewById(R.id.btn_dec_scale);
 
-        initTrackPainter();
+//        btnStartRecordTrack = view.findViewById(R.id.button_start);
+//        btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (trackPainterOnMap != null) trackPainterOnMap.beginNewTrackDrawing();
+//            }
+//        });
 
+        //initTrackPainter();
+        //trackPainterOnMap = new TrackPainterOnMap(trackDrawerTranzister, context);
+//        trackDrawerTranzister = new TrackDrawerTranzister() {
+//            @Override
+//            public void setDrawView(DrawView drawView) {
+//                trackDrawerView = drawView;
+//                Log.i("racer_timer_painter", "!!!!!!transiting the drawView by callback");
+//            }
+//        };
         return view;
     }
 
@@ -77,7 +88,9 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         exportViewsIntoTools();
-        trackViewInflating();
+        //initTrackPainter();
+
+        //trackViewInflating();
     }
 
     private void exportViewsIntoTools () {
@@ -87,10 +100,15 @@ public class MapFragment extends Fragment {
     }
 
     /** Публичные методы для связи с внешним миром */
-    public void locationIsChanged (Location location) {
-        this.currentLocation = location;
-
-    }
+//    public void locationIsChanged (Location location) {
+//        this.currentLocation = location;
+//        Log.i("racer_timer_painter", "renew location for the track painter");
+//
+//        if (trackPainterOnMap != null) {
+//            trackPainterOnMap.onLocatoinChanged(location);
+//            Log.i("racer_timer_painter", "sending the location into track pointer");
+//        } else Log.i("racer_timer_painter", "track painter is null");
+//    }
 
     public void setCoordinates (double latitude, double longitude) {
         Log.i(PROJECT_LOG_TAG, "Forecast fragment get new coordinates");
@@ -98,17 +116,30 @@ public class MapFragment extends Fragment {
         this.longitude = longitude;
     }
 
-    private void initTrackPainter() {
-        Log.i(PROJECT_LOG_TAG, "initing trackPainter");
-        trackPainterOnMap = new TrackPainterOnMap();
-        trackDrawerView = trackPainterOnMap.getDrawView();
-        if (trackDrawerView == null) Log.i(PROJECT_LOG_TAG, "track painter is null!");
-        // TODO: получается наловый экземпляр trackDrawer'а. надо разобраться
-    }
+//    private void initTrackPainter() {
+//        Log.i("racer_timer_painter", "initing trackPainter");
+//        trackPainterOnMap = new TrackPainterOnMap(trackDrawerTranzister, context);
+//        //trackPainterOnMap.setTrackDrawerTranzister(trackDrawerTranzister);
+//
+//        //trackDrawerView = trackPainterOnMap.getDrawView();
+//        //if (trackDrawerView == null) Log.i(PROJECT_LOG_TAG, "track painter view is null!");
+//        // TODO: получается наловый экземпляр trackDrawer'а. надо разобраться
+//    }
 
-    private void trackViewInflating() {
+//    public void setTrackPainterOnMap(TrackPainterOnMap trackPainterOnMap) {
+//        this.trackPainterOnMap = trackPainterOnMap;
+//    }
 
-        tracksLayout.addView(trackDrawerView);
-    }
+//    private void trackViewInflating() {
+//        Log.i("racer_timer_painter", "!!!!!!!!!!!!!!!!!!!!!!!!!");
+//        if (trackDrawerView == null) Log.i(PROJECT_LOG_TAG, "!!!!trackDrawerView is NULL");
+//        if (trackDrawerView != null) Log.i(PROJECT_LOG_TAG, "!!!!drawView was maked and not null!");
+//        trackDrawerView = trackPainterOnMap.getDrawView();
+//        if (trackDrawerView == null) Log.i(PROJECT_LOG_TAG, "!!!!trackDrawerView is NULL");
+//        if (trackDrawerView != null) Log.i(PROJECT_LOG_TAG, "!!!!drawView was maked and not null!");
+//
+//        //tracksLayout.addView(trackDrawerView);
+//    }
 }
+
 

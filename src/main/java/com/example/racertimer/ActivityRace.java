@@ -37,7 +37,10 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
+import com.example.racertimer.map.DrawView;
 import com.example.racertimer.map.MapUITools;
+import com.example.racertimer.map.TrackDrawerTranzister;
+import com.example.racertimer.map.TrackPainterOnMap;
 import com.example.racertimer.multimedia.Voiceover;
 
 public class ActivityRace extends AppCompatActivity implements
@@ -47,6 +50,7 @@ public class ActivityRace extends AppCompatActivity implements
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
     private Button btnReset, btnStopwach;
+    private Button btnStartRecordTrack;
     private ImageButton btnMenu;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
@@ -58,6 +62,10 @@ public class ActivityRace extends AppCompatActivity implements
     public MenuFragment menuFragment = null;
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
+
+    private TrackPainterOnMap trackPainterOnMap;
+    private TrackDrawerTranzister trackDrawerTranzister;
+    private DrawView trackDrawerView;
 
     private ImageView arrowDirectionOnMap, arrowWindOnMap;
 
@@ -106,6 +114,16 @@ public class ActivityRace extends AppCompatActivity implements
 
         mapFragment = new MapFragment();
 
+        btnStartRecordTrack = findViewById(R.id.button_start);
+        btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (trackPainterOnMap != null) trackPainterOnMap.beginNewTrackDrawing();
+                Log.i("racer_timer_painter", "treck drawing is beginning");
+
+            }
+        });
+
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
 
@@ -115,6 +133,15 @@ public class ActivityRace extends AppCompatActivity implements
         voiceover = new Voiceover(context);
 
         deploySailingToolsFragment();
+
+        trackDrawerTranzister = new TrackDrawerTranzister() {
+            @Override
+            public void setDrawView(DrawView drawView) {
+                trackDrawerView = drawView;
+                Log.i("racer_timer_painter", "racer activity - transiting the drawView by callback");
+            }
+        };
+        trackPainterOnMap = new TrackPainterOnMap(trackDrawerTranzister, context);
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
 //        btnMenu.setOnClickListener(new View.OnClickListener() {
@@ -437,6 +464,8 @@ public class ActivityRace extends AppCompatActivity implements
 
 
         if (location.hasSpeed()) { // если есть скорость
+            trackPainterOnMap.onLocatoinChanged(location);
+            //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelocity;
             Log.i("racer_timer", " sending velocity = "+ velocity);
@@ -486,3 +515,9 @@ public class ActivityRace extends AppCompatActivity implements
 //  обработка остановки гонки (из таймера)
 //  cancelRace - кнопка вверху
 //  нужна кнопка моментального старта гонки
+
+
+// TODO: перед праздниками остановился на реализации отображения записываемого трека на карте
+//  нужно чистить mapFragment - убирать оттуда все контекстные поля, т.к. они во фрагментах не работают.
+//  логировать и тестировать вызов старта записи (сделал временную кнопку) и процесс создания и рисования трека - координаты, отображение точки, и т.д.
+//  переписать старт записи трека на остановку таймера
