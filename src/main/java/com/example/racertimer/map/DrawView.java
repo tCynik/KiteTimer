@@ -4,9 +4,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.View;
 
 public class DrawView extends View {
+    private final static String PROJECT_LOG_TAG = "racer_timer_draw_view";
+
     Paint paint;
 
     float prevCoordinateX;
@@ -17,6 +20,7 @@ public class DrawView extends View {
 
     public DrawView (Context context) {
         super (context);
+        Log.i(PROJECT_LOG_TAG, "!!!!!!=======draw view was screated=====!!!!!");
         paint = new Paint();
         prevCoordinateX = 0;
         prevCoordinateY = 0; // начинаем рисовать с нуля (центр экрана)

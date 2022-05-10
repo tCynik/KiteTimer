@@ -118,8 +118,8 @@ public class ActivityRace extends AppCompatActivity implements
         btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (trackPainterOnMap != null) trackPainterOnMap.beginNewTrackDrawing();
-                Log.i("racer_timer_painter", "treck drawing is beginning");
+                if (trackPainterOnMap != null) trackPainterOnMap.beginNewTrackDrawing(location);
+                Log.i("racer_timer_painter", "track drawing is beginning");
 
             }
         });
@@ -445,26 +445,30 @@ public class ActivityRace extends AppCompatActivity implements
 
     /** обработка вновь полученных геолокации */
     private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
-        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " Activity race get new location ");
+        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ". Activity race get new location ");
         double tempVelocity;
+
+        // TODO: прогноз открывается после получения локации? Нужно реализовать такой принцип, что
+        //  если нет кординат, прогноз открывается для ранее использованной точки, а при
+        //  попытке выбрать current location выходит тост, что нет связи со спутником
         if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
             this.location = location;
             latitude = location.getLatitude();
             longitude = location.getLongitude();
 //            Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 //            forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
-            // TODO: прогноз открывается после получения локации? Нужно реализовать такой принцип, что
-            //  если нет кординат, прогноз открывается для ранее использованной точки, а при
-            //  попытке выбрать current location выходит тост, что нет связи со спутником
         }
+
         latitude = location.getLatitude();
         longitude = location.getLongitude();
 //
         Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 
 
-        if (location.hasSpeed()) { // если есть скорость
+        if (location.hasSpeed()) {
+            Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
             trackPainterOnMap.onLocatoinChanged(location);
+
             //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelocity;
@@ -496,7 +500,9 @@ public class ActivityRace extends AppCompatActivity implements
 
     @Override
     public void finishTheTimer() {
-        deployMapFragment();
+        startRace();
+        // TODO: при окончании таймера закрываем фрагмерт (или делаем контейнер прозрачным)
+        //deployMapFragment();
     }
 
 }
@@ -518,6 +524,7 @@ public class ActivityRace extends AppCompatActivity implements
 
 
 // TODO: перед праздниками остановился на реализации отображения записываемого трека на карте
-//  нужно чистить mapFragment - убирать оттуда все контекстные поля, т.к. они во фрагментах не работают.
 //  логировать и тестировать вызов старта записи (сделал временную кнопку) и процесс создания и рисования трека - координаты, отображение точки, и т.д.
 //  переписать старт записи трека на остановку таймера
+
+// TODO: при вызове новой гонки таймер получается скомканный. что-то с контейнером таймера.

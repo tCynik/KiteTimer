@@ -56,7 +56,7 @@ public class MapUITools {
     }
 
     public void onWindChanged (int windDirection) {
-        Log.i(PROJECT_LOG_TAG, "wind on map was changed to "+windDirection);
+        Log.i(PROJECT_LOG_TAG, "wind on map was changed to "+CoursesCalculator.invertCourse(windDirection) );
         windArrow.setRotation(CoursesCalculator.invertCourse(windDirection));
     }
 
