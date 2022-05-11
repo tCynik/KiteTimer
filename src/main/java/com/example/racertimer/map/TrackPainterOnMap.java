@@ -3,6 +3,7 @@ package com.example.racertimer.map;
 import android.content.Context;
 import android.location.Location;
 import android.util.Log;
+import android.widget.Toast;
 
 public class TrackPainterOnMap {
     private final static String PROJECT_LOG_TAG = "racer_timer_painter";
@@ -21,7 +22,6 @@ public class TrackPainterOnMap {
 
     public TrackPainterOnMap (TrackDrawerTranzister trackDrawerTranzister, Context context) {
         this.trackDrawerTranzister = trackDrawerTranzister;
-        if (this.trackDrawerTranzister == null) Log.i(PROJECT_LOG_TAG, "!!! Tranziter is still null");
         this.context = context;
     }
 
@@ -34,10 +34,12 @@ public class TrackPainterOnMap {
     public void beginNewTrackDrawing (Location location) {
         Log.i(PROJECT_LOG_TAG, "track painter is starting new track drawing");
         drawView = new DrawView(context);
-        //setContentView(drawView);
         trackDrawerTranzister.setDrawView(drawView);
 
-        setStartCoordinates(location);
+        if (location != null) {
+            setStartCoordinates(location);
+            Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
+        } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 
         //TODO: setScreenCenterCoordinates()
         //  нужны координаты. как варик - сделать бродкастлистенер. Либо передавать их при вызове трека.
@@ -83,11 +85,8 @@ public class TrackPainterOnMap {
         Log.i(PROJECT_LOG_TAG, "new location coordinates is: X = "+actualPointX+", Y = "+actualPointY);
 
         if (drawView == null) {
-            Log.i(PROJECT_LOG_TAG, "!!!!!!draw view is null!!!!! = ");
+            Log.i(PROJECT_LOG_TAG, "drawView is null");
         } else {
-            Log.i(PROJECT_LOG_TAG, "=====!!!!!!draw view is not null!!!!!====== ");
-
-// TODO: не создается обьект Draw View!!!
             if (lastPaintedLocation == null) { // первая точка - ничего не рисуем, просто запоминаем
                 setStartCoordinates(location); // TODO: метод должен вызываться либо при вызове нового трека, либо при создании первой точки, не и там, и там!
                 drawView.setStartCoordinates(actualPointX, actualPointY);
@@ -103,7 +102,7 @@ public class TrackPainterOnMap {
     private int calculateLocalX (Location location) {
         double coordinateDifferent = location.getLongitude() - startPointLongitude;
         Log.i(PROJECT_LOG_TAG, "calculating different coord. X = "+coordinateDifferent+", pixels = "+calculatePixelFromCoordinate(coordinateDifferent));
-        return calculatePixelFromCoordinate(coordinateDifferent);
+        return calculatePixelFromCoordinate(coordinateDifferent); // TODO: вот эти координаты почему-то получаются нулевые, хотя в логах все ок
     }
 
     private int calculateLocalY (Location location) {
@@ -115,7 +114,9 @@ public class TrackPainterOnMap {
         int scaleMultiplier = 1;
         for (int i = 1; i < trackAccuracy; i ++) {
             scaleMultiplier = scaleMultiplier * 10;
+            //Log.i(PROJECT_LOG_TAG, "calculating multiplier = "+scaleMultiplier); // - tested, working correctly
         }
+        Log.i(PROJECT_LOG_TAG, "scaled coordinate = "+(int)(coordinate * scaleMultiplier));
         return (int) coordinate * scaleMultiplier;
 
         //TODO: протестировать корректность подсчета

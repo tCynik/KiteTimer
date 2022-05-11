@@ -9,7 +9,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 
-public class MapUITools {
+public class MapUIToolsAndTrackLines {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_tools";
 
     private ConstraintLayout trackLayout;
@@ -21,7 +21,7 @@ public class MapUITools {
     private float maxScale = 10f;
     private double stepScale = 0.5;
 
-    public MapUITools (float defaultMapScale) {
+    public MapUIToolsAndTrackLines(float defaultMapScale) {
         this.mapScale = defaultMapScale;
     }
 
@@ -60,6 +60,15 @@ public class MapUITools {
         windArrow.setRotation(CoursesCalculator.invertCourse(windDirection));
     }
 
+    public void onDrawViewCreated (DrawView drawView) {
+        if (trackLayout != null) {
+            trackLayout.addView(drawView);
+            Log.i(PROJECT_LOG_TAG, "the new drawView was added into trackLayout ");
+        } else Log.i(PROJECT_LOG_TAG, "trackline was not pasted into fragment - has no any trackLayout! ");
+
+    }
+
+    /** Scale management block */
     public void onScaleIncreased () {
         if (mapScale < maxScale) {
             mapScale = mapScale + (float)stepScale;

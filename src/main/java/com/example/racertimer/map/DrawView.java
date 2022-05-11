@@ -20,7 +20,7 @@ public class DrawView extends View {
 
     public DrawView (Context context) {
         super (context);
-        Log.i(PROJECT_LOG_TAG, "!!!!!!=======draw view was screated=====!!!!!");
+        Log.i(PROJECT_LOG_TAG, "draw view instance was created");
         paint = new Paint();
         prevCoordinateX = 0;
         prevCoordinateY = 0; // начинаем рисовать с нуля (центр экрана)
@@ -33,7 +33,8 @@ public class DrawView extends View {
         paint.setColor(Color.WHITE);
         paint.setStrokeWidth(5);
 
-        canvas.drawLine (prevCoordinateX, currentCoordinateY, currentCoordinateX, currentCoordinateY, paint);
+        Log.i(PROJECT_LOG_TAG, "drawing line: from "+prevCoordinateX + " : "+prevCoordinateY+ " to " + currentCoordinateX+ " : "+ currentCoordinateY);
+        canvas.drawLine (prevCoordinateX, prevCoordinateY, currentCoordinateX, currentCoordinateY, paint);
 
     }
 
@@ -48,6 +49,8 @@ public class DrawView extends View {
     public void drawNextPoint (int currentCoordinateX, int currentCoordinateY) {
         this.currentCoordinateX = currentCoordinateX;
         this.currentCoordinateY = currentCoordinateY;
+
+        Log.i(PROJECT_LOG_TAG, "invalidating: from "+currentCoordinateX + " : "+currentCoordinateY);
 
         invalidate();
 
