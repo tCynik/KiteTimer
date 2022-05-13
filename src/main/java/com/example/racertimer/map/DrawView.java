@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 public class DrawView extends View {
-    private final static String PROJECT_LOG_TAG = "racer_timer_draw_view";
+    private final static String PROJECT_LOG_TAG = "racer_timer_draw";
 
     Paint paint;
 
@@ -50,7 +50,7 @@ public class DrawView extends View {
         this.currentCoordinateX = currentCoordinateX;
         this.currentCoordinateY = currentCoordinateY;
 
-        Log.i(PROJECT_LOG_TAG, "invalidating: from "+currentCoordinateX + " : "+currentCoordinateY);
+        Log.i(PROJECT_LOG_TAG, "invalidating point: from "+prevCoordinateX+":"+prevCoordinateY+" to "+currentCoordinateX + ":"+currentCoordinateY);
 
         invalidate();
 

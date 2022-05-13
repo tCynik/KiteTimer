@@ -80,7 +80,7 @@ public class TrackPainterOnMap {
     }
 
     private void addLocationIntoTrack (Location location) {
-        int actualPointX = calculateLocalX(location);
+        int actualPointX = calculateLocalX(location); // нынешние координаты в системе координат лайаута
         int actualPointY = calculateLocalY(location);
         Log.i(PROJECT_LOG_TAG, "new location coordinates is: X = "+actualPointX+", Y = "+actualPointY);
 
@@ -93,36 +93,41 @@ public class TrackPainterOnMap {
             } else { // со второй точки начинаем рисовать
                 drawView.drawNextPoint(actualPointX, actualPointY);
             }
-
         }
         lastPaintedLocation = location;
-
     }
 
     private int calculateLocalX (Location location) {
         double coordinateDifferent = location.getLongitude() - startPointLongitude;
-        Log.i(PROJECT_LOG_TAG, "calculating different coord. X = "+coordinateDifferent+", pixels = "+calculatePixelFromCoordinate(coordinateDifferent));
-        return calculatePixelFromCoordinate(coordinateDifferent); // TODO: вот эти координаты почему-то получаются нулевые, хотя в логах все ок
+        int coordinatePixels = calculatePixelFromCoordinate(coordinateDifferent);
+        Log.i(PROJECT_LOG_TAG, "calculating different coord. X = "+coordinateDifferent+", pixels = "+coordinatePixels);
+        return coordinatePixels; // TODO: вот эти координаты почему-то получаются нулевые, хотя в логах все ок
     }
 
     private int calculateLocalY (Location location) {
         double coordinateDifferent = location.getLatitude() - startPointLatitude;
-        return (calculatePixelFromCoordinate(coordinateDifferent))*-1; // -1 для инвертирования оси У
+        int coordinatePixels = calculatePixelFromCoordinate(coordinateDifferent) * -1; // -1 для инвертирования оси У
+        Log.i(PROJECT_LOG_TAG, "calculating different coord. Y = "+coordinateDifferent+", pixels = "+coordinatePixels);
+        return coordinatePixels;
     }
 
-    private int calculatePixelFromCoordinate (double coordinate) {
-        int scaleMultiplier = 1;
-        for (int i = 1; i < trackAccuracy; i ++) {
-            scaleMultiplier = scaleMultiplier * 10;
-            //Log.i(PROJECT_LOG_TAG, "calculating multiplier = "+scaleMultiplier); // - tested, working correctly
+    private int calculatePixelFromCoordinate (double coordinateDifferent) {
+        int scaledCoordinates = 0;
+        if (Math.abs((int)coordinateDifferent) < 1) { // костыль на случай косяков с GPS и внезапных перескоков на большие расстояния
+            int scaleMultiplier = 1;
+            for (int i = 1; i < trackAccuracy; i ++) {
+                scaleMultiplier = scaleMultiplier * 10;
+            }
+            scaledCoordinates = (int) (coordinateDifferent * scaleMultiplier);
+            Log.i(PROJECT_LOG_TAG, "scale = "+scaleMultiplier+", different = "+coordinateDifferent+", " +
+                    "scaled coordinate = "+scaledCoordinates);
         }
-        Log.i(PROJECT_LOG_TAG, "scaled coordinate = "+(int)(coordinate * scaleMultiplier));
-        return (int) coordinate * scaleMultiplier;
+        return scaledCoordinates;
 
         //TODO: протестировать корректность подсчета
     }
 }
 
-
+//TODO: при не начатом записи трека идет обращение к этому классу, некорректное. Нужно запретить обращение если запись не ведется.
 
 // TODO: найти привязку канвы или окружения к конкретной вьюшке; залогировать код и дальше тестить всё
