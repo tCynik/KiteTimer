@@ -91,7 +91,7 @@ public class TrackPainterOnMap {
                 setStartCoordinates(location); // TODO: метод должен вызываться либо при вызове нового трека, либо при создании первой точки, не и там, и там!
                 drawView.setStartCoordinates(actualPointX, actualPointY);
             } else { // со второй точки начинаем рисовать
-                drawView.drawNextPoint(actualPointX, actualPointY);
+                drawView.drawNextLine(actualPointX, actualPointY);
             }
         }
         lastPaintedLocation = location;
@@ -131,3 +131,6 @@ public class TrackPainterOnMap {
 //TODO: при не начатом записи трека идет обращение к этому классу, некорректное. Нужно запретить обращение если запись не ведется.
 
 // TODO: найти привязку канвы или окружения к конкретной вьюшке; залогировать код и дальше тестить всё
+
+// TODO: отрисовку ранее загруженных треков производить методом canvas.drawLines("массив с координатами", paint) - см. урок 142
+//

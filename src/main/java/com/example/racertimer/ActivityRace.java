@@ -202,7 +202,7 @@ public class ActivityRace extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    public void deployMapFragment() { // создание фрагмента для прогноза
+    public void deployMapFragment() { // создание фрагмента для карты
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_place_map, mapFragment);

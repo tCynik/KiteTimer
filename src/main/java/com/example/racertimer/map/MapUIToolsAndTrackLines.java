@@ -63,9 +63,8 @@ public class MapUIToolsAndTrackLines {
     public void onDrawViewCreated (DrawView drawView) {
         if (trackLayout != null) {
             trackLayout.addView(drawView);
-            Log.i(PROJECT_LOG_TAG, "the new drawView was added into trackLayout ");
+            Log.i(PROJECT_LOG_TAG, "new drawView was added into trackLayout ");
         } else Log.i(PROJECT_LOG_TAG, "trackline was not pasted into fragment - has no any trackLayout! ");
-
     }
 
     /** Scale management block */
