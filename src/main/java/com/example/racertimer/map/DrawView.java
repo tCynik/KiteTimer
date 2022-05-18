@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.location.Location;
 import android.util.Log;
 import android.view.View;
 
@@ -21,9 +22,15 @@ public class DrawView extends View {
     float currentCoordinateX;
     float currentCoordinateY;
 
-    public DrawView (Context context) {
+    private double trackStartLongitude; // точка начала трека принимается как начало отсчета карты...
+    private double trackStartLatitude;  //      т.е. Х=0 У=0 в локальной системе отсчета
+
+    public DrawView (Context context, Location location) {
         super (context);
         Log.i(PROJECT_LOG_TAG, "draw view instance was created");
+
+        trackStartLatitude = location.getLatitude();
+        trackStartLongitude = location.getLongitude();
 
         paint = new Paint();
         paint.setColor(Color.RED);
@@ -36,9 +43,10 @@ public class DrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         Log.i(PROJECT_LOG_TAG, "drawing in drawViews's onDraw");
-
+        currentCoordinateX = currentCoordinateX*10+200;
+        currentCoordinateY = currentCoordinateY*10+200;
 //        path.lineTo(300, 300);
-        path.lineTo((currentCoordinateX*10+200), (currentCoordinateY*10+200)); // пока все вычисления для теста отрисовки
+        path.lineTo(currentCoordinateX, currentCoordinateY); // пока все вычисления для теста отрисовки
         canvas.drawPath(path, paint);
         path.moveTo(currentCoordinateX, currentCoordinateY);
 
@@ -63,6 +71,14 @@ public class DrawView extends View {
         //TODO: пока начало рисования в нулевой точке (грубо, где создается карта) При рисовании со старта норм,
         // но если запускаем не сразу (через стартовую процедуру), будем связыватсья с 0? Или при импорте трека для прорисовки
         // нужно в первую точку линию не рисовать! И при этом обойти частный случае если посреди трека появятся координаты 0, 0
+    }
+
+    public double getTrackStartLongitude() {
+        return trackStartLongitude;
+    }
+
+    public double getTrackStartLatitude() {
+        return trackStartLatitude;
     }
 
 

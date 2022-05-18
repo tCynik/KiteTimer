@@ -38,7 +38,7 @@ import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.map.DrawView;
-import com.example.racertimer.map.MapUIToolsAndTrackLines;
+import com.example.racertimer.map.MapUIManagement;
 import com.example.racertimer.map.TrackDrawerTranzister;
 import com.example.racertimer.map.TrackPainterOnMap;
 import com.example.racertimer.multimedia.Voiceover;
@@ -57,7 +57,7 @@ public class ActivityRace extends AppCompatActivity implements
 
     private TimerFragment timerFragment = null;
     private MapFragment mapFragment = null;
-    public MapUIToolsAndTrackLines mapUIToolsAndTrackLines;
+    public MapUIManagement mapUIManagement;
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
     public DeveloperFragment developerFragment = null;
@@ -138,7 +138,7 @@ public class ActivityRace extends AppCompatActivity implements
             @Override
             public void setDrawView(DrawView drawView) {
                 trackDrawerView = drawView; // TODO: теперь нужно вывести View на экран и заставить рисовать
-                mapUIToolsAndTrackLines.onDrawViewCreated(drawView);
+                mapUIManagement.onDrawViewCreated(drawView);
                 Log.i("racer_timer_painter", "racer activity - transiting the drawView by callback");
             }
         };
@@ -188,9 +188,9 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void uploadMapUIIntoTools (ConstraintLayout tracksLayout, ImageView arrowDirection, ImageView arrowWind, Button btnIncScale, Button btnDecScale) {
-        mapUIToolsAndTrackLines = new MapUIToolsAndTrackLines(defaultMapScale);
-        mapUIToolsAndTrackLines.setUIViews(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
-        mapUIToolsAndTrackLines.onWindChanged(CoursesCalculator.invertCourse(windDirection));
+        mapUIManagement = new MapUIManagement(defaultMapScale);
+        mapUIManagement.setUIViews(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
+        mapUIManagement.onWindChanged(CoursesCalculator.invertCourse(windDirection));
     }
 
     /** модуль методов выгрузки фрагментов */
@@ -432,9 +432,9 @@ public class ActivityRace extends AppCompatActivity implements
     public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
-        if (mapUIToolsAndTrackLines != null) {
+        if (mapUIManagement != null) {
             Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
-            mapUIToolsAndTrackLines.onWindChanged(updatedWindDirection);
+            mapUIManagement.onWindChanged(updatedWindDirection);
         }
     }
 
@@ -479,7 +479,7 @@ public class ActivityRace extends AppCompatActivity implements
         } else sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
-        if (mapUIToolsAndTrackLines != null) mapUIToolsAndTrackLines.onBearingChanged(bearing);
+        if (mapUIManagement != null) mapUIManagement.onBearingChanged(bearing);
     }
 
     public void muteChangedStatus(boolean b) { // выключение звука пищалки

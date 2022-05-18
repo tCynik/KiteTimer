@@ -10,7 +10,7 @@ public class TrackPainterOnMap {
 
     private Context context;
     public DrawView drawView;
-    private int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
+    private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
     private boolean recordingInProgress = true; //false; // TODO: after testing set FALSE
     private TrackDrawerTranzister trackDrawerTranzister;
@@ -25,15 +25,9 @@ public class TrackPainterOnMap {
         this.context = context;
     }
 
-//    @Override
-//    public void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//    }
-
     public void beginNewTrackDrawing (Location location) {
         Log.i(PROJECT_LOG_TAG, "track painter is starting new track drawing");
-        drawView = new DrawView(context);
+        drawView = new DrawView(context, location);
         trackDrawerTranzister.setDrawView(drawView);
 
         if (location != null) {
@@ -59,13 +53,6 @@ public class TrackPainterOnMap {
         //  maby ask to save the track or not (if track time is to short)
     }
 
-    public DrawView getDrawView() {
-        if (drawView == null) Log.i(PROJECT_LOG_TAG, "draw view in the track painter is null!");
-
-        Log.i(PROJECT_LOG_TAG, "sending drawView from TrackPainter");
-        return drawView;
-    }
-
     public void onLocatoinChanged(Location location) {
         Log.i(PROJECT_LOG_TAG, "new location in Track Painter, speed is: " +location.getSpeed());
         currentLocation = location;
@@ -79,6 +66,7 @@ public class TrackPainterOnMap {
         setScreenCenterCoordinates();
     }
 
+// todo: нужен рефакторинг. В трек отправляем локацию, дальше он сам высчитывает координаты следующей точки
     private void addLocationIntoTrack (Location location) {
         int actualPointX = calculateLocalX(location); // нынешние координаты в системе координат лайаута
         int actualPointY = calculateLocalY(location);
@@ -92,6 +80,7 @@ public class TrackPainterOnMap {
                 drawView.setStartCoordinates(actualPointX, actualPointY);
             } else { // со второй точки начинаем рисовать
                 drawView.drawNextLine(actualPointX, actualPointY);
+                // TODO: вот тут попробуем смещать drawView по мере отрисовки трека
             }
         }
         lastPaintedLocation = location;

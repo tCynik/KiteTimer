@@ -66,7 +66,7 @@ public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChan
         if (seekBar == bearingSB) {
             int bearing = i;
             activityRace.sailingToolsFragment.onBearingChanged(bearing);
-            activityRace.mapUIToolsAndTrackLines.onBearingChanged(bearing);
+            activityRace.mapUIManagement.onBearingChanged(bearing);
         }
         if (seekBar == velocitySB) {
             int velocity = i;

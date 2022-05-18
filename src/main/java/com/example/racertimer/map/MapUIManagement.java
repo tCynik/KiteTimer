@@ -9,19 +9,18 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 
-public class MapUIToolsAndTrackLines {
+public class MapUIManagement {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_tools";
 
     private ConstraintLayout trackLayout;
     private ImageView directionArrow, windArrow;
-    private Button btnDecScale, btnIncScale;
 
     private float mapScale;
     private float minScale = 0.5f;
     private float maxScale = 10f;
-    private double stepScale = 0.5;
+    private final float stepScaleChanging = 0.5f;
 
-    public MapUIToolsAndTrackLines(float defaultMapScale) {
+    public MapUIManagement(float defaultMapScale) {
         this.mapScale = defaultMapScale;
     }
 
@@ -32,8 +31,6 @@ public class MapUIToolsAndTrackLines {
         onScaleChanged(mapScale);
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
-        this.btnIncScale = btnIncScale;
-        this.btnDecScale = btnDecScale;
 
         btnIncScale.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +60,8 @@ public class MapUIToolsAndTrackLines {
     public void onDrawViewCreated (DrawView drawView) {
         if (trackLayout != null) {
             trackLayout.addView(drawView);
+            drawView.setX(200);
+            drawView.setY(200);
             Log.i(PROJECT_LOG_TAG, "new drawView was added into trackLayout ");
         } else Log.i(PROJECT_LOG_TAG, "trackline was not pasted into fragment - has no any trackLayout! ");
     }
@@ -70,7 +69,7 @@ public class MapUIToolsAndTrackLines {
     /** Scale management block */
     public void onScaleIncreased () {
         if (mapScale < maxScale) {
-            mapScale = mapScale + (float)stepScale;
+            mapScale = mapScale + stepScaleChanging;
             onScaleChanged(mapScale);
             Log.i(PROJECT_LOG_TAG, "map scale was increased to "+mapScale);
         }
@@ -78,7 +77,7 @@ public class MapUIToolsAndTrackLines {
 
     public void onScaleDecreased () {
         if (mapScale > minScale) {
-            mapScale = mapScale - (float)stepScale;
+            mapScale = mapScale - stepScaleChanging;
             onScaleChanged(mapScale);
             Log.i(PROJECT_LOG_TAG, "map scale was decreased to "+mapScale);
         }
