@@ -5,6 +5,8 @@ import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 public class TrackPainterOnMap {
     private final static String PROJECT_LOG_TAG = "racer_timer_painter";
 
@@ -13,22 +15,23 @@ public class TrackPainterOnMap {
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
     private boolean recordingInProgress = true; //false; // TODO: after testing set FALSE
-    private TrackDrawerTranzister trackDrawerTranzister;
+    private ConstraintLayout tracksLayout;
 
     private Location lastPaintedLocation = null;
     private Location currentLocation;
     private double startPointLongitude; // точка начала трека принимается как начало отсчета карты...
     private double startPointLatitude;  //      т.е. Х=0 У=0 в локальной системе отсчета
 
-    public TrackPainterOnMap (TrackDrawerTranzister trackDrawerTranzister, Context context) {
-        this.trackDrawerTranzister = trackDrawerTranzister;
+    public TrackPainterOnMap (Context context) {
         this.context = context;
     }
 
     public void beginNewTrackDrawing (Location location) {
         Log.i(PROJECT_LOG_TAG, "track painter is starting new track drawing");
         drawView = new DrawView(context, location);
-        trackDrawerTranzister.setDrawView(drawView);
+        //trackDrawerTranzister.setDrawView(drawView); !!!!!!
+        tracksLayout.addView(drawView);
+        setScreenCenterCoordinates();
 
         if (location != null) {
             setStartCoordinates(location);
@@ -43,7 +46,7 @@ public class TrackPainterOnMap {
     }
 
     private void setScreenCenterCoordinates() {
-
+        выставляем вьюшку трека по центру лайаута
     }
 
     public void endTrackDrawing() {
@@ -56,7 +59,10 @@ public class TrackPainterOnMap {
     public void onLocatoinChanged(Location location) {
         Log.i(PROJECT_LOG_TAG, "new location in Track Painter, speed is: " +location.getSpeed());
         currentLocation = location;
-        if (recordingInProgress) addLocationIntoTrack(location);
+        if (recordingInProgress) {
+            addLocationIntoTrack(location);
+            moveScreenCenter(location);
+        }
     }
 
 /** блок приватных методов */
@@ -81,9 +87,17 @@ public class TrackPainterOnMap {
             } else { // со второй точки начинаем рисовать
                 drawView.drawNextLine(actualPointX, actualPointY);
                 // TODO: вот тут попробуем смещать drawView по мере отрисовки трека
+
             }
         }
         lastPaintedLocation = location;
+    }
+
+    private void moveScreenCenter(Location location) {
+        int actualPointX = calculateLocalX(location)*-1; // нынешние координаты в системе координат лайаута
+        int actualPointY = calculateLocalY(location)*-1;
+        drawView.setX(actualPointX);
+        drawView.setY(actualPointY);
     }
 
     private int calculateLocalX (Location location) {
@@ -114,6 +128,10 @@ public class TrackPainterOnMap {
         return scaledCoordinates;
 
         //TODO: протестировать корректность подсчета
+    }
+
+    public void setTracksLayout(ConstraintLayout tracksLayout) {
+        this.tracksLayout = tracksLayout;
     }
 }
 

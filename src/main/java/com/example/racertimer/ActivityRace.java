@@ -39,7 +39,6 @@ import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.map.DrawView;
 import com.example.racertimer.map.MapUIManagement;
-import com.example.racertimer.map.TrackDrawerTranzister;
 import com.example.racertimer.map.TrackPainterOnMap;
 import com.example.racertimer.multimedia.Voiceover;
 
@@ -64,7 +63,6 @@ public class ActivityRace extends AppCompatActivity implements
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
     private TrackPainterOnMap trackPainterOnMap;
-    private TrackDrawerTranzister trackDrawerTranzister;
     private DrawView trackDrawerView;
 
     private ImageView arrowDirectionOnMap, arrowWindOnMap;
@@ -134,15 +132,7 @@ public class ActivityRace extends AppCompatActivity implements
 
         deploySailingToolsFragment();
 
-        trackDrawerTranzister = new TrackDrawerTranzister() {
-            @Override
-            public void setDrawView(DrawView drawView) {
-                trackDrawerView = drawView; // TODO: теперь нужно вывести View на экран и заставить рисовать
-                mapUIManagement.onDrawViewCreated(drawView);
-                Log.i("racer_timer_painter", "racer activity - transiting the drawView by callback");
-            }
-        };
-        trackPainterOnMap = new TrackPainterOnMap(trackDrawerTranzister, context);
+        trackPainterOnMap = new TrackPainterOnMap(context);
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
 //        btnMenu.setOnClickListener(new View.OnClickListener() {
@@ -189,8 +179,12 @@ public class ActivityRace extends AppCompatActivity implements
 
     public void uploadMapUIIntoTools (ConstraintLayout tracksLayout, ImageView arrowDirection, ImageView arrowWind, Button btnIncScale, Button btnDecScale) {
         mapUIManagement = new MapUIManagement(defaultMapScale);
-        mapUIManagement.setUIViews(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
+        mapUIManagement.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale);
         mapUIManagement.onWindChanged(CoursesCalculator.invertCourse(windDirection));
+    }
+
+    public void uploadTrackLayout (ConstraintLayout trackLayoutForTrackPainter) {
+        trackPainterOnMap.setTracksLayout(trackLayoutForTrackPainter);
     }
 
     /** модуль методов выгрузки фрагментов */

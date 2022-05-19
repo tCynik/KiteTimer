@@ -24,7 +24,6 @@ public class MapFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -56,12 +55,22 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         exportViewsIntoSailingTools();
+        exportTracksLayoutIntoTrackPainter();
     }
 
     private void exportViewsIntoSailingTools() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
         assert activityRace != null;
         activityRace.uploadMapUIIntoTools(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
+    }
+
+    private void exportTracksLayoutIntoTrackPainter() {
+        ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
+        activityRace.uploadTrackLayout(tracksLayout);
+    }
+
+    public ConstraintLayout getTracksLayout() {
+        return tracksLayout;
     }
 }
 

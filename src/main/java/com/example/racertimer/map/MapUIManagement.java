@@ -5,14 +5,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import com.example.racertimer.Instruments.CoursesCalculator;
 
 public class MapUIManagement {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_tools";
 
-    private ConstraintLayout trackLayout;
     private ImageView directionArrow, windArrow;
 
     private float mapScale;
@@ -24,10 +21,8 @@ public class MapUIManagement {
         this.mapScale = defaultMapScale;
     }
 
-    public void setUIViews (ConstraintLayout trackLayout,
-                            ImageView directionArrow, ImageView windArrow,
+    public void setUIViews (ImageView directionArrow, ImageView windArrow,
                             Button btnIncScale, Button btnDecScale) {
-        this.trackLayout = trackLayout;
         onScaleChanged(mapScale);
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
@@ -57,15 +52,6 @@ public class MapUIManagement {
         windArrow.setRotation(CoursesCalculator.invertCourse(windDirection));
     }
 
-    public void onDrawViewCreated (DrawView drawView) {
-        if (trackLayout != null) {
-            trackLayout.addView(drawView);
-            drawView.setX(200);
-            drawView.setY(200);
-            Log.i(PROJECT_LOG_TAG, "new drawView was added into trackLayout ");
-        } else Log.i(PROJECT_LOG_TAG, "trackline was not pasted into fragment - has no any trackLayout! ");
-    }
-
     /** Scale management block */
     public void onScaleIncreased () {
         if (mapScale < maxScale) {
@@ -84,7 +70,6 @@ public class MapUIManagement {
     }
 
     private void onScaleChanged (float updatedScale) {
-        trackLayout.setScaleY(updatedScale);
-        trackLayout.setScaleX(updatedScale);
+        // TODO: make interface with methods to change the scale
     }
 }
