@@ -43,8 +43,8 @@ public class DrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         Log.i(PROJECT_LOG_TAG, "drawing in drawViews's onDraw");
-        currentCoordinateX = currentCoordinateX*10+200;
-        currentCoordinateY = currentCoordinateY*10+200;
+        currentCoordinateX = currentCoordinateX*10;
+        currentCoordinateY = currentCoordinateY*10;
 //        path.lineTo(300, 300);
         path.lineTo(currentCoordinateX, currentCoordinateY); // пока все вычисления для теста отрисовки
         canvas.drawPath(path, paint);
@@ -81,6 +81,11 @@ public class DrawView extends View {
         return trackStartLatitude;
     }
 
+нужно сделать стартовую привязочную точку
+1. в рамках обьекта храним в массиве все точки трека (как location)
+2. в случае выхода координат точки за -0 меняем стартовую точку, и от нее перестраиваем весь трек
 
+ОДНАКО в этом случае получится странная история со смещением экрана. в идеале свой экран должна смещать сама вьюшка
+надо разбиратсья с делегирвоанием
 }
 
