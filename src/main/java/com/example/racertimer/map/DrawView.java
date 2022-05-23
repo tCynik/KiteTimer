@@ -12,9 +12,15 @@ import android.view.View;
 public class DrawView extends View {
     private final static String PROJECT_LOG_TAG = "racer_timer_draw";
 
-    Paint paint;
+    TrackPainterOnMap trackPainterOnMap;
 
-    Path path;
+    private TrackGridCalculator trackGridCalculator;
+
+    private Paint paint;
+    private Path path;
+
+    float screenCenterX;
+    float screenCenterY;
 
     float prevCoordinateX;
     float prevCoordinateY;
@@ -28,6 +34,7 @@ public class DrawView extends View {
     public DrawView (Context context, Location location) {
         super (context);
         Log.i(PROJECT_LOG_TAG, "draw view instance was created");
+        trackGridCalculator = new TrackGridCalculator(location);
 
         trackStartLatitude = location.getLatitude();
         trackStartLongitude = location.getLongitude();
@@ -43,9 +50,8 @@ public class DrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         Log.i(PROJECT_LOG_TAG, "drawing in drawViews's onDraw");
-        currentCoordinateX = currentCoordinateX*10;
-        currentCoordinateY = currentCoordinateY*10;
-//        path.lineTo(300, 300);
+        currentCoordinateX = screenCenterX + currentCoordinateX*10;
+        currentCoordinateY = screenCenterY + currentCoordinateY*10;
         path.lineTo(currentCoordinateX, currentCoordinateY); // пока все вычисления для теста отрисовки
         canvas.drawPath(path, paint);
         path.moveTo(currentCoordinateX, currentCoordinateY);
@@ -53,25 +59,32 @@ public class DrawView extends View {
         Log.i(PROJECT_LOG_TAG, "drawing line: from "+prevCoordinateX + " : "+prevCoordinateY+ " to " + currentCoordinateX+ " : "+ currentCoordinateY);
     }
 
-    public void drawNextLine(int currentCoordinateX, int currentCoordinateY) {
-        this.currentCoordinateX = currentCoordinateX;
-        this.currentCoordinateY = currentCoordinateY;
+    public void setScreenCenterCoordinates (float screenCenterX, float screenCenterY) {
+        this.screenCenterX = screenCenterX;
+        this.screenCenterY = screenCenterY;
+        path.moveTo(screenCenterX, screenCenterY);
+    }
+
+    public void onLocationChanged (Location location) {
+        this.currentCoordinateX = trackGridCalculator.calculateLocalX(location); //calculateLocalX(location); // нынешние координаты в системе координат лайаута
+        this.currentCoordinateY = trackGridCalculator.calculateLocalY(location); //calculateLocalY(location);
 
         Log.i(PROJECT_LOG_TAG, "invalidating point: from "+prevCoordinateX+" : "+prevCoordinateY+" to "+currentCoordinateX + " : "+currentCoordinateY);
-
         invalidate();
-//
-//        prevCoordinateX = currentCoordinateX;
-//        prevCoordinateY = currentCoordinateY;
+
+        setScreenCenter();
     }
 
-    public void setStartCoordinates(int prevCoordinateX, int prevCoordinateY) {
-        this.prevCoordinateX = prevCoordinateX;
-        this.prevCoordinateY = prevCoordinateY;
-        //TODO: пока начало рисования в нулевой точке (грубо, где создается карта) При рисовании со старта норм,
-        // но если запускаем не сразу (через стартовую процедуру), будем связыватсья с 0? Или при импорте трека для прорисовки
-        // нужно в первую точку линию не рисовать! И при этом обойти частный случае если посреди трека появятся координаты 0, 0
+    private void setScreenCenter () {
+        trackPainterOnMap.setScreenToCoordinates(currentCoordinateX*10, currentCoordinateY*10);
+        // TODO: надо разобраться, где выставлять центр координат - здесь или в трэк пэйнтере
+        //  скорей здесь, т.к. при расширении вьюшки поменяется и центр
+
     }
+
+    //TODO: пока начало рисования в нулевой точке (грубо, где создается карта) При рисовании со старта норм,
+    // но если запускаем не сразу (через стартовую процедуру), будем связыватсья с 0? Или при импорте трека для прорисовки
+    // нужно в первую точку линию не рисовать! И при этом обойти частный случае если посреди трека появятся координаты 0, 0
 
     public double getTrackStartLongitude() {
         return trackStartLongitude;
@@ -81,11 +94,16 @@ public class DrawView extends View {
         return trackStartLatitude;
     }
 
-нужно сделать стартовую привязочную точку
-1. в рамках обьекта храним в массиве все точки трека (как location)
-2. в случае выхода координат точки за -0 меняем стартовую точку, и от нее перестраиваем весь трек
+    public void setTrackPainterOnMap(TrackPainterOnMap trackPainterOnMap) {
+        this.trackPainterOnMap = trackPainterOnMap;
+        //trackPainterOnMap.setScreenToCenter();
+    }
 
-ОДНАКО в этом случае получится странная история со смещением экрана. в идеале свой экран должна смещать сама вьюшка
-надо разбиратсья с делегирвоанием
+//    нужно сделать стартовую привязочную точку
+// TODO: 1. в рамках обьекта храним в массиве все точки трека (как location)
+//2. в случае выхода координат точки за -0 меняем стартовую точку, и от нее перестраиваем весь трек
+//
+//ОДНАКО в этом случае получится странная история со смещением экрана. в идеале свой экран должна смещать сама вьюшка
+//надо разбиратсья с делегирвоанием
 }
 

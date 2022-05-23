@@ -34,12 +34,15 @@ public class TrackPainterOnMap {
         Log.i(PROJECT_LOG_TAG, "track painter is starting new track drawing");
         drawView = new DrawView(context, location);
         tracksLayout.addView(drawView);
-        setScreenCenterCoordinates();
+        drawView.setTrackPainterOnMap(this);
+        float screenCenterX = (tracksLayout.getWidth() / 2);
+        float screenCenterY = (tracksLayout.getHeight() / 2);
+        drawView.setScreenCenterCoordinates(screenCenterX, screenCenterY);
         drawView.setBackgroundColor(Color.GRAY);
         Log.i(PROJECT_LOG_TAG, "view sizes: X ="+drawView.getWidth()+", Y ="+drawView.getHeight());
 
         if (location != null) {
-            setStartCoordinates(location);
+            //setStartCoordinates(location);
             Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 
@@ -50,11 +53,13 @@ public class TrackPainterOnMap {
         recordingInProgress = true;
     }
 
-    private void setScreenCenterCoordinates() {
-        layoutCenterCoordinateX = (tracksLayout.getWidth() / 2);
-        layoutCenterCoordinateY = (tracksLayout.getHeight() / 2);
-        drawView.setX(layoutCenterCoordinateX);
-        drawView.setY(layoutCenterCoordinateY);
+    public void setScreenToCoordinates (float coordX, float coordY) {
+        drawView.setX(layoutCenterCoordinateX - coordX);
+        drawView.setY(layoutCenterCoordinateY - coordY);
+    }
+
+    public void moveBorderX(double volume) {
+
     }
 
     public void endTrackDrawing() {
@@ -68,76 +73,8 @@ public class TrackPainterOnMap {
         Log.i(PROJECT_LOG_TAG, "new location in Track Painter, speed is: " +location.getSpeed());
         currentLocation = location;
         if (recordingInProgress) {
-            addLocationIntoTrack(location);
-            //moveScreenCenter(location);
+            drawView.onLocationChanged(location);
         }
-    }
-
-/** блок приватных методов */
-    private void setStartCoordinates(Location location) {
-        startPointLatitude = location.getLatitude();
-        startPointLongitude = location.getLongitude();
-        setScreenCenterCoordinates();
-    }
-
-// todo: нужен рефакторинг. В трек отправляем локацию, дальше он сам высчитывает координаты следующей точки
-    private void addLocationIntoTrack (Location location) {
-        int actualPointX = calculateLocalX(location); // нынешние координаты в системе координат лайаута
-        int actualPointY = calculateLocalY(location);
-        Log.i(PROJECT_LOG_TAG, "new location coordinates is: X = "+actualPointX+", Y = "+actualPointY);
-
-        if (drawView == null) {
-            Log.i(PROJECT_LOG_TAG, "drawView is null");
-        } else {
-            if (lastPaintedLocation == null) { // первая точка - ничего не рисуем, просто запоминаем
-                setStartCoordinates(location); // TODO: метод должен вызываться либо при вызове нового трека, либо при создании первой точки, не и там, и там!
-                drawView.setStartCoordinates(actualPointX, actualPointY);
-            } else { // со второй точки начинаем рисовать
-                drawView.drawNextLine(actualPointX, actualPointY);
-                setPositionIntoScreenCenter(actualPointX, actualPointY);
-                // TODO: вот тут попробуем смещать drawView по мере отрисовки трека
-
-            }
-        }
-        lastPaintedLocation = location;
-    }
-
-    private void setPositionIntoScreenCenter(int actualPointX, int actualPointY) {
-        float drawViewCoordinateX = layoutCenterCoordinateX - actualPointX*10;
-        float drawViewCoordinateY = layoutCenterCoordinateY - actualPointY*10;
-        Log.i(PROJECT_LOG_TAG, "view coordinates: X = "+drawViewCoordinateX+", Y = "+drawViewCoordinateY);
-        drawView.setX(drawViewCoordinateX);
-        drawView.setY(drawViewCoordinateY);
-    }
-
-    private int calculateLocalX (Location location) {
-        double coordinateDifferent = location.getLongitude() - startPointLongitude;
-        int coordinatePixels = calculatePixelFromCoordinate(coordinateDifferent);
-        Log.i(PROJECT_LOG_TAG, "calculating different coord. X = "+coordinateDifferent+", pixels = "+coordinatePixels);
-        return coordinatePixels; // TODO: вот эти координаты почему-то получаются нулевые, хотя в логах все ок
-    }
-
-    private int calculateLocalY (Location location) {
-        double coordinateDifferent = location.getLatitude() - startPointLatitude;
-        int coordinatePixels = calculatePixelFromCoordinate(coordinateDifferent) * -1; // -1 для инвертирования оси У
-        Log.i(PROJECT_LOG_TAG, "calculating different coord. Y = "+coordinateDifferent+", pixels = "+coordinatePixels);
-        return coordinatePixels;
-    }
-
-    private int calculatePixelFromCoordinate (double coordinateDifferent) {
-        int scaledCoordinates = 0;
-        if (Math.abs((int)coordinateDifferent) < 1) { // костыль на случай косяков с GPS и внезапных перескоков на большие расстояния
-            int scaleMultiplier = 1;
-            for (int i = 1; i < trackAccuracy; i ++) {
-                scaleMultiplier = scaleMultiplier * 10;
-            }
-            scaledCoordinates = (int) (coordinateDifferent * scaleMultiplier);
-            Log.i(PROJECT_LOG_TAG, "scale = "+scaleMultiplier+", different = "+coordinateDifferent+", " +
-                    "scaled coordinate = "+scaledCoordinates);
-        }
-        return scaledCoordinates;
-
-        //TODO: протестировать корректность подсчета
     }
 
     public void setTracksLayout(ConstraintLayout tracksLayout) {
