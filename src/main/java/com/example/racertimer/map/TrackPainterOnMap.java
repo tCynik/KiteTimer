@@ -38,6 +38,7 @@ public class TrackPainterOnMap {
         float screenCenterX = (tracksLayout.getWidth() / 2);
         float screenCenterY = (tracksLayout.getHeight() / 2);
         drawView.setScreenCenterCoordinates(screenCenterX, screenCenterY);
+//        drawView.setBorderShiftStep(tracksLayout.getWidth() / 2);
         drawView.setBackgroundColor(Color.GRAY);
         Log.i(PROJECT_LOG_TAG, "view sizes: X ="+drawView.getWidth()+", Y ="+drawView.getHeight());
 

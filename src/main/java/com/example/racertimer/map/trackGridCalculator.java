@@ -32,7 +32,7 @@ class TrackGridCalculator {
     private int calculatePixelFromCoordinate(double coordinateDifferent) {
         int scaledCoordinates = 0;
         if (Math.abs((int) coordinateDifferent) < 1) { // костыль на случай косяков с GPS и внезапных перескоков на большие расстояния
-            int scaleMultiplier = 1;
+            int scaleMultiplier = 10;
             for (int i = 1; i < trackAccuracy; i++) { // 5 - trackAccuracy
                 scaleMultiplier = scaleMultiplier * 10;
             }
