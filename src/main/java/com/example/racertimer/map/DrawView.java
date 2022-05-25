@@ -21,9 +21,10 @@ public class DrawView extends View {
 
     float screenCenterX, screenCenterY;
 
-    private float prevCoordinateX, prevCoordinateY;
+    private float lastCoordinateX, lastCoordinateY;
 
     private float currentCoordinateX, currentCoordinateY;
+    private float coordinateXToDraw, coordinateYToDraw, viewShiftX, viewShiftY;
 
     private float borderXShift = 0; // сдвиг для динамического расширения вьюшки при необходимости
     private float borderYShift = 0;
@@ -31,6 +32,8 @@ public class DrawView extends View {
 
     private double trackStartLongitude; // точка начала трека принимается как начало отсчета карты...
     private double trackStartLatitude;  //      т.е. Х=0+сдвиг У=0+сдвиг в локальной системе отсчета
+
+    private boolean screenCenterOnLocation = true;
 
     public DrawView (Context context, Location location) {
         super (context);
@@ -51,17 +54,49 @@ public class DrawView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        checkViewBorders();
-        path.lineTo(currentCoordinateX, currentCoordinateY); // пока все вычисления для теста отрисовки
         canvas.drawPath(path, paint);
-        path.moveTo(currentCoordinateX, currentCoordinateY);
-
-        Log.i(PROJECT_LOG_TAG, "drawing line: from "+prevCoordinateX + " : "+prevCoordinateY+ " to " + currentCoordinateX+ " : "+ currentCoordinateY);
     }
 
-    private void calculateDrawingCoordinates () {
-        currentCoordinateX = screenCenterX + currentCoordinateX + borderXShift;
-        currentCoordinateY = screenCenterY + currentCoordinateY + borderYShift;
+    public void onLocationChanged (Location location) {
+        calculateCoordinates(location);
+        drawLine();
+        recordWaypoint(location);
+        if (screenCenterOnLocation) moveScreenToCoordinate();
+    }
+
+    public void calculateCoordinates(Location location) {
+        currentCoordinateX = trackGridCalculator.calculateLocalX(location) + borderXShift; //calculateLocalX(location); // нынешние координаты в системе координат лайаута
+        currentCoordinateY = trackGridCalculator.calculateLocalY(location) + borderYShift; //calculateLocalY(location);
+
+        if (screenCenterX == 0) trackPainterOnMap.setScreenCenterToView();
+        coordinateXToDraw = screenCenterX + currentCoordinateX;
+        coordinateYToDraw = screenCenterY + currentCoordinateY;
+
+        viewShiftX = - screenCenterX currentCoordinateX * -1; // (тут должно быть центр вьюшки + центр экрана) * -1
+        viewShiftY = currentCoordinateY * -1;
+    }
+
+    private void drawLine () {
+        checkViewBoarders();
+        //Log.i(PROJECT_LOG_TAG, "invalidating point: from "+ lastCoordinateX +" : "+ lastCoordinateY +" to "+currentCoordinateX + " : "+currentCoordinateY);
+
+        path.lineTo(coordinateXToDraw, coordinateYToDraw); // пока все вычисления для теста отрисовки
+        invalidate();
+        path.moveTo(coordinateXToDraw, coordinateYToDraw);
+
+        lastCoordinateX = currentCoordinateX;
+        lastCoordinateY = currentCoordinateY;
+    }
+
+    private void recordWaypoint(Location location) {
+        // TODO: recording the location into array
+    }
+
+    private void moveScreenToCoordinate() {
+        trackPainterOnMap.setScreenToCoordinates(viewShiftX, viewShiftY);
+
+        if (boarderShiftStep == 0)
+            boarderShiftStep = this.getWidth() / 2;
     }
 
     public void setScreenCenterCoordinates (float screenCenterX, float screenCenterY) {
@@ -70,23 +105,10 @@ public class DrawView extends View {
         path.moveTo(screenCenterX, screenCenterY);
     }
 
-    public void onLocationChanged (Location location) {
-        this.currentCoordinateX = trackGridCalculator.calculateLocalX(location) + borderXShift; //calculateLocalX(location); // нынешние координаты в системе координат лайаута
-        this.currentCoordinateY = trackGridCalculator.calculateLocalY(location) + borderYShift; //calculateLocalY(location);
-        setScreenCenter();
-        calculateDrawingCoordinates();
-        Log.i(PROJECT_LOG_TAG, "invalidating point: from "+prevCoordinateX+" : "+prevCoordinateY+" to "+currentCoordinateX + " : "+currentCoordinateY);
-        invalidate();
+    private void checkViewBoarders() {
+        Log.i(PROJECT_LOG_TAG, "!!! current X = " + coordinateXToDraw+", width = " +this.getWidth() );
 
-
-        if (boarderShiftStep == 0)
-            boarderShiftStep = this.getWidth() / 2;
-    }
-
-    private void checkViewBorders() {
-        Log.i(PROJECT_LOG_TAG, "!!! current X = " + currentCoordinateX+", width = " +this.getWidth() );
-
-        if (currentCoordinateX > this.getWidth()) {
+        if (coordinateXToDraw > this.getWidth()) {
             Log.i(PROJECT_LOG_TAG, "expending X board " );
             expendBoarderX();
         }
@@ -101,10 +123,6 @@ public class DrawView extends View {
 
     private void expendBorderY() {}
 
-    private void setScreenCenter () {
-
-        trackPainterOnMap.setScreenToCoordinates(currentCoordinateX, currentCoordinateY);
-    }
     // TODO: надо разбираться с расчетом координат. Сейчас бардак: двухстадийный расчет отдельно для трека, отдельно для смещения экрана.
 
     // TODO: когда кончается вьюшка, она не хочет менять размер! Придется составлять трек из массива вьюшек?
@@ -124,7 +142,6 @@ public class DrawView extends View {
 
     public void setTrackPainterOnMap(TrackPainterOnMap trackPainterOnMap) {
         this.trackPainterOnMap = trackPainterOnMap;
-        //trackPainterOnMap.setScreenToCenter();
     }
 
 //    нужно сделать стартовую привязочную точку

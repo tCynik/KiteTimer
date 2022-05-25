@@ -35,9 +35,6 @@ public class TrackPainterOnMap {
         drawView = new DrawView(context, location);
         tracksLayout.addView(drawView);
         drawView.setTrackPainterOnMap(this);
-        float screenCenterX = (tracksLayout.getWidth() / 2);
-        float screenCenterY = (tracksLayout.getHeight() / 2);
-        drawView.setScreenCenterCoordinates(screenCenterX, screenCenterY);
 //        drawView.setBorderShiftStep(tracksLayout.getWidth() / 2);
         drawView.setBackgroundColor(Color.GRAY);
         Log.i(PROJECT_LOG_TAG, "view sizes: X ="+drawView.getWidth()+", Y ="+drawView.getHeight());
@@ -55,8 +52,14 @@ public class TrackPainterOnMap {
     }
 
     public void setScreenToCoordinates (float coordX, float coordY) {
-        drawView.setX(layoutCenterCoordinateX - coordX);
-        drawView.setY(layoutCenterCoordinateY - coordY);
+        drawView.setX(coordX);
+        drawView.setY(coordY);
+    }
+
+    public void setScreenCenterToView () {
+        float screenCenterX = (tracksLayout.getWidth() / 2);
+        float screenCenterY = (tracksLayout.getHeight() / 2);
+        drawView.setScreenCenterCoordinates(screenCenterX, screenCenterY);
     }
 
     public void moveBorderX(double volume) {
