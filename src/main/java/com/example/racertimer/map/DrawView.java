@@ -19,7 +19,7 @@ public class DrawView extends View {
     private Paint paint;
     private Path path;
 
-    float screenCenterX, screenCenterY;
+    float centerOfViewX, centerOfViewY, windowCenterX, windowCenterY;
 
     private float lastCoordinateX, lastCoordinateY;
 
@@ -33,7 +33,7 @@ public class DrawView extends View {
     private double trackStartLongitude; // точка начала трека принимается как начало отсчета карты...
     private double trackStartLatitude;  //      т.е. Х=0+сдвиг У=0+сдвиг в локальной системе отсчета
 
-    private boolean screenCenterOnLocation = true;
+    //private boolean screenCenterOnLocation = true;
 
     public DrawView (Context context, Location location) {
         super (context);
@@ -61,23 +61,29 @@ public class DrawView extends View {
         calculateCoordinates(location);
         drawLine();
         recordWaypoint(location);
-        if (screenCenterOnLocation) moveScreenToCoordinate();
+        //if (screenCenterOnLocation) moveScreenToCoordinate();
     }
 
     public void calculateCoordinates(Location location) {
         currentCoordinateX = trackGridCalculator.calculateLocalX(location) + borderXShift; //calculateLocalX(location); // нынешние координаты в системе координат лайаута
         currentCoordinateY = trackGridCalculator.calculateLocalY(location) + borderYShift; //calculateLocalY(location);
 
-        if (screenCenterX == 0) trackPainterOnMap.setScreenCenterToView();
-        coordinateXToDraw = screenCenterX + currentCoordinateX;
-        coordinateYToDraw = screenCenterY + currentCoordinateY;
+        if (centerOfViewX == 0) trackPainterOnMap.setScreenCenterToView();
+        coordinateXToDraw = centerOfViewX + currentCoordinateX;
+        coordinateYToDraw = centerOfViewY + currentCoordinateY;
 
-        viewShiftX = - screenCenterX currentCoordinateX * -1; // (тут должно быть центр вьюшки + центр экрана) * -1
-        viewShiftY = currentCoordinateY * -1;
+        viewShiftX = (coordinateXToDraw + 400) * -1; //(centerOfViewX + currentCoordinateY - windowCenterX) * -1;
+        viewShiftY = (coordinateYToDraw + 400) * -1;//(centerOfViewY + currentCoordinateY - windowCenterY) * -1;
+
+        Log.i(PROJECT_LOG_TAG, "coord X to draw = "+ coordinateXToDraw+ ", coord X to move screen = "
+                + viewShiftX+ ", different = " + (coordinateXToDraw + viewShiftX));
+
     }
 
     private void drawLine () {
-        checkViewBoarders();
+        //checkViewBoarders();
+        // TODO: пока оставлю так, что границы динамически не меняем а у контейнера вьюшки вручную
+        //  установлены огромные границы. В будущем потребуется их динамическое определение (при дальних поездках, марафонах, итд)
         //Log.i(PROJECT_LOG_TAG, "invalidating point: from "+ lastCoordinateX +" : "+ lastCoordinateY +" to "+currentCoordinateX + " : "+currentCoordinateY);
 
         path.lineTo(coordinateXToDraw, coordinateYToDraw); // пока все вычисления для теста отрисовки
@@ -92,28 +98,31 @@ public class DrawView extends View {
         // TODO: recording the location into array
     }
 
-    private void moveScreenToCoordinate() {
-        trackPainterOnMap.setScreenToCoordinates(viewShiftX, viewShiftY);
+//    private void moveScreenToCoordinate() {
+//        trackPainterOnMap.setScreenToCoordinates(viewShiftX, viewShiftY);
+//
+////        if (boarderShiftStep == 0)
+////            boarderShiftStep = this.getWidth() / 2;
+//    }
 
-        if (boarderShiftStep == 0)
-            boarderShiftStep = this.getWidth() / 2;
+    public void setScreenCenterCoordinates (float viewCenterX, float viewCenterY, float windowCenterX, float windowCenterY) {
+        this.centerOfViewX = viewCenterX;
+        this.centerOfViewY = viewCenterY;
+        this.windowCenterX = windowCenterX;
+        this.windowCenterY = windowCenterY;
+
+        path.moveTo(viewCenterX, viewCenterY); //TODO: wtf? не этот метод должен двигать экран
     }
 
-    public void setScreenCenterCoordinates (float screenCenterX, float screenCenterY) {
-        this.screenCenterX = screenCenterX;
-        this.screenCenterY = screenCenterY;
-        path.moveTo(screenCenterX, screenCenterY);
-    }
-
-    private void checkViewBoarders() {
-        Log.i(PROJECT_LOG_TAG, "!!! current X = " + coordinateXToDraw+", width = " +this.getWidth() );
-
-        if (coordinateXToDraw > this.getWidth()) {
-            Log.i(PROJECT_LOG_TAG, "expending X board " );
-            expendBoarderX();
-        }
-        if (currentCoordinateY > this.getHeight()) expendBorderY();
-    }
+//    private void checkViewBoarders() {
+//        Log.i(PROJECT_LOG_TAG, "!!! current X = " + coordinateXToDraw+", width = " +this.getWidth() );
+//
+//        if (coordinateXToDraw > this.getWidth()) {
+//            Log.i(PROJECT_LOG_TAG, "expending X board " );
+//            expendBoarderX();
+//        }
+//        if (currentCoordinateY > this.getHeight()) expendBorderY();
+//    }
 
     private void expendBoarderX() {
         this.setMinimumWidth(this.getWidth() + boarderShiftStep);

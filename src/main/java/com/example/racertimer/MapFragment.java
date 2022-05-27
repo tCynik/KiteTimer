@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -16,6 +17,8 @@ public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
 
     private ConstraintLayout tracksLayout;
+    private ScrollView windowMap;
+
     public ImageView arrowDirection, arrowWind;
 
     private Button btnIncScale, btnDecScale;
@@ -41,6 +44,7 @@ public class MapFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_map, null);
 
         tracksLayout = view.findViewById(R.id.tracks_layout);
+        windowMap = view.findViewById(R.id.window_map);
 
         arrowDirection = view.findViewById(R.id.arrow_position_on_map); // стрелка метка курса
         arrowWind = view.findViewById(R.id.wind_direction_arrow_on_map); // стрелка ветра
@@ -66,12 +70,14 @@ public class MapFragment extends Fragment {
 
     private void exportTracksLayoutIntoTrackPainter() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
-        activityRace.uploadTrackLayout(tracksLayout);
+        activityRace.uploadTrackLayout(windowMap, tracksLayout);
     }
 
     public ConstraintLayout getTracksLayout() {
         return tracksLayout;
     }
 }
+
+// TODO: настроить масштаб так чтобы не выставалять слишком большой размер лайаута вьюшек треков
 
 
