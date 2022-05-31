@@ -12,6 +12,8 @@ public class MapUIManagement {
 
     private ImageView directionArrow, windArrow;
 
+    private MapManager mapManager;
+
     private float mapScale;
     private float minScale = 0.5f;
     private float maxScale = 10f;
@@ -23,7 +25,7 @@ public class MapUIManagement {
 
     public void setUIViews (ImageView directionArrow, ImageView windArrow,
                             Button btnIncScale, Button btnDecScale) {
-        onScaleChanged(mapScale);
+        //onScaleChanged(mapScale);
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
 
@@ -47,13 +49,17 @@ public class MapUIManagement {
         if (directionArrow != null) directionArrow.setRotation(bearing);
     }
 
-    public void onWindChanged (int windDirection) {
+    public void setWindArrowDirection(int windDirection) {
         Log.i(PROJECT_LOG_TAG, "wind on map was changed to "+CoursesCalculator.invertCourse(windDirection) );
         windArrow.setRotation(CoursesCalculator.invertCourse(windDirection));
     }
 
+    public void setMapManager(MapManager mapManager) {
+        this.mapManager = mapManager;
+    }
+
     /** Scale management block */
-    public void onScaleIncreased () {
+    private void onScaleIncreased () {
         if (mapScale < maxScale) {
             mapScale = mapScale + stepScaleChanging;
             onScaleChanged(mapScale);
@@ -61,7 +67,7 @@ public class MapUIManagement {
         }
     }
 
-    public void onScaleDecreased () {
+    private void onScaleDecreased () {
         if (mapScale > minScale) {
             mapScale = mapScale - stepScaleChanging;
             onScaleChanged(mapScale);
@@ -70,6 +76,7 @@ public class MapUIManagement {
     }
 
     private void onScaleChanged (float updatedScale) {
-        // TODO: make interface with methods to change the scale
+        mapManager.onScaleChanged(updatedScale);
+
     }
 }

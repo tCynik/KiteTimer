@@ -12,7 +12,7 @@ import android.view.View;
 public class DrawView extends View {
     private final static String PROJECT_LOG_TAG = "racer_timer_draw";
 
-    TrackPainterOnMap trackPainterOnMap;
+    MapManager mapManager;
 
     private TrackGridCalculator trackGridCalculator;
 
@@ -68,15 +68,12 @@ public class DrawView extends View {
         currentCoordinateX = trackGridCalculator.calculateLocalX(location) + borderXShift; //calculateLocalX(location); // нынешние координаты в системе координат лайаута
         currentCoordinateY = trackGridCalculator.calculateLocalY(location) + borderYShift; //calculateLocalY(location);
 
-        if (centerOfViewX == 0) trackPainterOnMap.setScreenCenterToView();
+        if (centerOfViewX == 0) mapManager.setScreenCenterToView();
         coordinateXToDraw = centerOfViewX + currentCoordinateX;
         coordinateYToDraw = centerOfViewY + currentCoordinateY;
 
         viewShiftX = (coordinateXToDraw + 400) * -1; //(centerOfViewX + currentCoordinateY - windowCenterX) * -1;
         viewShiftY = (coordinateYToDraw + 400) * -1;//(centerOfViewY + currentCoordinateY - windowCenterY) * -1;
-
-        Log.i(PROJECT_LOG_TAG, "coord X to draw = "+ coordinateXToDraw+ ", coord X to move screen = "
-                + viewShiftX+ ", different = " + (coordinateXToDraw + viewShiftX));
 
     }
 
@@ -149,8 +146,8 @@ public class DrawView extends View {
         return trackStartLatitude;
     }
 
-    public void setTrackPainterOnMap(TrackPainterOnMap trackPainterOnMap) {
-        this.trackPainterOnMap = trackPainterOnMap;
+    public void setTrackPainterOnMap(MapManager mapManager) {
+        this.mapManager = mapManager;
     }
 
 //    нужно сделать стартовую привязочную точку

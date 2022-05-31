@@ -40,7 +40,7 @@ import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.map.DrawView;
 import com.example.racertimer.map.MapUIManagement;
-import com.example.racertimer.map.TrackPainterOnMap;
+import com.example.racertimer.map.MapManager;
 import com.example.racertimer.multimedia.Voiceover;
 
 public class ActivityRace extends AppCompatActivity implements
@@ -63,7 +63,7 @@ public class ActivityRace extends AppCompatActivity implements
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
-    private TrackPainterOnMap trackPainterOnMap;
+    private MapManager mapManager;
     private DrawView trackDrawerView;
 
     private ImageView arrowDirectionOnMap, arrowWindOnMap;
@@ -117,7 +117,7 @@ public class ActivityRace extends AppCompatActivity implements
         btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (trackPainterOnMap != null) trackPainterOnMap.beginNewTrackDrawing(location);
+                if (mapManager != null) mapManager.beginNewTrackDrawing(location);
                 Log.i("racer_timer_painter", "track drawing is beginning");
 
             }
@@ -133,7 +133,7 @@ public class ActivityRace extends AppCompatActivity implements
 
         deploySailingToolsFragment();
 
-        trackPainterOnMap = new TrackPainterOnMap(context);
+        mapManager = new MapManager(context);
 
 //// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
 //        btnMenu.setOnClickListener(new View.OnClickListener() {
@@ -181,11 +181,13 @@ public class ActivityRace extends AppCompatActivity implements
     public void uploadMapUIIntoTools (ConstraintLayout tracksLayout, ImageView arrowDirection, ImageView arrowWind, Button btnIncScale, Button btnDecScale) {
         mapUIManagement = new MapUIManagement(defaultMapScale);
         mapUIManagement.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale);
-        mapUIManagement.onWindChanged(CoursesCalculator.invertCourse(windDirection));
+        mapUIManagement.setMapManager(mapManager);
+
+        mapUIManagement.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
     }
 
     public void uploadTrackLayout (ScrollView windowForMap, ConstraintLayout trackLayoutForTrackPainter) {
-        trackPainterOnMap.setTracksLayout(windowForMap, trackLayoutForTrackPainter);
+        mapManager.setTracksLayout(windowForMap, trackLayoutForTrackPainter);
     }
 
     /** модуль методов выгрузки фрагментов */
@@ -429,7 +431,7 @@ public class ActivityRace extends AppCompatActivity implements
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
         if (mapUIManagement != null) {
             Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
-            mapUIManagement.onWindChanged(updatedWindDirection);
+            mapUIManagement.setWindArrowDirection(updatedWindDirection);
         }
     }
 
@@ -463,7 +465,7 @@ public class ActivityRace extends AppCompatActivity implements
 
         if (location.hasSpeed()) {
             Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
-            trackPainterOnMap.onLocatoinChanged(location);
+            mapManager.onLocatoinChanged(location);
 
             //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;

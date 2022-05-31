@@ -16,8 +16,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/tracks_layout"
-        android:layout_width="500dp"
-        android:layout_height="500dp"
+        android:layout_width="10000dp"
+        android:layout_height="10000dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
