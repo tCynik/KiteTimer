@@ -27,11 +27,6 @@ public class MapManager {
 
     private Location lastPaintedLocation = null;
     private Location currentLocation;
-    private double startPointLongitude; // точка начала трека принимается как начало отсчета карты...
-    private double startPointLatitude;  //      т.е. Х=0 У=0 в локальной системе отсчета
-
-    private float layoutCenterCoordinateX;
-    private float layoutCenterCoordinateY;
 
     public MapManager(Context context) {
         this.context = context;
@@ -72,6 +67,7 @@ public class MapManager {
         lastPaintedLocation = null;
         //TODO: change the color/alfa of just painted track
         //  maby ask to save the track or not (if track time is to short)
+
     }
 
     public void onLocatoinChanged(Location location) {
@@ -101,7 +97,13 @@ public class MapManager {
     }
 }
 
-//TODO: при не начатом записи трека идет обращение к этому классу, некорректное. Нужно запретить обращение если запись не ведется.
+//TODO: разобраться с алгоритмом начала запука трека (совместно с таймером)
 
-// TODO: отрисовку ранее загруженных треков производить методом canvas.drawLines("массив с координатами", paint) - см. урок 142
+/** утро 02.06:
+// TODO: сделать сохранение точек трека в массив. Сделать сохранение и загрузку треков. Сделать отображении сохраненных треков
+//  отрисовку ранее загруженных треков производить методом canvas.drawLines("массив с координатами", paint) - см. урок 142
+*/
+
+// TODO: переработать отображение маркера позиции. Маркер - не по центру экрана, а на текущей позиции.
+//  Расчет позиции маркера - в отдельном классе
 //
