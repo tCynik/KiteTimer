@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
 import android.util.Log;
+import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -24,6 +25,7 @@ public class MapManager {
     private boolean recordingInProgress = false; // TODO: after testing set FALSE
     private ConstraintLayout tracksLayout;
     private ScrollView windowMap;
+    private HorizontalScrollView horizontalMapScroll;
 
     private Location lastPaintedLocation = null;
     private Location currentLocation;
@@ -41,7 +43,7 @@ public class MapManager {
         drawView.setBackgroundColor(Color.GRAY);
         Log.i(PROJECT_LOG_TAG, "view sizes: X ="+drawView.getWidth()+", Y ="+drawView.getHeight());
 
-        screenWindowShifter = new ScreenWindowShifter(this, location, tracksLayout, scale);
+        screenWindowShifter = new ScreenWindowShifter(this, location, tracksLayout,  windowMap, horizontalMapScroll, scale);
         if (location != null) {
             //setStartCoordinates(location);
             Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
@@ -79,9 +81,10 @@ public class MapManager {
         }
     }
 
-    public void setTracksLayout(ScrollView windowMap, ConstraintLayout tracksLayout) {
+    public void setTracksLayout(ScrollView windowMap, HorizontalScrollView horizontalMapScroll, ConstraintLayout tracksLayout) {
         this.tracksLayout = tracksLayout;
         this.windowMap = windowMap;
+        this.horizontalMapScroll = horizontalMapScroll;
     }
 
     public void onScaleChanged (double scale) {
@@ -99,7 +102,7 @@ public class MapManager {
 
 //TODO: разобраться с алгоритмом начала запука трека (совместно с таймером)
 
-/** утро 02.06:
+/** утро 02.06: если придумаю как быть со scrollView, пилить их, если нет:в
 // TODO: сделать сохранение точек трека в массив. Сделать сохранение и загрузку треков. Сделать отображении сохраненных треков
 //  отрисовку ранее загруженных треков производить методом canvas.drawLines("массив с координатами", paint) - см. урок 142
 */

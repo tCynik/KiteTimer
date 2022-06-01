@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -186,8 +187,8 @@ public class ActivityRace extends AppCompatActivity implements
         mapUIManagement.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
     }
 
-    public void uploadTrackLayout (ScrollView windowForMap, ConstraintLayout trackLayoutForTrackPainter) {
-        mapManager.setTracksLayout(windowForMap, trackLayoutForTrackPainter);
+    public void uploadTrackLayout (ScrollView windowForMap, HorizontalScrollView horizontalMapScroll, ConstraintLayout trackLayoutForTrackPainter) {
+        mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter);
     }
 
     /** модуль методов выгрузки фрагментов */

@@ -2,6 +2,8 @@ package com.example.racertimer.map;
 
 import android.location.Location;
 import android.util.Log;
+import android.widget.HorizontalScrollView;
+import android.widget.ScrollView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -10,23 +12,23 @@ public class ScreenWindowShifter {
 
     private MapManager mapManager;
     private TrackGridCalculator trackGridCalculator;
-    private double startPositionX, startPositionY;
 
     private double scale;
-    private ConstraintLayout tracksLayout;
     private int layoutSizeX, layoutSizeY, windowSizeX, windowSizeY;
 
-    private float layoutShiftX, layoutShiftY;
+    private ScrollView verticalMapScroll;
+    private HorizontalScrollView horizontalMapScroll;
+
+    private int layoutShiftX, layoutShiftY;
 
     private Location lastLocation;
 
-    public ScreenWindowShifter(MapManager mapManager, Location location, ConstraintLayout tracksLayout, double scale) {
+    public ScreenWindowShifter(MapManager mapManager, Location location, ConstraintLayout tracksLayout,
+                               ScrollView verticalMapScroll, HorizontalScrollView horizontalMapScroll, double scale) {
         this.mapManager = mapManager;
-        setLayout(tracksLayout);
+        setLayout(tracksLayout, verticalMapScroll, horizontalMapScroll);
         trackGridCalculator = new TrackGridCalculator(location);
         lastLocation = location;
-        startPositionX = location.getLatitude();
-        startPositionY = location.getLongitude();
 
         this.scale = scale;
     }
@@ -36,21 +38,17 @@ public class ScreenWindowShifter {
 
         lastLocation = location;
         calculateLayoutShifts(location);
-        //shiftLayoutByScale();
-        tracksLayout.setX(layoutShiftX);
-        tracksLayout.setY(layoutShiftY);
+
+        horizontalMapScroll.scrollTo(layoutShiftX, 0);
+        verticalMapScroll.scrollTo(0, layoutShiftY);
     }
 
     private void calculateLayoutShifts(Location location) {
         int localX = trackGridCalculator.calculateLocalX(location);
         int localY = trackGridCalculator.calculateLocalY(location);
 
-        layoutShiftX = (float) (windowSizeX / 2 - (layoutSizeX / 2 + localX * scale));
-        layoutShiftY = (float) (windowSizeY / 2 - (layoutSizeY / 2 + localY * scale));
-    }
-
-    private void shiftLayoutByScale () {
-
+        layoutShiftX = (int) ((layoutSizeX / 2) + (localX * scale) - (windowSizeX / 2));
+        layoutShiftY = (int) ((layoutSizeY / 2) + (localY * scale) - (windowSizeY / 2));
     }
 
     public void onScaleChanged (double currentScale) {
@@ -58,10 +56,12 @@ public class ScreenWindowShifter {
         moveWindowCenterToPosition(lastLocation);
     }
 
-    public void setLayout(ConstraintLayout tracksLayout) {
-        this.tracksLayout = tracksLayout;
+    public void setLayout(ConstraintLayout tracksLayout, ScrollView verticalScroll, HorizontalScrollView horizontalMapScroll) {
         layoutSizeX = tracksLayout.getWidth();
         layoutSizeY = tracksLayout.getHeight();
+
+        this.verticalMapScroll = verticalScroll;
+        this.horizontalMapScroll = horizontalMapScroll;
     }
 
     public void setWindowSizes(int windowSizeX, int windowSizeY) {

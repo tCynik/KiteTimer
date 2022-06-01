@@ -28,6 +28,7 @@
         >
 
         <HorizontalScrollView
+            android:id="@+id/horizontal_map_scroll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <LinearLayout

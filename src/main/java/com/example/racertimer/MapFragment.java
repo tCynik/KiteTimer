@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 
@@ -18,6 +19,7 @@ public class MapFragment extends Fragment {
 
     private ConstraintLayout tracksLayout;
     private ScrollView windowMap;
+    private HorizontalScrollView horizontalScroll;
 
     public ImageView arrowDirection, arrowWind;
 
@@ -45,6 +47,7 @@ public class MapFragment extends Fragment {
 
         tracksLayout = view.findViewById(R.id.tracks_layout);
         windowMap = view.findViewById(R.id.window_map);
+        horizontalScroll = view.findViewById(R.id.horizontal_map_scroll);
 
         arrowDirection = view.findViewById(R.id.arrow_position_on_map); // стрелка метка курса
         arrowWind = view.findViewById(R.id.wind_direction_arrow_on_map); // стрелка ветра
@@ -70,7 +73,7 @@ public class MapFragment extends Fragment {
 
     private void exportTracksLayoutIntoTrackPainter() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
-        activityRace.uploadTrackLayout(windowMap, tracksLayout);
+        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout);
     }
 
     public ConstraintLayout getTracksLayout() {
