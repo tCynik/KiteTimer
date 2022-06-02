@@ -39,6 +39,7 @@ public class ScreenWindowShifter {
         lastLocation = location;
         calculateLayoutShifts(location);
 
+        Log.i("bugfix", "layoutShiftX = "+ layoutShiftX );
         horizontalMapScroll.scrollTo(layoutShiftX, 0);
         verticalMapScroll.scrollTo(0, layoutShiftY);
     }

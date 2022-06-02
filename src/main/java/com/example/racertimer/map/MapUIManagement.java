@@ -3,6 +3,7 @@ package com.example.racertimer.map;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
@@ -11,6 +12,7 @@ public class MapUIManagement {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_tools";
 
     private ImageView directionArrow, windArrow;
+    private ImageButton btnFixPosition;
 
     private MapManager mapManager;
 
@@ -19,15 +21,18 @@ public class MapUIManagement {
     private float maxScale = 10f;
     private final float stepScaleChanging = 0.5f;
 
+    private boolean screenCenterPinnedOnPosition = true;
+
     public MapUIManagement(float defaultMapScale) {
         this.mapScale = defaultMapScale;
     }
 
     public void setUIViews (ImageView directionArrow, ImageView windArrow,
-                            Button btnIncScale, Button btnDecScale) {
+                            Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition) {
         //onScaleChanged(mapScale);
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
+        this.btnFixPosition = btnFixPosition;
 
         btnIncScale.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,6 +45,13 @@ public class MapUIManagement {
             @Override
             public void onClick(View view) {
                 onScaleDecreased();
+            }
+        });
+
+        btnFixPosition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapManager.onFixButtonPressed();
             }
         });
     }
@@ -77,6 +89,12 @@ public class MapUIManagement {
 
     private void onScaleChanged (float updatedScale) {
         mapManager.onScaleChanged(updatedScale);
-
+        if (screenCenterPinnedOnPosition) {
+            screenCenterPinnedOnPosition = false;
+            btnFixPosition.setVisibility(View.VISIBLE);
+        } else {
+            screenCenterPinnedOnPosition = true;
+            btnFixPosition.setVisibility(View.INVISIBLE);
+        }
     }
 }

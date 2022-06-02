@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.location.Location;
 import android.util.Log;
+import android.view.View;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -26,8 +28,8 @@ public class MapManager {
     private ConstraintLayout tracksLayout;
     private ScrollView windowMap;
     private HorizontalScrollView horizontalMapScroll;
+    private ImageButton btnFixPosition;
 
-    private Location lastPaintedLocation = null;
     private Location currentLocation;
 
     public MapManager(Context context) {
@@ -66,7 +68,6 @@ public class MapManager {
 
     public void endTrackDrawing() {
         recordingInProgress = false;
-        lastPaintedLocation = null;
         //TODO: change the color/alfa of just painted track
         //  maby ask to save the track or not (if track time is to short)
 
@@ -77,14 +78,37 @@ public class MapManager {
         currentLocation = location;
         if (recordingInProgress) {
             drawView.onLocationChanged(location);
-            if (screenCenterPinnedOnPosition) screenWindowShifter.moveWindowCenterToPosition(location);
+            if (screenCenterPinnedOnPosition) {
+                screenWindowShifter.moveWindowCenterToPosition(location);
+                //btnFixPosition.setVisibility(View.INVISIBLE);
+            }
         }
     }
 
-    public void setTracksLayout(ScrollView windowMap, HorizontalScrollView horizontalMapScroll, ConstraintLayout tracksLayout) {
+    public void setTracksLayout(ScrollView windowMap, HorizontalScrollView horizontalMapScroll,
+                                ConstraintLayout tracksLayout, ImageButton btnFixPosition) {
         this.tracksLayout = tracksLayout;
         this.windowMap = windowMap;
+        this.windowMap.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (screenCenterPinnedOnPosition) {
+                    // TODO: вот эту логику нужноразделить - изменение локации воспринимается как перемотка
+                    screenCenterPinnedOnPosition = false;
+                    btnFixPosition.setVisibility(View.VISIBLE);
+                }
+            }
+        });
         this.horizontalMapScroll = horizontalMapScroll;
+        this.btnFixPosition = btnFixPosition;
+
+        this.btnFixPosition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                screenCenterPinnedOnPosition = true;
+                btnFixPosition.setVisibility(View.INVISIBLE);
+            }
+        });
     }
 
     public void onScaleChanged (double scale) {
@@ -97,6 +121,13 @@ public class MapManager {
         int windowX = windowMap.getWidth();
         int windowY = windowMap.getHeight();
         screenWindowShifter.setWindowSizes(windowX, windowY);
+    }
+
+    public void onFixButtonPressed() {
+        if (screenCenterPinnedOnPosition) {
+            screenCenterPinnedOnPosition = false;
+
+        }
     }
 }
 

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 
@@ -24,6 +25,7 @@ public class MapFragment extends Fragment {
     public ImageView arrowDirection, arrowWind;
 
     private Button btnIncScale, btnDecScale;
+    private ImageButton btnFixPosition;
 
     public MapFragment() {
         // Required empty public constructor
@@ -55,6 +57,7 @@ public class MapFragment extends Fragment {
         btnIncScale = view.findViewById(R.id.btn_inc_scale);
         btnDecScale = view.findViewById(R.id.btn_dec_scale);
 
+        btnFixPosition = view.findViewById(R.id.btn_fix_position);
         return view;
     }
 
@@ -68,16 +71,12 @@ public class MapFragment extends Fragment {
     private void exportViewsIntoSailingTools() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
         assert activityRace != null;
-        activityRace.uploadMapUIIntoTools(tracksLayout, arrowDirection, arrowWind, btnIncScale, btnDecScale);
+        activityRace.uploadMapUIIntoTools(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
     }
 
     private void exportTracksLayoutIntoTrackPainter() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
-        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout);
-    }
-
-    public ConstraintLayout getTracksLayout() {
-        return tracksLayout;
+        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition);
     }
 }
 

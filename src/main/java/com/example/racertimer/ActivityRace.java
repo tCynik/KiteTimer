@@ -179,16 +179,18 @@ public class ActivityRace extends AppCompatActivity implements
         updateWindDirection();
     }
 
-    public void uploadMapUIIntoTools (ConstraintLayout tracksLayout, ImageView arrowDirection, ImageView arrowWind, Button btnIncScale, Button btnDecScale) {
+    public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
+                                      Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition) {
         mapUIManagement = new MapUIManagement(defaultMapScale);
-        mapUIManagement.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale);
+        mapUIManagement.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUIManagement.setMapManager(mapManager);
 
         mapUIManagement.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
     }
 
-    public void uploadTrackLayout (ScrollView windowForMap, HorizontalScrollView horizontalMapScroll, ConstraintLayout trackLayoutForTrackPainter) {
-        mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter);
+    public void uploadTrackLayout (ScrollView windowForMap, HorizontalScrollView horizontalMapScroll,
+                                   ConstraintLayout trackLayoutForTrackPainter, ImageButton btnFixPressed) {
+        mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter, btnFixPressed);
     }
 
     /** модуль методов выгрузки фрагментов */

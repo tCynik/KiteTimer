@@ -73,7 +73,7 @@
         android:layout_height="60dp"
         android:text="+"
         android:textSize="30sp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -83,8 +83,18 @@
         android:layout_height="60dp"
         android:text="-"
         android:textSize="30sp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintTop_toBottomOf="@id/btn_inc_scale"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ImageButton
+        android:id="@+id/btn_fix_position"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/ic_position_fix_button"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_dec_scale"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="invisible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

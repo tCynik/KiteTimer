@@ -65,8 +65,8 @@ public class DrawView extends View {
     }
 
     public void calculateCoordinates(Location location) {
-        currentCoordinateX = trackGridCalculator.calculateLocalX(location) + borderXShift; //calculateLocalX(location); // нынешние координаты в системе координат лайаута
-        currentCoordinateY = trackGridCalculator.calculateLocalY(location) + borderYShift; //calculateLocalY(location);
+        currentCoordinateX = trackGridCalculator.calculateLocalX(location); // нынешние координаты в системе координат лайаута
+        currentCoordinateY = trackGridCalculator.calculateLocalY(location);
 
         if (centerOfViewX == 0) mapManager.setScreenCenterToView();
         coordinateXToDraw = centerOfViewX + currentCoordinateX;
