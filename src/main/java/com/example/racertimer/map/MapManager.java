@@ -22,7 +22,7 @@ public class MapManager {
     private ScreenWindowShifter screenWindowShifter;
     private double scale = 1;
     private boolean screenCenterPinnedOnPosition = true;
-
+    private boolean scrollingIsManual = true;
 
     private boolean recordingInProgress = false; // TODO: after testing set FALSE
     private ConstraintLayout tracksLayout;
@@ -69,7 +69,7 @@ public class MapManager {
     public void endTrackDrawing() {
         recordingInProgress = false;
         //TODO: change the color/alfa of just painted track
-        //  maby ask to save the track or not (if track time is to short)
+        //  maby ask to save the track or not to save (if track time is to short)
 
     }
 
@@ -78,9 +78,11 @@ public class MapManager {
         currentLocation = location;
         if (recordingInProgress) {
             drawView.onLocationChanged(location);
+
             if (screenCenterPinnedOnPosition) {
+                scrollingIsManual = false;
                 screenWindowShifter.moveWindowCenterToPosition(location);
-                //btnFixPosition.setVisibility(View.INVISIBLE);
+                scrollingIsManual = true;
             }
         }
     }
@@ -88,23 +90,37 @@ public class MapManager {
     public void setTracksLayout(ScrollView windowMap, HorizontalScrollView horizontalMapScroll,
                                 ConstraintLayout tracksLayout, ImageButton btnFixPosition) {
         this.tracksLayout = tracksLayout;
-        this.windowMap = windowMap;
-        this.windowMap.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+        windowMap.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if (screenCenterPinnedOnPosition) {
-                    // TODO: вот эту логику нужноразделить - изменение локации воспринимается как перемотка
-                    screenCenterPinnedOnPosition = false;
-                    btnFixPosition.setVisibility(View.VISIBLE);
+                    if (scrollingIsManual) {
+                        screenCenterPinnedOnPosition = false;
+                        btnFixPosition.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+        });
+        this.windowMap = windowMap;
+
+        horizontalMapScroll.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (screenCenterPinnedOnPosition) {
+                    if (scrollingIsManual) {
+                        screenCenterPinnedOnPosition = false;
+                        btnFixPosition.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         });
         this.horizontalMapScroll = horizontalMapScroll;
-        this.btnFixPosition = btnFixPosition;
 
+        this.btnFixPosition = btnFixPosition;
         this.btnFixPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                screenWindowShifter.moveWindowCenterToPosition(currentLocation);
                 screenCenterPinnedOnPosition = true;
                 btnFixPosition.setVisibility(View.INVISIBLE);
             }
@@ -112,9 +128,15 @@ public class MapManager {
     }
 
     public void onScaleChanged (double scale) {
-        screenWindowShifter.onScaleChanged(scale);
+        scrollingIsManual = false;
+        if (screenCenterPinnedOnPosition) {
+            screenWindowShifter.onScaleChanged(scale);
+            //screenCenterPinnedOnPosition = true;
+        }
+
         tracksLayout.setScaleX((float)scale);
         tracksLayout.setScaleY((float)scale);
+        scrollingIsManual = true;
     }
 
     public void setWindowSizesToShifter() {
@@ -130,13 +152,13 @@ public class MapManager {
         }
     }
 }
+//Log.i("bugfix", "fixPosition is working2. pinned = "+ screenCenterPinnedOnPosition );
+
 
 //TODO: разобраться с алгоритмом начала запука трека (совместно с таймером)
 
-/** утро 02.06: если придумаю как быть со scrollView, пилить их, если нет:в
 // TODO: сделать сохранение точек трека в массив. Сделать сохранение и загрузку треков. Сделать отображении сохраненных треков
 //  отрисовку ранее загруженных треков производить методом canvas.drawLines("массив с координатами", paint) - см. урок 142
-*/
 
 // TODO: переработать отображение маркера позиции. Маркер - не по центру экрана, а на текущей позиции.
 //  Расчет позиции маркера - в отдельном классе
