@@ -29,7 +29,6 @@ public class MapUIManagement {
 
     public void setUIViews (ImageView directionArrow, ImageView windArrow,
                             Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition) {
-        //onScaleChanged(mapScale);
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
         this.btnFixPosition = btnFixPosition;
@@ -74,7 +73,7 @@ public class MapUIManagement {
     private void onScaleIncreased () {
         if (mapScale < maxScale) {
             mapScale = mapScale + stepScaleChanging;
-            onScaleChanged(mapScale);
+            mapManager.onScaleChanged(mapScale);
             Log.i(PROJECT_LOG_TAG, "map scale was increased to "+mapScale);
         }
     }
@@ -82,19 +81,8 @@ public class MapUIManagement {
     private void onScaleDecreased () {
         if (mapScale > minScale) {
             mapScale = mapScale - stepScaleChanging;
-            onScaleChanged(mapScale);
+            mapManager.onScaleChanged(mapScale);
             Log.i(PROJECT_LOG_TAG, "map scale was decreased to "+mapScale);
-        }
-    }
-
-    private void onScaleChanged (float updatedScale) {
-        mapManager.onScaleChanged(updatedScale);
-        if (screenCenterPinnedOnPosition) {
-            screenCenterPinnedOnPosition = false;
-            btnFixPosition.setVisibility(View.VISIBLE);
-        } else {
-            screenCenterPinnedOnPosition = true;
-            btnFixPosition.setVisibility(View.INVISIBLE);
         }
     }
 }

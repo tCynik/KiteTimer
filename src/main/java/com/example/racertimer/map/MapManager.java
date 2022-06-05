@@ -131,7 +131,6 @@ public class MapManager {
         scrollingIsManual = false;
         if (screenCenterPinnedOnPosition) {
             screenWindowShifter.onScaleChanged(scale);
-            //screenCenterPinnedOnPosition = true;
         }
 
         tracksLayout.setScaleX((float)scale);
@@ -148,7 +147,6 @@ public class MapManager {
     public void onFixButtonPressed() {
         if (screenCenterPinnedOnPosition) {
             screenCenterPinnedOnPosition = false;
-
         }
     }
 }
