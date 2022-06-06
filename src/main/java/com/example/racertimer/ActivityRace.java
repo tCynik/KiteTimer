@@ -40,7 +40,7 @@ import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.map.DrawView;
-import com.example.racertimer.map.MapUIManagement;
+import com.example.racertimer.map.MapUITools;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.multimedia.Voiceover;
 
@@ -58,7 +58,7 @@ public class ActivityRace extends AppCompatActivity implements
 
     private TimerFragment timerFragment = null;
     private MapFragment mapFragment = null;
-    public MapUIManagement mapUIManagement;
+    public MapUITools mapUITools;
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
     public DeveloperFragment developerFragment = null;
@@ -181,16 +181,16 @@ public class ActivityRace extends AppCompatActivity implements
 
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
                                       Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition) {
-        mapUIManagement = new MapUIManagement(defaultMapScale);
-        mapUIManagement.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
-        mapUIManagement.setMapManager(mapManager);
+        mapUITools = new MapUITools(defaultMapScale);
+        mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
+        mapUITools.setMapManager(mapManager);
 
-        mapUIManagement.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
+        mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
     }
 
     public void uploadTrackLayout (ScrollView windowForMap, HorizontalScrollView horizontalMapScroll,
-                                   ConstraintLayout trackLayoutForTrackPainter, ImageButton btnFixPressed) {
-        mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter, btnFixPressed);
+                                   ConstraintLayout trackLayoutForTrackPainter, ImageButton btnFixPressed, ImageView arrowWind) {
+        mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter, btnFixPressed, arrowWind);
     }
 
     /** модуль методов выгрузки фрагментов */
@@ -432,9 +432,9 @@ public class ActivityRace extends AppCompatActivity implements
     public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
-        if (mapUIManagement != null) {
+        if (mapUITools != null) {
             Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
-            mapUIManagement.setWindArrowDirection(updatedWindDirection);
+            mapUITools.setWindArrowDirection(updatedWindDirection);
         }
     }
 
@@ -479,7 +479,7 @@ public class ActivityRace extends AppCompatActivity implements
         } else sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
-        if (mapUIManagement != null) mapUIManagement.onBearingChanged(bearing);
+        if (mapUITools != null) mapUITools.onBearingChanged(bearing);
     }
 
     public void muteChangedStatus(boolean b) { // выключение звука пищалки

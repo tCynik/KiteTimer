@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -16,10 +17,13 @@ public class MapManager {
     private final static String PROJECT_LOG_TAG = "racer_timer_painter";
 
     private Context context;
-    public DrawView drawView;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
+    public DrawView drawView;
+    TrackGridCalculator trackGridCalculator;
     private ScreenWindowShifter screenWindowShifter;
+    private ArrowMover arrowMover;
+
     private double scale = 1;
     private boolean screenCenterPinnedOnPosition = true;
     private boolean scrollingIsManual = true;
@@ -37,23 +41,22 @@ public class MapManager {
     }
 
     public void beginNewTrackDrawing (Location location) {
-        Log.i(PROJECT_LOG_TAG, "track painter is starting new track drawing");
-        drawView = new DrawView(context, location);
+        Log.i(PROJECT_LOG_TAG, "Map Manager is starting new track drawing");
+        trackGridCalculator = new TrackGridCalculator(this, location);
+        // TODO: make calculator in Manager constuctor. When track starting set the location in calculator
+        //trackGridCalculator.setTracksLayout(tracksLayout);
+
+        drawView = new DrawView(context, trackGridCalculator);
         tracksLayout.addView(drawView);
-        drawView.setTrackPainterOnMap(this); // TODO: what will be when location = null!!!!
-//        drawView.setBorderShiftStep(tracksLayout.getWidth() / 2);
+        drawView.setMapManager(this); // TODO: what will be when location = null?!! service the case!
         drawView.setBackgroundColor(Color.GRAY);
         Log.i(PROJECT_LOG_TAG, "view sizes: X ="+drawView.getWidth()+", Y ="+drawView.getHeight());
 
-        screenWindowShifter = new ScreenWindowShifter(this, location, tracksLayout,  windowMap, horizontalMapScroll, scale);
+        screenWindowShifter = new ScreenWindowShifter(this, location, trackGridCalculator, tracksLayout,  windowMap, horizontalMapScroll, scale);
         if (location != null) {
             //setStartCoordinates(location);
             Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
-
-        //TODO: setScreenCenterCoordinates()
-        //  нужны координаты. как варик - сделать бродкастлистенер. Либо передавать их при вызове трека.
-        //  либо сохранять постоянно и брать последние (используй lastLocation)
 
         recordingInProgress = true;
     }
@@ -85,11 +88,17 @@ public class MapManager {
                 scrollingIsManual = true;
             }
         }
+
+        arrowMover.moveArrowToPosition(location);
     }
 
     public void setTracksLayout(ScrollView windowMap, HorizontalScrollView horizontalMapScroll,
-                                ConstraintLayout tracksLayout, ImageButton btnFixPosition) {
+                                ConstraintLayout tracksLayout, ImageButton btnFixPosition, ImageView arrowWind) {
         this.tracksLayout = tracksLayout;
+        if (trackGridCalculator == null) Log.i("bugfix", "!!! calculator = NULL!" ); else
+            Log.i("bugfix", "!!! calculator NOT null!" );
+        trackGridCalculator.setTracksLayout(tracksLayout);
+
         windowMap.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
@@ -125,6 +134,8 @@ public class MapManager {
                 btnFixPosition.setVisibility(View.INVISIBLE);
             }
         });
+
+        arrowMover = new ArrowMover(this, arrowWind, trackGridCalculator);
     }
 
     public void onScaleChanged (double scale) {

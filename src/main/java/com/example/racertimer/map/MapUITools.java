@@ -8,7 +8,7 @@ import android.widget.ImageView;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 
-public class MapUIManagement {
+public class MapUITools {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_tools";
 
     private ImageView directionArrow, windArrow;
@@ -23,7 +23,7 @@ public class MapUIManagement {
 
     private boolean screenCenterPinnedOnPosition = true;
 
-    public MapUIManagement(float defaultMapScale) {
+    public MapUITools(float defaultMapScale) {
         this.mapScale = defaultMapScale;
     }
 

@@ -3,16 +3,36 @@ package com.example.racertimer.map;
 import android.location.Location;
 import android.util.Log;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 class TrackGridCalculator {
     private final String PROJECT_LOG_TAG = "racer_timer_grid";
+    private MapManager mapManager;
+
     private double trackStartLongitude; // точка начала трека принимается как начало отсчета карты...
     private double trackStartLatitude;  //      т.е. Х=0 У=0 в локальной системе отсчета
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
+    private ConstraintLayout tracksLayout;
+    private int centerOfViewX, centerOfViewY;
 
-    public TrackGridCalculator (Location location) {
+    public TrackGridCalculator (MapManager mapManager, Location location) {
+        this.mapManager = mapManager;
+
         trackStartLatitude = location.getLatitude();
         trackStartLongitude = location.getLongitude();
+    }
+
+    public int calculateCoordXInView(Location location) {
+        int coordinateInView = centerOfViewX + calculateLocalX(location);
+        // TODO: если будет ошибка с не нейденными параметрами, нужно запилить коллбек для получения лайаута
+        return coordinateInView;
+    }
+
+    public int calculateCoordYInView(Location location) {
+        int coordinateInView = centerOfViewY + calculateLocalY(location);
+        // TODO: если будет ошибка с не нейденными параметрами, нужно запилить коллбек для получения лайаута
+        return coordinateInView;
     }
 
     public int calculateLocalX(Location location) {
@@ -27,6 +47,13 @@ class TrackGridCalculator {
         int coordinatePixels = calculatePixelFromCoordinate(coordinateDifferent) * -1; // -1 для инвертирования оси У
         Log.i(PROJECT_LOG_TAG, "calculating different coord. Y = " + coordinateDifferent + ", pixels = " + coordinatePixels);
         return coordinatePixels;
+    }
+
+    public void setTracksLayout (ConstraintLayout constraintLayout) {
+        this.tracksLayout = tracksLayout;
+        centerOfViewX = tracksLayout.getWidth() / 2;
+        centerOfViewY = tracksLayout.getHeight() / 2;
+
     }
 
     private int calculatePixelFromCoordinate(double coordinateDifferent) {

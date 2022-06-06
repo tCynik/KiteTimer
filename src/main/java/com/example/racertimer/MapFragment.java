@@ -76,7 +76,7 @@ public class MapFragment extends Fragment {
 
     private void exportTracksLayoutIntoTrackPainter() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
-        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition);
+        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition, arrowWind);
     }
 }
 
