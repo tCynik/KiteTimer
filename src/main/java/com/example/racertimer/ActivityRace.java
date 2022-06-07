@@ -189,8 +189,8 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void uploadTrackLayout (ScrollView windowForMap, HorizontalScrollView horizontalMapScroll,
-                                   ConstraintLayout trackLayoutForTrackPainter, ImageButton btnFixPressed, ImageView arrowWind) {
-        mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter, btnFixPressed, arrowWind);
+                                   ConstraintLayout trackLayoutForTrackPainter, ImageButton btnFixPressed, ImageView arrowPosition) {
+        mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter, btnFixPressed, arrowPosition);
     }
 
     /** модуль методов выгрузки фрагментов */

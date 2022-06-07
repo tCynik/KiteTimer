@@ -1,7 +1,6 @@
 package com.example.racertimer.map;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.location.Location;
 import android.util.Log;
 import android.view.View;
@@ -33,23 +32,25 @@ public class MapManager {
     private ScrollView windowMap;
     private HorizontalScrollView horizontalMapScroll;
     private ImageButton btnFixPosition;
+    private ImageView arrowPosition;
 
     private Location currentLocation;
 
     public MapManager(Context context) {
         this.context = context;
+        trackGridCalculator = new TrackGridCalculator(this);
+
     }
 
     public void beginNewTrackDrawing (Location location) {
         Log.i(PROJECT_LOG_TAG, "Map Manager is starting new track drawing");
-        trackGridCalculator = new TrackGridCalculator(this, location);
-        // TODO: make calculator in Manager constuctor. When track starting set the location in calculator
-        //trackGridCalculator.setTracksLayout(tracksLayout);
+        trackGridCalculator.onTrackStarted(location);
 
         drawView = new DrawView(context, trackGridCalculator);
         tracksLayout.addView(drawView);
+        arrowPosition.bringToFront();
+
         drawView.setMapManager(this); // TODO: what will be when location = null?!! service the case!
-        drawView.setBackgroundColor(Color.GRAY);
         Log.i(PROJECT_LOG_TAG, "view sizes: X ="+drawView.getWidth()+", Y ="+drawView.getHeight());
 
         screenWindowShifter = new ScreenWindowShifter(this, location, trackGridCalculator, tracksLayout,  windowMap, horizontalMapScroll, scale);
@@ -88,15 +89,13 @@ public class MapManager {
                 scrollingIsManual = true;
             }
         }
-
         arrowMover.moveArrowToPosition(location);
     }
 
     public void setTracksLayout(ScrollView windowMap, HorizontalScrollView horizontalMapScroll,
-                                ConstraintLayout tracksLayout, ImageButton btnFixPosition, ImageView arrowWind) {
+                                ConstraintLayout tracksLayout, ImageButton btnFixPosition, ImageView arrowPosition) {
         this.tracksLayout = tracksLayout;
-        if (trackGridCalculator == null) Log.i("bugfix", "!!! calculator = NULL!" ); else
-            Log.i("bugfix", "!!! calculator NOT null!" );
+        this.arrowPosition = arrowPosition;
         trackGridCalculator.setTracksLayout(tracksLayout);
 
         windowMap.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -135,7 +134,7 @@ public class MapManager {
             }
         });
 
-        arrowMover = new ArrowMover(this, arrowWind, trackGridCalculator);
+        arrowMover = new ArrowMover(this, arrowPosition, trackGridCalculator);
     }
 
     public void onScaleChanged (double scale) {

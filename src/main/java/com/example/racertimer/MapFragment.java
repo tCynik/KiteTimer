@@ -22,7 +22,7 @@ public class MapFragment extends Fragment {
     private ScrollView windowMap;
     private HorizontalScrollView horizontalScroll;
 
-    public ImageView arrowDirection, arrowWind;
+    public ImageView arrowPosition, arrowWind;
 
     private Button btnIncScale, btnDecScale;
     private ImageButton btnFixPosition;
@@ -51,7 +51,7 @@ public class MapFragment extends Fragment {
         windowMap = view.findViewById(R.id.window_map);
         horizontalScroll = view.findViewById(R.id.horizontal_map_scroll);
 
-        arrowDirection = view.findViewById(R.id.arrow_position_on_map); // стрелка метка курса
+        arrowPosition = view.findViewById(R.id.arrow_position_on_map); // стрелка метка курса
         arrowWind = view.findViewById(R.id.wind_direction_arrow_on_map); // стрелка ветра
 
         btnIncScale = view.findViewById(R.id.btn_inc_scale);
@@ -71,12 +71,12 @@ public class MapFragment extends Fragment {
     private void exportViewsIntoSailingTools() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
         assert activityRace != null;
-        activityRace.uploadMapUIIntoTools(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
+        activityRace.uploadMapUIIntoTools(arrowPosition, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
     }
 
     private void exportTracksLayoutIntoTrackPainter() {
         ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
-        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition, arrowWind);
+        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition, arrowPosition);
     }
 }
 

@@ -12,6 +12,8 @@ public class ArrowMover {
     private MapManager mapManager;
     private TrackGridCalculator trackGridCalculator;
 
+    private int arrowCenterX, arrowCenterY;
+
     /**
      * ниже идут параметры (лайауты) В будущем имеет смысл сделать единый калькулятор, который будет
      * высчитывать все нужные координаты для всех классов, чтобы не делать это индивидуально в каждом классе
@@ -22,14 +24,22 @@ public class ArrowMover {
         this.mapManager = mapManager;
         this.arrowPosition = arrowPosition;
         this.trackGridCalculator = trackGridCalculator;
+        calculateArrowCenter();
+    }
+
+    private void calculateArrowCenter () {
+        arrowCenterX = arrowPosition.getWidth() / 2;
+        arrowCenterY = arrowPosition.getHeight() / 2;
     }
 
     public void moveArrowToPosition (Location location) {
         int currentCoordinateX = trackGridCalculator.calculateCoordXInView(location); // нынешние координаты в системе координат лайаута
         int currentCoordinateY = trackGridCalculator.calculateCoordYInView(location);
 
-        arrowPosition.setX(currentCoordinateX);
-        arrowPosition.setY(currentCoordinateY);
+        if (arrowCenterX == 0) calculateArrowCenter();
+
+        arrowPosition.setX(currentCoordinateX - arrowCenterX);
+        arrowPosition.setY(currentCoordinateY - arrowCenterY);
     }
 
     public void setLayoutSizes (ConstraintLayout tracksLayout, ScrollView verticalScroll, HorizontalScrollView horizontalMapScroll) {

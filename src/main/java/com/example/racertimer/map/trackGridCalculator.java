@@ -16,16 +16,23 @@ class TrackGridCalculator {
     private ConstraintLayout tracksLayout;
     private int centerOfViewX, centerOfViewY;
 
-    public TrackGridCalculator (MapManager mapManager, Location location) {
+    public TrackGridCalculator (MapManager mapManager){
         this.mapManager = mapManager;
+    }
 
+    public void onTrackStarted(Location location) {
         trackStartLatitude = location.getLatitude();
         trackStartLongitude = location.getLongitude();
     }
 
+
     public int calculateCoordXInView(Location location) {
+        if (centerOfViewX == 0) calculateCenterOfView();
+
         int coordinateInView = centerOfViewX + calculateLocalX(location);
         // TODO: если будет ошибка с не нейденными параметрами, нужно запилить коллбек для получения лайаута
+        Log.i("bugfix", " coordinate = " + coordinateInView );
+
         return coordinateInView;
     }
 
@@ -39,7 +46,7 @@ class TrackGridCalculator {
         double coordinateDifferent = location.getLongitude() - trackStartLongitude;
         int coordinatePixels = calculatePixelFromCoordinate(coordinateDifferent);
         Log.i(PROJECT_LOG_TAG, "calculating different coord. X = " + coordinateDifferent + ", pixels = " + coordinatePixels);
-        return coordinatePixels; // TODO: вот эти координаты почему-то получаются нулевые, хотя в логах все ок
+        return coordinatePixels;
     }
 
     public int calculateLocalY(Location location) {
@@ -49,11 +56,14 @@ class TrackGridCalculator {
         return coordinatePixels;
     }
 
-    public void setTracksLayout (ConstraintLayout constraintLayout) {
+    public void setTracksLayout (ConstraintLayout tracksLayout) {
         this.tracksLayout = tracksLayout;
+        calculateCenterOfView();
+    }
+
+    private void calculateCenterOfView () {
         centerOfViewX = tracksLayout.getWidth() / 2;
         centerOfViewY = tracksLayout.getHeight() / 2;
-
     }
 
     private int calculatePixelFromCoordinate(double coordinateDifferent) {
