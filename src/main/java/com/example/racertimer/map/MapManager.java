@@ -4,10 +4,8 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 import android.view.View;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -29,8 +27,8 @@ public class MapManager {
 
     private boolean recordingInProgress = false; // TODO: after testing set FALSE
     private ConstraintLayout tracksLayout;
-    private ScrollView windowMap;
-    private HorizontalScrollView horizontalMapScroll;
+    private MapScrollView windowMap;
+    private MapHorizontalScrollView horizontalMapScroll;
     private ImageButton btnFixPosition;
     private ImageView arrowPosition;
 
@@ -92,7 +90,7 @@ public class MapManager {
         arrowMover.moveArrowToPosition(location);
     }
 
-    public void setTracksLayout(ScrollView windowMap, HorizontalScrollView horizontalMapScroll,
+    public void setTracksLayout(MapScrollView windowMap, MapHorizontalScrollView horizontalMapScroll,
                                 ConstraintLayout tracksLayout, ImageButton btnFixPosition, ImageView arrowPosition) {
         this.tracksLayout = tracksLayout;
         this.arrowPosition = arrowPosition;

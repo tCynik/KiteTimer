@@ -22,10 +22,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,10 +37,12 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
-import com.example.racertimer.map.DrawView;
-import com.example.racertimer.map.MapUITools;
+import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
+import com.example.racertimer.map.MapScrollView;
+import com.example.racertimer.map.MapUITools;
 import com.example.racertimer.multimedia.Voiceover;
+import com.example.racertimer.tracks.GPSTrackSaver;
 
 public class ActivityRace extends AppCompatActivity implements
         TimerFragment.CloserTimerInterface {
@@ -64,8 +64,8 @@ public class ActivityRace extends AppCompatActivity implements
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
+    private GPSTrackSaver gpsTrackSaver;
     private MapManager mapManager;
-    private DrawView trackDrawerView;
 
     private ImageView arrowDirectionOnMap, arrowWindOnMap;
 
@@ -121,8 +121,11 @@ public class ActivityRace extends AppCompatActivity implements
                 if (mapManager != null) mapManager.beginNewTrackDrawing(location);
                 Log.i("racer_timer_painter", "track drawing is beginning");
 
+                gpsTrackSaver.beginRecordTrack();
             }
         });
+
+        gpsTrackSaver = new GPSTrackSaver(this);
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
@@ -135,16 +138,6 @@ public class ActivityRace extends AppCompatActivity implements
         deploySailingToolsFragment();
 
         mapManager = new MapManager(context);
-
-//// потом перепишу слушатели кнопок в единый блок кода. Кнопок добавится много, в т.ч поля
-//        btnMenu.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Log.i("racer_timer", "btn menu1 was pressed ");
-//
-//                openOptionsMenu();
-//            }
-//        });
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,7 +157,6 @@ public class ActivityRace extends AppCompatActivity implements
             }
         });
 
-        //sailingToolsFragment.setVelocity(2)
     }
 
     @Override
@@ -174,7 +166,6 @@ public class ActivityRace extends AppCompatActivity implements
             initBroadcastListener(); // запускаем слушатель новых геоданных
             bindToLocationService();
         }
-        //activateMapFragment();
 
         updateWindDirection();
     }
@@ -188,7 +179,7 @@ public class ActivityRace extends AppCompatActivity implements
         mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
     }
 
-    public void uploadTrackLayout (ScrollView windowForMap, HorizontalScrollView horizontalMapScroll,
+    public void uploadTrackLayout (MapScrollView windowForMap, MapHorizontalScrollView horizontalMapScroll,
                                    ConstraintLayout trackLayoutForTrackPainter, ImageButton btnFixPressed, ImageView arrowPosition) {
         mapManager.setTracksLayout(windowForMap, horizontalMapScroll, trackLayoutForTrackPainter, btnFixPressed, arrowPosition);
     }
@@ -456,19 +447,17 @@ public class ActivityRace extends AppCompatActivity implements
             this.location = location;
             latitude = location.getLatitude();
             longitude = location.getLongitude();
-//            Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
-//            forecastFragment.setCoordinates(latitude, longitude); // даем его в прогноз погоды
         }
 
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-//
         Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 
 
         if (location.hasSpeed()) {
             Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
             mapManager.onLocatoinChanged(location);
+            gpsTrackSaver.onLocationChanged(location);
 
             //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;

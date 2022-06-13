@@ -6,21 +6,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import com.example.racertimer.map.MapHorizontalScrollView;
+import com.example.racertimer.map.MapScrollView;
+
 public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
 
     private ConstraintLayout tracksLayout;
-    private ScrollView windowMap;
-    private HorizontalScrollView horizontalScroll;
+    private MapScrollView windowMap;
+    private MapHorizontalScrollView horizontalScroll;
 
     public ImageView arrowPosition, arrowWind;
 
