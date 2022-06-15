@@ -9,6 +9,9 @@ public class GeoTrack {
     private String datetime;
     private ArrayList<Location> pointsList;
 
+    public GeoTrack () {
+    }
+
     public String getTrackName() {
         return trackName;
     }
@@ -19,6 +22,10 @@ public class GeoTrack {
 
     public ArrayList<Location> getPointsList() {
         return pointsList;
+    }
+
+    public void setPointsList(ArrayList<Location> pointList) {
+        this.pointsList = pointList;
     }
 
     public int getLength() {

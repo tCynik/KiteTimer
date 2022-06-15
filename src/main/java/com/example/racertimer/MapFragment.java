@@ -19,13 +19,15 @@ import com.example.racertimer.map.MapScrollView;
 public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
 
+    private ActivityRace activityRace;
+
     private ConstraintLayout tracksLayout;
     private MapScrollView windowMap;
     private MapHorizontalScrollView horizontalScroll;
 
     public ImageView arrowPosition, arrowWind;
 
-    private Button btnIncScale, btnDecScale;
+    private Button btnIncScale, btnDecScale, btnMenuTracks;
     private ImageButton btnFixPosition;
 
     public MapFragment() {
@@ -57,6 +59,7 @@ public class MapFragment extends Fragment {
 
         btnIncScale = view.findViewById(R.id.btn_inc_scale);
         btnDecScale = view.findViewById(R.id.btn_dec_scale);
+        btnMenuTracks = view.findViewById(R.id.btn_tracks_menu);
 
         btnFixPosition = view.findViewById(R.id.btn_fix_position);
         return view;
@@ -65,18 +68,17 @@ public class MapFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        activityRace = (ActivityRace) getActivity();
         exportViewsIntoSailingTools();
         exportTracksLayoutIntoTrackPainter();
     }
 
     private void exportViewsIntoSailingTools() {
-        ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
         assert activityRace != null;
-        activityRace.uploadMapUIIntoTools(arrowPosition, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
+        activityRace.uploadMapUIIntoTools(arrowPosition, arrowWind, btnIncScale, btnDecScale, btnFixPosition, btnMenuTracks);
     }
 
     private void exportTracksLayoutIntoTrackPainter() {
-        ActivityRace activityRace = (ActivityRace) getActivity(); // экземпляр главной активити
         activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition, arrowPosition);
     }
 }

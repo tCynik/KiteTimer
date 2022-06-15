@@ -1,6 +1,7 @@
 package com.example.racertimer.tracks;
 
 import android.location.Location;
+import android.util.Log;
 
 import com.example.racertimer.ActivityRace;
 
@@ -15,13 +16,15 @@ import java.util.ArrayList;
 public class GPSTrackSaver {
     private boolean isTrackRecordingProgress = false;
     private ArrayList<Location> trackPoints;
+    private String packageAddress;
 
     private ActivityRace activityRace;
 
     private Long currentDate;
 
-    public GPSTrackSaver (ActivityRace activityRace) {
+    public GPSTrackSaver (ActivityRace activityRace, String packageAddress) {
         this.activityRace = activityRace;
+        this.packageAddress = packageAddress;
         trackPoints = new ArrayList<>();
     }
 
@@ -75,6 +78,7 @@ public class GPSTrackSaver {
 
         String trackNameToBeSaved = year + "-" +month + "-" + day;
 
+        Log.i("bugfix", "generated trackName is: "+ trackNameToBeSaved );
         return trackNameToBeSaved;
     }
 
@@ -83,11 +87,11 @@ public class GPSTrackSaver {
         //вот тут перебираем имена файлов, каждый раз добавляя цифровой модификатор, пока не получим
         // уникальное имя (для начала пробуем без модификатора). Когда находим уникальное имя, пишем на него.
         int counter = 0;
-        if (!checkNextName(trackNameToBeChecked)) { // если имя без модификатора не найдено, запускаем перебор
+        if (!checkNameUniquelity(trackNameToBeChecked)) { // если имя без модификатора не найдено, запускаем перебор
             boolean nameMached = false;
             while (!nameMached) {
                 counter++;
-                nameMached = checkNextName(trackNameToBeChecked+"-"+counter);
+                nameMached = checkNameUniquelity(trackNameToBeChecked+"-"+counter);
             }
             uniqueName = trackNameToBeChecked + "-" + counter;
         } else uniqueName = trackNameToBeChecked; // если первоначального имени не было, сохраняем его как есть
@@ -95,7 +99,7 @@ public class GPSTrackSaver {
         return uniqueName;
     }
 
-    private boolean checkNextName (String nextNameToComplain) {
+    private boolean checkNameUniquelity(String nextNameToComplain) {
         boolean nameMached = true;
         try {
             FileInputStream file = new FileInputStream (nextNameToComplain);
@@ -105,17 +109,52 @@ public class GPSTrackSaver {
         return nameMached;
     }
 
-    public void saveTrackFile (String trackNameToBeSaved) {
+    public void saveTheTrack (String trackNameToBeSaved) {
+        saveTrackFile(trackNameToBeSaved);
+        saveTracksList(trackNameToBeSaved);
+    }
+
+    private void saveTrackFile (String trackNameToBeSaved) {
+        GeoTrack trackObject = new GeoTrack();
+        trackObject.setTrackName(trackNameToBeSaved);
+        trackObject.setPointsList(trackPoints);
+        // TODO: определить папку, в которую сохранять трек /tracks/saved
         FileOutputStream file = null;
         try {
-            file = new FileOutputStream(trackNameToBeSaved);
+            file = new FileOutputStream(packageAddress+trackNameToBeSaved+".bin");
             ObjectOutputStream obj = new ObjectOutputStream(file);
-            obj.writeObject(trackPoints);
+            obj.writeObject(trackObject);
+            obj.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void saveTracksList(String trackNameToBeSaved) {
+        ArrayList<String> alreadyExistingTracksNames = new ArrayList<>();
+
+        GPSTrackLoader gpsTrackLoader = new GPSTrackLoader(packageAddress);
+        alreadyExistingTracksNames = gpsTrackLoader.uploadTracksList();
+
+        FileOutputStream file = null;
+        try {
+            file = new FileOutputStream(packageAddress + "trackList.bin");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(file);
+            for (String trackFileName: alreadyExistingTracksNames) {
+                objectOutputStream.writeChars(trackFileName);
+            }
+            objectOutputStream.writeChars(trackNameToBeSaved);
+            objectOutputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        //+ "trackList.bin"
     }
 
     private void askUserToSave (String trackNameToBeChecked) {

@@ -66,6 +66,7 @@ public class ActivityRace extends AppCompatActivity implements
 
     private GPSTrackSaver gpsTrackSaver;
     private MapManager mapManager;
+    private String tracksFolderAddress = "\ntracks\nsaved\n";
 
     private ImageView arrowDirectionOnMap, arrowWindOnMap;
 
@@ -125,7 +126,7 @@ public class ActivityRace extends AppCompatActivity implements
             }
         });
 
-        gpsTrackSaver = new GPSTrackSaver(this);
+        gpsTrackSaver = new GPSTrackSaver(this, tracksFolderAddress);
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
@@ -171,12 +172,21 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
-                                      Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition) {
+                                      Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition,
+                                      Button menuTracks) {
         mapUITools = new MapUITools(defaultMapScale);
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);
 
         mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
+
+        Button buttonMenuTracks = menuTracks;
+        buttonMenuTracks.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuTracksLaunch();
+            }
+        });
     }
 
     public void uploadTrackLayout (MapScrollView windowForMap, MapHorizontalScrollView horizontalMapScroll,
@@ -493,6 +503,10 @@ public class ActivityRace extends AppCompatActivity implements
         startRace();
         // TODO: при окончании таймера закрываем фрагмерт (или делаем контейнер прозрачным)
         //deployMapFragment();
+    }
+
+    public String getTracksPackage() {
+        return tracksFolderAddress;
     }
 
 }
