@@ -293,7 +293,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
     private void fillForecastLine (String time, String temp, String windSpeed, String windGust, String windDir) {
         LayoutInflater layoutInflater = getLayoutInflater();
 
-        View item = layoutInflater.inflate(R.layout.forecast_string, layoutToBeFilled, false);
+        View item = layoutInflater.inflate(R.layout.forecast_line, layoutToBeFilled, false);
 
         // заполняем arrayList, создавая конструктором новый экземпляр с полученными полями
         timeTV = (TextView) item.findViewById(R.id.forecast_string_time);

@@ -12,8 +12,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
-public class GPSTrackSaver {
+public class GPSTrackRecorderAndSaver {
     private boolean isTrackRecordingProgress = false;
     private ArrayList<Location> trackPoints;
     private String packageAddress;
@@ -22,7 +23,7 @@ public class GPSTrackSaver {
 
     private Long currentDate;
 
-    public GPSTrackSaver (ActivityRace activityRace, String packageAddress) {
+    public GPSTrackRecorderAndSaver(ActivityRace activityRace, String packageAddress) {
         this.activityRace = activityRace;
         this.packageAddress = packageAddress;
         trackPoints = new ArrayList<>();
@@ -110,51 +111,29 @@ public class GPSTrackSaver {
     }
 
     public void saveTheTrack (String trackNameToBeSaved) {
-        saveTrackFile(trackNameToBeSaved);
-        saveTracksList(trackNameToBeSaved);
+        GPSTrackLoader gpsTrackLoader = new GPSTrackLoader(packageAddress);
+        LinkedList<GeoTrack> alreadyExistedTracks = gpsTrackLoader.getSavedTracks();
+        GeoTrack trackToBeSaved = new GeoTrack();
+        trackToBeSaved.setTrackName(trackNameToBeSaved);
+        trackToBeSaved.setPointsList(trackPoints);
+        addTrackToExisted(alreadyExistedTracks, trackToBeSaved);
     }
 
-    private void saveTrackFile (String trackNameToBeSaved) {
-        GeoTrack trackObject = new GeoTrack();
-        trackObject.setTrackName(trackNameToBeSaved);
-        trackObject.setPointsList(trackPoints);
-        // TODO: определить папку, в которую сохранять трек /tracks/saved
+    private void addTrackToExisted(LinkedList<GeoTrack> alreadyExistedTracks, GeoTrack trackToBeSaved) {
         FileOutputStream file = null;
         try {
-            file = new FileOutputStream(packageAddress+trackNameToBeSaved+".bin");
+            file = new FileOutputStream(packageAddress+"savedTracks.bin");
             ObjectOutputStream obj = new ObjectOutputStream(file);
-            obj.writeObject(trackObject);
+            for (GeoTrack savedTrack: alreadyExistedTracks) {
+                obj.writeObject(savedTrack);
+            }
+            obj.writeObject(trackToBeSaved);
             obj.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void saveTracksList(String trackNameToBeSaved) {
-        ArrayList<String> alreadyExistingTracksNames = new ArrayList<>();
-
-        GPSTrackLoader gpsTrackLoader = new GPSTrackLoader(packageAddress);
-        alreadyExistingTracksNames = gpsTrackLoader.uploadTracksList();
-
-        FileOutputStream file = null;
-        try {
-            file = new FileOutputStream(packageAddress + "trackList.bin");
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(file);
-            for (String trackFileName: alreadyExistingTracksNames) {
-                objectOutputStream.writeChars(trackFileName);
-            }
-            objectOutputStream.writeChars(trackNameToBeSaved);
-            objectOutputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        //+ "trackList.bin"
     }
 
     private void askUserToSave (String trackNameToBeChecked) {

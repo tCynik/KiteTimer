@@ -1,6 +1,5 @@
 package com.example.racertimer;
 
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -19,7 +18,6 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
     private ActivityRace activityRace;
-    private Context context;
     private Button btnForecast, btnWindCalc, btnResetMax, btnDeveloper;
     private ImageButton btnClose;
     private SwitchCompat switchMuteVMG;

@@ -42,7 +42,7 @@ import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
 import com.example.racertimer.map.MapUITools;
 import com.example.racertimer.multimedia.Voiceover;
-import com.example.racertimer.tracks.GPSTrackSaver;
+import com.example.racertimer.tracks.GPSTrackRecorderAndSaver;
 
 public class ActivityRace extends AppCompatActivity implements
         TimerFragment.CloserTimerInterface {
@@ -64,7 +64,7 @@ public class ActivityRace extends AppCompatActivity implements
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
-    private GPSTrackSaver gpsTrackSaver;
+    private GPSTrackRecorderAndSaver gpsTrackRecorderAndSaver;
     private MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 
@@ -122,11 +122,11 @@ public class ActivityRace extends AppCompatActivity implements
                 if (mapManager != null) mapManager.beginNewTrackDrawing(location);
                 Log.i("racer_timer_painter", "track drawing is beginning");
 
-                gpsTrackSaver.beginRecordTrack();
+                gpsTrackRecorderAndSaver.beginRecordTrack();
             }
         });
 
-        gpsTrackSaver = new GPSTrackSaver(this, tracksFolderAddress);
+        gpsTrackRecorderAndSaver = new GPSTrackRecorderAndSaver(this, tracksFolderAddress);
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
@@ -467,7 +467,7 @@ public class ActivityRace extends AppCompatActivity implements
         if (location.hasSpeed()) {
             Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
             mapManager.onLocatoinChanged(location);
-            gpsTrackSaver.onLocationChanged(location);
+            gpsTrackRecorderAndSaver.onLocationChanged(location);
 
             //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;

@@ -2,9 +2,10 @@ package com.example.racertimer.tracks;
 
 import android.location.Location;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class GeoTrack {
+public class GeoTrack implements Serializable {
     private String trackName;
     private String datetime;
     private ArrayList<Location> pointsList;

@@ -5,6 +5,7 @@ import com.example.racertimer.ActivityRace;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class GPSTrackLoader {
@@ -25,22 +26,21 @@ public class GPSTrackLoader {
         }
     }
 
-    public ArrayList<String> uploadTracksList() {
-        ArrayList<String> tracksNames = new ArrayList<>();
-
-        File trackListFile = new File (listPackageAddress + "trackList.bin");
+    public LinkedList<GeoTrack> getSavedTracks() {
+        LinkedList<GeoTrack> loadedTracks = new ArrayList<>();
+        File trackListFile = new File (listPackageAddress + "savedTracks.bin");
         Scanner scanner = null;
         try {
             scanner = new Scanner(trackListFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace(); // убрать при не сузествующем файле?
         }
-        while (scanner.hasNext()) { tracksNames.add(scanner.nextLine());}
+        while (scanner.hasNext()) { loadedTracks.add(scanner.next());}
         scanner.close();
 
-        return tracksNames;
+        return loadedTracks;
     }
-
+    
     private void addNextFileNameToList (String filename) {
         // TODO: здесь инфлейтим в новую строчку списка новую запись из файла
     }
