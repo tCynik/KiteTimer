@@ -12,12 +12,13 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class GPSTrackRecorderAndSaver {
     private boolean isTrackRecordingProgress = false;
     private ArrayList<Location> trackPoints;
     private String packageAddress;
+
+    GPSTrackLoader gpsTrackLoader;
 
     private ActivityRace activityRace;
 
@@ -27,6 +28,7 @@ public class GPSTrackRecorderAndSaver {
         this.activityRace = activityRace;
         this.packageAddress = packageAddress;
         trackPoints = new ArrayList<>();
+        gpsTrackLoader = new GPSTrackLoader(packageAddress);
     }
 
     public void onLocationChanged (Location location) {
@@ -111,29 +113,33 @@ public class GPSTrackRecorderAndSaver {
     }
 
     public void saveTheTrack (String trackNameToBeSaved) {
-        GPSTrackLoader gpsTrackLoader = new GPSTrackLoader(packageAddress);
-        LinkedList<GeoTrack> alreadyExistedTracks = gpsTrackLoader.getSavedTracks();
         GeoTrack trackToBeSaved = new GeoTrack();
         trackToBeSaved.setTrackName(trackNameToBeSaved);
         trackToBeSaved.setPointsList(trackPoints);
-        addTrackToExisted(alreadyExistedTracks, trackToBeSaved);
+
+        TracksDatabase writedTracks = gpsTrackLoader.getSavedTracks();
+        writedTracks.addTrack(trackToBeSaved);
+
+        saveTrackDatabase(writedTracks);
     }
 
-    private void addTrackToExisted(LinkedList<GeoTrack> alreadyExistedTracks, GeoTrack trackToBeSaved) {
-        FileOutputStream file = null;
+    private void saveTrackDatabase (TracksDatabase tracksDatabase) {
         try {
-            file = new FileOutputStream(packageAddress+"savedTracks.bin");
-            ObjectOutputStream obj = new ObjectOutputStream(file);
-            for (GeoTrack savedTrack: alreadyExistedTracks) {
-                obj.writeObject(savedTrack);
-            }
-            obj.writeObject(trackToBeSaved);
-            obj.close();
+            FileOutputStream fileOutputStream = new FileOutputStream(packageAddress + "savedTracks.bin");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(tracksDatabase);
+            objectOutputStream.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void deleteTrackByName (String nameTractToBeDeleted) {
+        TracksDatabase writedTracks = gpsTrackLoader.getSavedTracks();
+        writedTracks.deleteTrackByName(nameTractToBeDeleted);
+        saveTrackDatabase(writedTracks);
     }
 
     private void askUserToSave (String trackNameToBeChecked) {

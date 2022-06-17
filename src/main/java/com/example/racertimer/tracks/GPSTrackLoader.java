@@ -2,11 +2,10 @@ package com.example.racertimer.tracks;
 
 import com.example.racertimer.ActivityRace;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 public class GPSTrackLoader {
     private ActivityRace activityRace;
@@ -16,31 +15,23 @@ public class GPSTrackLoader {
         this.listPackageAddress = listPackageAddress;
     }
 
-    public void fillTrackList () {
-        ArrayList<String> tracksNames = new ArrayList<>();
-        tracksNames = uploadTracksList();
-
-        for (String trackFileName:
-             tracksNames) {
-            addNextFileNameToList(trackFileName);
-        }
-    }
-
-    public LinkedList<GeoTrack> getSavedTracks() {
-        LinkedList<GeoTrack> loadedTracks = new ArrayList<>();
-        File trackListFile = new File (listPackageAddress + "savedTracks.bin");
-        Scanner scanner = null;
+    public TracksDatabase getSavedTracks() {
+        TracksDatabase tracksDatabase = new TracksDatabase();
         try {
-            scanner = new Scanner(trackListFile);
+            FileInputStream trackListFile = new FileInputStream(listPackageAddress + "savedTracks.bin");
+            ObjectInputStream inputObject = new ObjectInputStream(trackListFile);
+            tracksDatabase = (TracksDatabase) inputObject.readObject();
+            inputObject.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace(); // убрать при не сузествующем файле?
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
-        while (scanner.hasNext()) { loadedTracks.add(scanner.next());}
-        scanner.close();
-
-        return loadedTracks;
+        return tracksDatabase;
     }
-    
+
     private void addNextFileNameToList (String filename) {
         // TODO: здесь инфлейтим в новую строчку списка новую запись из файла
     }
