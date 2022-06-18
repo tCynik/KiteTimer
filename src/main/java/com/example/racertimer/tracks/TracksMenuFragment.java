@@ -4,14 +4,21 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.ActivityRace;
 import com.example.racertimer.R;
 
+import java.util.LinkedList;
+
 public class TracksMenuFragment extends Fragment {
-    GPSTrackLoader gpsTrackLoader;
+    private GPSTrackLoader gpsTrackLoader;
+    private TracksDatabase tracksDatabase;
+
+    private LinearLayout trackLineToBeFilled;
 
     public TracksMenuFragment() {
         // Required empty public constructor
@@ -30,12 +37,52 @@ public class TracksMenuFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_tracks_menu, null);
         ActivityRace activityRace = (ActivityRace) getActivity();
         gpsTrackLoader = new GPSTrackLoader(activityRace.getTracksPackage());
-
+        trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
         return view;
     }
 
-    private void updateTracksList() {
-        gpsTrackLoader.uploadTracksList();
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateTrackList();
     }
 
+    public void updateTrackList() {
+        //loadTracksData();
+        clearListAndFillTop();
+        //fillListInView();
+    }
+
+    private void loadTracksData() {
+        tracksDatabase = gpsTrackLoader.getSavedTracks();
+    }
+
+    private void fillListInView() {
+        if (tracksDatabase.isItAnyTracks()) {
+            LinkedList<GeoTrack> tracksArray = tracksDatabase.getSavedTracks();
+            for (GeoTrack currentTrack: tracksArray) {
+                String trackName = currentTrack.getTrackName();
+                String trackDate = currentTrack.getDatetime();
+            }
+        } else {
+            fillNextLine("No saved tracks", "");
+        }
+    }
+
+    private void clearListAndFillTop () {
+        trackLineToBeFilled.removeAllViewsInLayout();
+        fillNextLine("name", "date");
+    }
+
+    private void fillNextLine(String date, String name) {
+        LayoutInflater layoutInflater = getLayoutInflater();
+        View item = layoutInflater.inflate(R.layout.tracks_list_line, trackLineToBeFilled, false);
+        TextView trackName = item.findViewById(R.id.tracks_name);
+        TextView trackDate = item.findViewById(R.id.tracks_date);
+
+        trackName.setText(name);
+        trackDate.setText(date);
+
+        trackLineToBeFilled.addView(item);
+    }
 }

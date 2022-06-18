@@ -12,19 +12,20 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
-public class GPSTrackRecorderAndSaver {
+public class TracksDataManager {
     private boolean isTrackRecordingProgress = false;
     private ArrayList<Location> trackPoints;
     private String packageAddress;
 
-    GPSTrackLoader gpsTrackLoader;
+    private GPSTrackLoader gpsTrackLoader;
 
     private ActivityRace activityRace;
 
     private Long currentDate;
 
-    public GPSTrackRecorderAndSaver(ActivityRace activityRace, String packageAddress) {
+    public TracksDataManager(ActivityRace activityRace, String packageAddress) {
         this.activityRace = activityRace;
         this.packageAddress = packageAddress;
         trackPoints = new ArrayList<>();
@@ -145,5 +146,10 @@ public class GPSTrackRecorderAndSaver {
     private void askUserToSave (String trackNameToBeChecked) {
         // TODO: make request to user by dialogMenu to save the track with the current name.
         //  if user pressed Y save the file. If user cancelled - clear the arraylist
+    }
+
+    public LinkedList<GeoTrack> loadTracksDatabase () {
+        TracksDatabase tracksDatabase = gpsTrackLoader.getSavedTracks();
+        return tracksDatabase.getSavedTracks();
     }
 }

@@ -42,7 +42,8 @@ import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
 import com.example.racertimer.map.MapUITools;
 import com.example.racertimer.multimedia.Voiceover;
-import com.example.racertimer.tracks.GPSTrackRecorderAndSaver;
+import com.example.racertimer.tracks.TracksDataManager;
+import com.example.racertimer.tracks.TracksMenuFragment;
 
 public class ActivityRace extends AppCompatActivity implements
         TimerFragment.CloserTimerInterface {
@@ -56,6 +57,7 @@ public class ActivityRace extends AppCompatActivity implements
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
 
+    private TracksMenuFragment tracksMenuFragment;
     private TimerFragment timerFragment = null;
     private MapFragment mapFragment = null;
     public MapUITools mapUITools;
@@ -64,7 +66,7 @@ public class ActivityRace extends AppCompatActivity implements
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
-    private GPSTrackRecorderAndSaver gpsTrackRecorderAndSaver;
+    private TracksDataManager tracksDataManager;
     private MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 
@@ -122,11 +124,11 @@ public class ActivityRace extends AppCompatActivity implements
                 if (mapManager != null) mapManager.beginNewTrackDrawing(location);
                 Log.i("racer_timer_painter", "track drawing is beginning");
 
-                gpsTrackRecorderAndSaver.beginRecordTrack();
+                tracksDataManager.beginRecordTrack();
             }
         });
 
-        gpsTrackRecorderAndSaver = new GPSTrackRecorderAndSaver(this, tracksFolderAddress);
+        tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
 
         /** запускаем таймер */
         timerRunning(); // запускаем отсчет и обработку таймера
@@ -184,7 +186,7 @@ public class ActivityRace extends AppCompatActivity implements
         buttonMenuTracks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                menuTracksLaunch();
+                deployTracksFragment();
             }
         });
     }
@@ -233,6 +235,14 @@ public class ActivityRace extends AppCompatActivity implements
         developerFragment = new DeveloperFragment();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_menu_place, developerFragment);
+        fragmentTransaction.commit();
+    }
+
+    public void deployTracksFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        tracksMenuFragment = new TracksMenuFragment();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fr_menu_place, tracksMenuFragment);
         fragmentTransaction.commit();
     }
 
@@ -467,7 +477,7 @@ public class ActivityRace extends AppCompatActivity implements
         if (location.hasSpeed()) {
             Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
             mapManager.onLocatoinChanged(location);
-            gpsTrackRecorderAndSaver.onLocationChanged(location);
+            tracksDataManager.onLocationChanged(location);
 
             //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;
