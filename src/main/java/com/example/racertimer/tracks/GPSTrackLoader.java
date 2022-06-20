@@ -18,7 +18,7 @@ public class GPSTrackLoader {
     public TracksDatabase getSavedTracks() {
         TracksDatabase tracksDatabase = new TracksDatabase();
         try {
-            FileInputStream trackListFile = new FileInputStream(listPackageAddress + "savedTracks.bin");
+            FileInputStream trackListFile = new FileInputStream("savedTracks.bin");//listPackageAddress + "savedTracks.bin");
             ObjectInputStream inputObject = new ObjectInputStream(trackListFile);
             tracksDatabase = (TracksDatabase) inputObject.readObject();
             inputObject.close();

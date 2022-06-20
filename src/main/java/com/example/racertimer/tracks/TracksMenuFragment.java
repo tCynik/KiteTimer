@@ -15,6 +15,7 @@ import com.example.racertimer.R;
 import java.util.LinkedList;
 
 public class TracksMenuFragment extends Fragment {
+    private TracksDataManager tracksDataManager;
     private GPSTrackLoader gpsTrackLoader;
     private TracksDatabase tracksDatabase;
 
@@ -36,6 +37,7 @@ public class TracksMenuFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracks_menu, null);
         ActivityRace activityRace = (ActivityRace) getActivity();
+        tracksDataManager = new TracksDataManager((ActivityRace) getActivity(), "");
         gpsTrackLoader = new GPSTrackLoader(activityRace.getTracksPackage());
         trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
         return view;
@@ -48,9 +50,14 @@ public class TracksMenuFragment extends Fragment {
     }
 
     public void updateTrackList() {
-        //loadTracksData();
         clearListAndFillTop();
-        //fillListInView();
+        makeTracksFile();
+        //loadTracksData();
+        fillListInView();
+    }
+
+    private void makeTracksFile (){
+        tracksDataManager.saveTrackDatabase(new TracksDatabase());
     }
 
     private void loadTracksData() {
@@ -58,14 +65,18 @@ public class TracksMenuFragment extends Fragment {
     }
 
     private void fillListInView() {
+        if (tracksDatabase == null) {
+            fillNextLine("no saved tracks", "");
+        } else
         if (tracksDatabase.isItAnyTracks()) {
             LinkedList<GeoTrack> tracksArray = tracksDatabase.getSavedTracks();
             for (GeoTrack currentTrack: tracksArray) {
                 String trackName = currentTrack.getTrackName();
                 String trackDate = currentTrack.getDatetime();
+                fillNextLine(trackDate, trackName);
             }
         } else {
-            fillNextLine("No saved tracks", "");
+            fillNextLine("no saved tracks", "");
         }
     }
 

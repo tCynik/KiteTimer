@@ -1,8 +1,9 @@
 package com.example.racertimer.tracks;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public class TracksDatabase {
+public class TracksDatabase implements Serializable {
     private LinkedList<GeoTrack> savedTracks;
 
     public void addTrack (GeoTrack trackToBeAdded) {

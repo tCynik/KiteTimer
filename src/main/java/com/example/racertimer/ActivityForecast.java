@@ -68,7 +68,6 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         setContentView(R.layout.activity_forecast);
         context = this;
 
-        // строчка для последующего заполнения при получении прогноза
         layoutToBeFilled = (LinearLayout) findViewById(R.id.listView); // пустая линия, в которой будем надувать таблицу
         selectLocationButton = findViewById(R.id.btn_select_location);
 

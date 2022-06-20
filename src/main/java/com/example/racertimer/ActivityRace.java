@@ -186,7 +186,7 @@ public class ActivityRace extends AppCompatActivity implements
         buttonMenuTracks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deployTracksFragment();
+                deployTracksMenuFragment();
             }
         });
     }
@@ -238,7 +238,8 @@ public class ActivityRace extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    public void deployTracksFragment() {
+    public void deployTracksMenuFragment() {
+        menuPlace.setVisibility(View.VISIBLE);
         FragmentManager fragmentManager = getSupportFragmentManager();
         tracksMenuFragment = new TracksMenuFragment();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

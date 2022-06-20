@@ -1,5 +1,6 @@
 package com.example.racertimer.tracks;
 
+import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
@@ -124,9 +125,9 @@ public class TracksDataManager {
         saveTrackDatabase(writedTracks);
     }
 
-    private void saveTrackDatabase (TracksDatabase tracksDatabase) {
+    public void saveTrackDatabase (TracksDatabase tracksDatabase) {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(packageAddress + "savedTracks.bin");
+            FileOutputStream fileOutputStream = context.openFileOutput("tracks.saved.savedTracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(tracksDatabase);
             objectOutputStream.close();
