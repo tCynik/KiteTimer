@@ -1,5 +1,7 @@
 package com.example.racertimer.tracks;
 
+import android.util.Log;
+
 import com.example.racertimer.ActivityRace;
 
 import java.io.FileInputStream;
@@ -8,20 +10,25 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 public class GPSTrackLoader {
+    private final static String PROJECT_LOG_TAG = "tracks_loader";
+
     private ActivityRace activityRace;
     private String listPackageAddress;
 
-    public GPSTrackLoader (String listPackageAddress) {
+    public GPSTrackLoader (ActivityRace activityRace, String listPackageAddress) {
+        this.activityRace = activityRace;
         this.listPackageAddress = listPackageAddress;
     }
 
     public TracksDatabase getSavedTracks() {
         TracksDatabase tracksDatabase = new TracksDatabase();
         try {
-            FileInputStream trackListFile = new FileInputStream("savedTracks.bin");//listPackageAddress + "savedTracks.bin");
+            FileInputStream trackListFile = activityRace.openFileInput("saved.savedTracks.bin");
             ObjectInputStream inputObject = new ObjectInputStream(trackListFile);
             tracksDatabase = (TracksDatabase) inputObject.readObject();
             inputObject.close();
+            trackListFile.close();
+            Log.i(PROJECT_LOG_TAG, "tracks database was loaded");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

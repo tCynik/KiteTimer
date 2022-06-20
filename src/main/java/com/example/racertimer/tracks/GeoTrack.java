@@ -11,6 +11,7 @@ public class GeoTrack implements Serializable {
     private ArrayList<Location> pointsList;
 
     public GeoTrack () {
+        pointsList = new ArrayList<>();
     }
 
     public String getTrackName() {

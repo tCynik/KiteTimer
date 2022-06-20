@@ -1,6 +1,7 @@
 package com.example.racertimer.tracks;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +39,7 @@ public class TracksMenuFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_tracks_menu, null);
         ActivityRace activityRace = (ActivityRace) getActivity();
         tracksDataManager = new TracksDataManager((ActivityRace) getActivity(), "");
-        gpsTrackLoader = new GPSTrackLoader(activityRace.getTracksPackage());
+        gpsTrackLoader = new GPSTrackLoader(activityRace, activityRace.getTracksPackage());
         trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
         return view;
     }
@@ -52,7 +53,7 @@ public class TracksMenuFragment extends Fragment {
     public void updateTrackList() {
         clearListAndFillTop();
         makeTracksFile();
-        //loadTracksData();
+        loadTracksData();
         fillListInView();
     }
 
@@ -61,6 +62,8 @@ public class TracksMenuFragment extends Fragment {
     }
 
     private void loadTracksData() {
+        if (gpsTrackLoader == null)
+        Log.i("bugfix", "GPSTrackLoader is null!!! ");
         tracksDatabase = gpsTrackLoader.getSavedTracks();
     }
 

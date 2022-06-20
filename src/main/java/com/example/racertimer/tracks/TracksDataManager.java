@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class TracksDataManager {
+    private final static String PROJECT_LOG_TAG = "tracks_data_manager";
+
     private boolean isTrackRecordingProgress = false;
     private ArrayList<Location> trackPoints;
     private String packageAddress;
@@ -30,7 +32,7 @@ public class TracksDataManager {
         this.activityRace = activityRace;
         this.packageAddress = packageAddress;
         trackPoints = new ArrayList<>();
-        gpsTrackLoader = new GPSTrackLoader(packageAddress);
+        gpsTrackLoader = new GPSTrackLoader(activityRace, packageAddress);
     }
 
     public void onLocationChanged (Location location) {
@@ -127,10 +129,12 @@ public class TracksDataManager {
 
     public void saveTrackDatabase (TracksDatabase tracksDatabase) {
         try {
-            FileOutputStream fileOutputStream = context.openFileOutput("tracks.saved.savedTracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
+            FileOutputStream fileOutputStream = activityRace.openFileOutput("saved.savedTracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(tracksDatabase);
             objectOutputStream.close();
+            fileOutputStream.close();
+            Log.i(PROJECT_LOG_TAG, "tracks database was saved");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

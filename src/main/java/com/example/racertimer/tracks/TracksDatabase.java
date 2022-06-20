@@ -6,6 +6,10 @@ import java.util.LinkedList;
 public class TracksDatabase implements Serializable {
     private LinkedList<GeoTrack> savedTracks;
 
+    public TracksDatabase () {
+        savedTracks = new LinkedList<>();
+    }
+
     public void addTrack (GeoTrack trackToBeAdded) {
         savedTracks.add(trackToBeAdded);
     }

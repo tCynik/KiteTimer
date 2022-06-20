@@ -131,9 +131,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         try { // записываем обьект список локаций в файл
             FileOutputStream fileOutputStream = context.openFileOutput("saved.locations_list.bin", Context.MODE_PRIVATE);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream( fileOutputStream);
-            Log.i("racer_timer, loc list serialization", " uploading stream is launched ");
             objectOutputStream.writeObject(listLocationForecast);
-            Log.i("racer_timer, loc list serialization", " object was writed ");
             objectOutputStream.close();
             fileOutputStream.close();
             Log.i("racer_timer, loc list serialization", " location saved ");
