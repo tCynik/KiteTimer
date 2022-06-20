@@ -53,6 +53,8 @@ public class ActivityRace extends AppCompatActivity implements
 
     private Button btnReset, btnStopwach;
     private Button btnStartRecordTrack;
+    private boolean isTrackRecorded = false;
+
     private ImageButton btnMenu;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
@@ -121,10 +123,18 @@ public class ActivityRace extends AppCompatActivity implements
         btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mapManager != null) mapManager.beginNewTrackDrawing(location);
-                Log.i("racer_timer_painter", "track drawing is beginning");
+                if (isTrackRecorded) {
+                    isTrackRecorded = false;
+                    btnStartRecordTrack.setText("START");
+                    askToSaveTrack("new track");
+                } else {
+                    isTrackRecorded = true;
+                    btnStartRecordTrack.setText("STOP");
+                    if (mapManager != null) mapManager.beginNewTrackDrawing(location);
+                    Log.i("racer_timer_painter", "track drawing is beginning");
 
-                tracksDataManager.beginRecordTrack();
+                    tracksDataManager.beginRecordTrack();
+                }
             }
         });
 
@@ -171,6 +181,35 @@ public class ActivityRace extends AppCompatActivity implements
         }
 
         updateWindDirection();
+    }
+
+    public void askToSaveTrack(String trackName) {
+        AlertDialog.Builder confirmSaveTrack = new AlertDialog.Builder(this); // строитель диалога
+        confirmSaveTrack.setMessage("Save the track?")
+                .setCancelable(true) // можно продолжить запись, нажав мимо
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Log.i("racer_timer", "saving track by name = " + trackName);
+                        tracksDataManager.initSavingRecordedTrack();
+                    }
+                })
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                })
+                .setNeutralButton("delete track", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        tracksDataManager.clearTheTrack();
+                        dialogInterface.cancel();
+                    }
+                });
+        AlertDialog alertDialog = confirmSaveTrack.create(); // создание диалога
+        alertDialog.setTitle("Stop track writing"); // заголовок
+        alertDialog.show(); // отображение диалога
     }
 
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
