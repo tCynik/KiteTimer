@@ -58,7 +58,7 @@ public class TracksMenuFragment extends Fragment {
     }
 
     private void makeTracksFile (){
-        tracksDataManager.saveTrackDatabase(new TracksDatabase());
+        tracksDataManager.saveTracksDatabase(new TracksDatabase());
     }
 
     private void loadTracksData() {

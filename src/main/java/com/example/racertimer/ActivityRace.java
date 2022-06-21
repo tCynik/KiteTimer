@@ -124,16 +124,13 @@ public class ActivityRace extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 if (isTrackRecorded) {
-                    isTrackRecorded = false;
-                    btnStartRecordTrack.setText("START");
-                    askToSaveTrack("new track");
+                    tracksDataManager.initSavingRecordedTrack();
                 } else {
+                    tracksDataManager.beginRecordTrack();
                     isTrackRecorded = true;
                     btnStartRecordTrack.setText("STOP");
-                    if (mapManager != null) mapManager.beginNewTrackDrawing(location);
+                    mapManager.beginNewTrackDrawing(location);
                     Log.i("racer_timer_painter", "track drawing is beginning");
-
-                    tracksDataManager.beginRecordTrack();
                 }
             }
         });
@@ -184,14 +181,18 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void askToSaveTrack(String trackName) {
+        Log.i("bugfix", "Race: asked to save the track: " );
         AlertDialog.Builder confirmSaveTrack = new AlertDialog.Builder(this); // строитель диалога
-        confirmSaveTrack.setMessage("Save the track?")
+        confirmSaveTrack.setMessage("Track name: " + trackName)
                 .setCancelable(true) // можно продолжить запись, нажав мимо
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Log.i("racer_timer", "saving track by name = " + trackName);
-                        tracksDataManager.initSavingRecordedTrack();
+                        tracksDataManager.saveCurrentTrackByName(trackName);
+                        mapManager.endTrackDrawing();
+                        isTrackRecorded = false;
+                        btnStartRecordTrack.setText("START");
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -208,7 +209,7 @@ public class ActivityRace extends AppCompatActivity implements
                     }
                 });
         AlertDialog alertDialog = confirmSaveTrack.create(); // создание диалога
-        alertDialog.setTitle("Stop track writing"); // заголовок
+        alertDialog.setTitle("Save the track?"); // заголовок
         alertDialog.show(); // отображение диалога
     }
 

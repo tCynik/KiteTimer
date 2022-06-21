@@ -58,9 +58,9 @@ public class TracksDataManager {
      * сохранить трек - записываем трекс указанным именем.
      */
 
-    public void stopRecordTrack () {
-        initSavingRecordedTrack();
-    }
+//    public void stopRecordTrack () {
+//        initSavingRecordedTrack();
+//    }
 
     public void clearTheTrack () {
         trackPoints.clear();
@@ -85,49 +85,73 @@ public class TracksDataManager {
 
         String trackNameToBeSaved = year + "-" +month + "-" + day;
 
-        Log.i("bugfix", "generated trackName is: "+ trackNameToBeSaved );
+        Log.i("bugfix", "DataManager: generated trackName is: "+ trackNameToBeSaved );
         return trackNameToBeSaved;
     }
 
     private String trackNameUniquer (String trackNameToBeChecked) {
-        String uniqueName;
-        //вот тут перебираем имена файлов, каждый раз добавляя цифровой модификатор, пока не получим
-        // уникальное имя (для начала пробуем без модификатора). Когда находим уникальное имя, пишем на него.
-        int counter = 0;
-        if (!checkNameUniquelity(trackNameToBeChecked)) { // если имя без модификатора не найдено, запускаем перебор
-            boolean nameMached = false;
-            while (!nameMached) {
-                counter++;
-                nameMached = checkNameUniquelity(trackNameToBeChecked+"-"+counter);
+        String uniqueName = trackNameToBeChecked + "_" + 1;
+        Log.i("bugfix", "Uniquer: first unique trackName is: "+ uniqueName );
+
+        LinkedList<GeoTrack> existedTracks = loadTracksDatabase().getSavedTracks();
+        for (GeoTrack nextTrack: existedTracks) {
+            String nextTrackName = nextTrack.getTrackName();
+            // TODO: берем последнюю цифру трека для текущей даты, и если для этой даты вообще есть треки,
+            //  берем последний из них и +1
+            if (trackNameToBeChecked == nextTrackName) {
+                int currentNumber = 1;//parseDailyNumber(nextTrackName);
+                uniqueName = trackNameToBeChecked + "_" + currentNumber;
             }
-            uniqueName = trackNameToBeChecked + "-" + counter;
-        } else uniqueName = trackNameToBeChecked; // если первоначального имени не было, сохраняем его как есть
+        }
 
         return uniqueName;
+
+        //вот тут перебираем имена файлов, каждый раз добавляя цифровой модификатор, пока не получим
+        // уникальное имя (для начала пробуем без модификатора). Когда находим уникальное имя, пишем на него.
+//        int counter = 0;
+//        if (!checkNameUniqueness(trackNameToBeChecked)) { // если имя без модификатора не найдено, запускаем перебор
+//            boolean nameMatched = false;
+//            while (!nameMatched) {
+//                counter++;
+//                nameMatched = checkNameUniqueness(trackNameToBeChecked+"-"+counter);
+//            }
+//            uniqueName = trackNameToBeChecked + "-" + counter;
+//        } else uniqueName = trackNameToBeChecked; // если первоначального имени не было, сохраняем его как есть
+//
+//        return uniqueName;
     }
 
-    private boolean checkNameUniquelity(String nextNameToComplain) {
-        boolean nameMached = true;
+//    private int parseDailyNumber(String trackName) {
+//        String radix = "_";
+//        char[] parsedName = trackName.toCharArray();
+//        for (char nextChar: parsedName) {
+//
+//        }
+//        return
+//    }
+
+    private boolean checkNameUniqueness(String nextNameToComplain) {
+        boolean nameMatched = true;
         try {
             FileInputStream file = new FileInputStream (nextNameToComplain);
         } catch (FileNotFoundException e) {
-            nameMached = false;
+            nameMatched = false;
         }
-        return nameMached;
+        return nameMatched;
     }
 
-    public void saveTheTrack (String trackNameToBeSaved) {
+    public void saveCurrentTrackByName(String trackNameToBeSaved) {
         GeoTrack trackToBeSaved = new GeoTrack();
         trackToBeSaved.setTrackName(trackNameToBeSaved);
         trackToBeSaved.setPointsList(trackPoints);
 
-        TracksDatabase writedTracks = gpsTrackLoader.getSavedTracks();
+        TracksDatabase writedTracks = loadTracksDatabase();
         writedTracks.addTrack(trackToBeSaved);
 
-        saveTrackDatabase(writedTracks);
+        saveTracksDatabase(writedTracks);
     }
 
-    public void saveTrackDatabase (TracksDatabase tracksDatabase) {
+    public void saveTracksDatabase(TracksDatabase tracksDatabase) {
         try {
             FileOutputStream fileOutputStream = activityRace.openFileOutput("saved.savedTracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
@@ -145,17 +169,18 @@ public class TracksDataManager {
     public void deleteTrackByName (String nameTractToBeDeleted) {
         TracksDatabase writedTracks = gpsTrackLoader.getSavedTracks();
         writedTracks.deleteTrackByName(nameTractToBeDeleted);
-        saveTrackDatabase(writedTracks);
+        saveTracksDatabase(writedTracks);
     }
 
     private void askUserToSave (String trackNameToBeChecked) {
+        Log.i("bugfix", "DataManager: asking user to save " + trackNameToBeChecked);
 
+        activityRace.askToSaveTrack(trackNameToBeChecked);
         // TODO: make request to user by dialogMenu to save the track with the current name.
         //  if user pressed Y save the file. If user cancelled - clear the arraylist
     }
 
-    public LinkedList<GeoTrack> loadTracksDatabase () {
-        TracksDatabase tracksDatabase = gpsTrackLoader.getSavedTracks();
-        return tracksDatabase.getSavedTracks();
+    public TracksDatabase loadTracksDatabase () {
+        return gpsTrackLoader.getSavedTracks();
     }
 }
