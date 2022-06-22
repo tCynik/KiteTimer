@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.example.racertimer.ActivityRace;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -85,22 +84,20 @@ public class TracksDataManager {
 
         String trackNameToBeSaved = year + "-" +month + "-" + day;
 
-        Log.i("bugfix", "DataManager: generated trackName is: "+ trackNameToBeSaved );
         return trackNameToBeSaved;
     }
 
     private String trackNameUniquer (String trackNameToBeChecked) {
-        String uniqueName = trackNameToBeChecked + "_" + 1;
-        Log.i("bugfix", "Uniquer: first unique trackName is: "+ uniqueName );
+        int modifier = 1;
+        String uniqueName = trackNameToBeChecked + "_" + modifier;
 
         LinkedList<GeoTrack> existedTracks = loadTracksDatabase().getSavedTracks();
         for (GeoTrack nextTrack: existedTracks) {
             String nextTrackName = nextTrack.getTrackName();
-            // TODO: берем последнюю цифру трека для текущей даты, и если для этой даты вообще есть треки,
-            //  берем последний из них и +1
-            if (trackNameToBeChecked == nextTrackName) {
-                int currentNumber = 1;//parseDailyNumber(nextTrackName);
-                uniqueName = trackNameToBeChecked + "_" + currentNumber;
+            if (uniqueName.equals(nextTrackName)) {
+                modifier++;
+
+                uniqueName  = trackNameToBeChecked + "_" + modifier;
             }
         }
 
@@ -130,17 +127,8 @@ public class TracksDataManager {
 //        return
 //    }
 
-    private boolean checkNameUniqueness(String nextNameToComplain) {
-        boolean nameMatched = true;
-        try {
-            FileInputStream file = new FileInputStream (nextNameToComplain);
-        } catch (FileNotFoundException e) {
-            nameMatched = false;
-        }
-        return nameMatched;
-    }
-
     public void saveCurrentTrackByName(String trackNameToBeSaved) {
+        Log.i("bugfix", "Manager: saving track by name " + trackNameToBeSaved);
         GeoTrack trackToBeSaved = new GeoTrack();
         trackToBeSaved.setTrackName(trackNameToBeSaved);
         trackToBeSaved.setPointsList(trackPoints);
@@ -153,6 +141,7 @@ public class TracksDataManager {
 
     public void saveTracksDatabase(TracksDatabase tracksDatabase) {
         try {
+            Log.i("bugfix", "Manager: saving database " );
             FileOutputStream fileOutputStream = activityRace.openFileOutput("saved.savedTracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(tracksDatabase);

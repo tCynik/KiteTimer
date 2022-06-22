@@ -181,14 +181,12 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void askToSaveTrack(String trackName) {
-        Log.i("bugfix", "Race: asked to save the track: " );
         AlertDialog.Builder confirmSaveTrack = new AlertDialog.Builder(this); // строитель диалога
         confirmSaveTrack.setMessage("Track name: " + trackName)
                 .setCancelable(true) // можно продолжить запись, нажав мимо
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.i("racer_timer", "saving track by name = " + trackName);
                         tracksDataManager.saveCurrentTrackByName(trackName);
                         mapManager.endTrackDrawing();
                         isTrackRecorded = false;
