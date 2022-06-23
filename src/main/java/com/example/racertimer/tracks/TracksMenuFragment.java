@@ -51,6 +51,7 @@ public class TracksMenuFragment extends Fragment {
     }
 
     public void updateTrackList() {
+        Log.i("bugfix", "fragment: updating database ");
         clearListAndFillTop();
         makeTracksFile();
         loadTracksData();
@@ -62,24 +63,30 @@ public class TracksMenuFragment extends Fragment {
     }
 
     private void loadTracksData() {
+        Log.i("bugfix", "fragment: loading database ");
         if (gpsTrackLoader == null)
         Log.i("bugfix", "GPSTrackLoader is null!!! ");
         tracksDatabase = gpsTrackLoader.getSavedTracks();
     }
 
     private void fillListInView() {
+        Log.i("bugfix", "fragment: starting fill the track list ");
         if (tracksDatabase == null) {
             fillNextLine("no saved tracks", "");
-        } else
-        if (tracksDatabase.isItAnyTracks()) {
-            LinkedList<GeoTrack> tracksArray = tracksDatabase.getSavedTracks();
-            for (GeoTrack currentTrack: tracksArray) {
-                String trackName = currentTrack.getTrackName();
-                String trackDate = currentTrack.getDatetime();
-                fillNextLine(trackDate, trackName);
-            }
         } else {
-            fillNextLine("no saved tracks", "");
+            Log.i("bugfix", "fragment: database size = " + tracksDatabase.getSavedTracks().size());
+            if (tracksDatabase.isItAnyTracks()) {
+                Log.i("bugfix", "fragment: the tracks are founded in the database ");
+                LinkedList<GeoTrack> tracksArray = tracksDatabase.getSavedTracks();
+                for (GeoTrack currentTrack: tracksArray) {
+                    Log.i("bugfix", "fragment: filling next line with name = " + currentTrack.getTrackName() );
+                    String trackName = currentTrack.getTrackName();
+                    String trackDate = currentTrack.getDatetime();
+                    fillNextLine(trackDate, trackName);
+                }
+            } else {
+                fillNextLine("no saved tracks", "");
+            }
         }
     }
 

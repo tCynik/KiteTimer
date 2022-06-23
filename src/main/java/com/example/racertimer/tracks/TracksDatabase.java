@@ -1,5 +1,7 @@
 package com.example.racertimer.tracks;
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 
@@ -19,7 +21,9 @@ public class TracksDatabase implements Serializable {
     }
 
     public boolean isItAnyTracks () {
+        Log.i("bugfix", "tracksDatabase: checking is it any tracks. DB size = " + savedTracks.size());
         if (savedTracks.isEmpty()) return false;
+
         else return true;
     }
 

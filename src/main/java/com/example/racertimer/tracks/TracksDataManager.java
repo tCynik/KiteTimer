@@ -142,7 +142,7 @@ public class TracksDataManager {
     public void saveTracksDatabase(TracksDatabase tracksDatabase) {
         try {
             Log.i("bugfix", "Manager: saving database " );
-            FileOutputStream fileOutputStream = activityRace.openFileOutput("saved.savedTracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
+            FileOutputStream fileOutputStream = activityRace.openFileOutput("saved.saved_tracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(tracksDatabase);
             objectOutputStream.close();
