@@ -1,15 +1,10 @@
 package com.example.racertimer.tracks;
 
-import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
 import com.example.racertimer.ActivityRace;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,6 +17,7 @@ public class TracksDataManager {
     private String packageAddress;
 
     private GPSTrackLoader gpsTrackLoader;
+    private TracksSaver tracksSaver;
 
     private ActivityRace activityRace;
 
@@ -32,6 +28,7 @@ public class TracksDataManager {
         this.packageAddress = packageAddress;
         trackPoints = new ArrayList<>();
         gpsTrackLoader = new GPSTrackLoader(activityRace, packageAddress);
+        tracksSaver = new TracksSaver(activityRace);
     }
 
     public void onLocationChanged (Location location) {
@@ -102,30 +99,7 @@ public class TracksDataManager {
         }
 
         return uniqueName;
-
-        //вот тут перебираем имена файлов, каждый раз добавляя цифровой модификатор, пока не получим
-        // уникальное имя (для начала пробуем без модификатора). Когда находим уникальное имя, пишем на него.
-//        int counter = 0;
-//        if (!checkNameUniqueness(trackNameToBeChecked)) { // если имя без модификатора не найдено, запускаем перебор
-//            boolean nameMatched = false;
-//            while (!nameMatched) {
-//                counter++;
-//                nameMatched = checkNameUniqueness(trackNameToBeChecked+"-"+counter);
-//            }
-//            uniqueName = trackNameToBeChecked + "-" + counter;
-//        } else uniqueName = trackNameToBeChecked; // если первоначального имени не было, сохраняем его как есть
-//
-//        return uniqueName;
     }
-
-//    private int parseDailyNumber(String trackName) {
-//        String radix = "_";
-//        char[] parsedName = trackName.toCharArray();
-//        for (char nextChar: parsedName) {
-//
-//        }
-//        return
-//    }
 
     public void saveCurrentTrackByName(String trackNameToBeSaved) {
         Log.i("bugfix", "Manager: saving track by name " + trackNameToBeSaved);
@@ -135,30 +109,13 @@ public class TracksDataManager {
 
         TracksDatabase writedTracks = loadTracksDatabase();
         writedTracks.addTrack(trackToBeSaved);
-
-        saveTracksDatabase(writedTracks);
-    }
-
-    public void saveTracksDatabase(TracksDatabase tracksDatabase) {
-        try {
-            Log.i("bugfix", "Manager: saving database " );
-            FileOutputStream fileOutputStream = activityRace.openFileOutput("saved.saved_tracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-            objectOutputStream.writeObject(tracksDatabase);
-            objectOutputStream.close();
-            fileOutputStream.close();
-            Log.i(PROJECT_LOG_TAG, "tracks database was saved");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+         tracksSaver.saveTracksDatabase(writedTracks);
     }
 
     public void deleteTrackByName (String nameTractToBeDeleted) {
         TracksDatabase writedTracks = gpsTrackLoader.getSavedTracks();
         writedTracks.deleteTrackByName(nameTractToBeDeleted);
-        saveTracksDatabase(writedTracks);
+        tracksSaver.saveTracksDatabase(writedTracks);
     }
 
     private void askUserToSave (String trackNameToBeChecked) {

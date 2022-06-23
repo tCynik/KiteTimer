@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.example.racertimer.ActivityRace;
 import com.example.racertimer.R;
 
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 
 public class TracksMenuFragment extends Fragment {
@@ -53,13 +54,8 @@ public class TracksMenuFragment extends Fragment {
     public void updateTrackList() {
         Log.i("bugfix", "fragment: updating database ");
         clearListAndFillTop();
-        makeTracksFile();
         loadTracksData();
         fillListInView();
-    }
-
-    private void makeTracksFile (){
-        tracksDataManager.saveTracksDatabase(new TracksDatabase());
     }
 
     private void loadTracksData() {
@@ -81,8 +77,9 @@ public class TracksMenuFragment extends Fragment {
                 for (GeoTrack currentTrack: tracksArray) {
                     Log.i("bugfix", "fragment: filling next line with name = " + currentTrack.getTrackName() );
                     String trackName = currentTrack.getTrackName();
-                    String trackDate = currentTrack.getDatetime();
-                    fillNextLine(trackDate, trackName);
+
+                    String trackDuration = durationToString(currentTrack.getDuration());
+                    fillNextLine(trackName, trackDuration);
                 }
             } else {
                 fillNextLine("no saved tracks", "");
@@ -90,19 +87,27 @@ public class TracksMenuFragment extends Fragment {
         }
     }
 
-    private void clearListAndFillTop () {
-        trackLineToBeFilled.removeAllViewsInLayout();
-        fillNextLine("name", "date");
+    private String durationToString (long durationTime) {
+        String durationString = "0";
+        if (durationTime != 0) {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm:ss");
+            durationString = timeFormat.format(durationTime);
+        }
+        return durationString;
     }
 
-    private void fillNextLine(String date, String name) {
+    private void clearListAndFillTop () {
+        trackLineToBeFilled.removeAllViewsInLayout();
+        fillNextLine("name", "duration");
+    }
+
+    private void fillNextLine(String name, String duration) {
         LayoutInflater layoutInflater = getLayoutInflater();
         View item = layoutInflater.inflate(R.layout.tracks_list_line, trackLineToBeFilled, false);
         TextView trackName = item.findViewById(R.id.tracks_name);
-        TextView trackDate = item.findViewById(R.id.tracks_date);
-
+        TextView trackDuration = item.findViewById(R.id.track_duration);
         trackName.setText(name);
-        trackDate.setText(date);
+        trackDuration.setText(duration);
 
         trackLineToBeFilled.addView(item);
     }

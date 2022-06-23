@@ -11,7 +11,7 @@ import android.widget.Toast;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class MapManager {
-    private final static String PROJECT_LOG_TAG = "racer_timer_painter";
+    private final static String PROJECT_LOG_TAG = "racer_timer_map_manager";
 
     private Context context;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах

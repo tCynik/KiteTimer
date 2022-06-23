@@ -46,4 +46,16 @@ public class GeoTrack implements Serializable {
         pointsList.add(location);
 
     }
+
+    public long getDuration () {
+        long duration = 0;
+        if (! pointsList.isEmpty()) {
+            Location location = pointsList.get(0);
+            long timeStart = location.getTime();
+            location = pointsList.get(pointsList.size());
+            long timeEnd = location.getTime();
+            duration = timeEnd - timeStart;
+        }
+        return duration;
+    }
 }
