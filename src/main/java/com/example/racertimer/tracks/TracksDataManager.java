@@ -109,7 +109,7 @@ public class TracksDataManager {
 
         TracksDatabase writedTracks = loadTracksDatabase();
         writedTracks.addTrack(trackToBeSaved);
-         tracksSaver.saveTracksDatabase(writedTracks);
+        tracksSaver.saveTracksDatabase(writedTracks);
     }
 
     public void deleteTrackByName (String nameTractToBeDeleted) {
@@ -127,6 +127,7 @@ public class TracksDataManager {
     }
 
     public TracksDatabase loadTracksDatabase () {
+        Log.i("bugfix", "Manager: loading the tracks. number is: "+ gpsTrackLoader.getSavedTracks().homMuchSavedTracks());
         return gpsTrackLoader.getSavedTracks();
     }
 }

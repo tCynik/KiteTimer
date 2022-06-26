@@ -60,9 +60,7 @@ public class TracksMenuFragment extends Fragment {
 
     private void loadTracksData() {
         Log.i("bugfix", "fragment: loading database ");
-        if (gpsTrackLoader == null)
-        Log.i("bugfix", "GPSTrackLoader is null!!! ");
-        tracksDatabase = gpsTrackLoader.getSavedTracks();
+        tracksDatabase = tracksDataManager.loadTracksDatabase();
     }
 
     private void fillListInView() {

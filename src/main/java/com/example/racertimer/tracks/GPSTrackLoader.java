@@ -14,14 +14,15 @@ public class GPSTrackLoader {
 
     private ActivityRace activityRace;
     private String listPackageAddress;
+    private TracksDatabase tracksDatabase;
 
     public GPSTrackLoader (ActivityRace activityRace, String listPackageAddress) {
         this.activityRace = activityRace;
         this.listPackageAddress = listPackageAddress;
+        this.tracksDatabase = new TracksDatabase();
     }
 
     public TracksDatabase getSavedTracks() {
-        TracksDatabase tracksDatabase = new TracksDatabase();
         try {
             FileInputStream trackListFile = activityRace.openFileInput("saved.saved_tracks.bin");
             ObjectInputStream inputObject = new ObjectInputStream(trackListFile);
@@ -29,6 +30,7 @@ public class GPSTrackLoader {
             inputObject.close();
             trackListFile.close();
             Log.i(PROJECT_LOG_TAG, "tracks database was loaded");
+            Log.i("bugfix", "Loader: number of saved tracks " + tracksDatabase.homMuchSavedTracks());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

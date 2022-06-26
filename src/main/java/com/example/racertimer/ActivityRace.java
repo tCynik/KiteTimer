@@ -68,7 +68,7 @@ public class ActivityRace extends AppCompatActivity implements
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
-    private TracksDataManager tracksDataManager;
+    public TracksDataManager tracksDataManager;
     private MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 

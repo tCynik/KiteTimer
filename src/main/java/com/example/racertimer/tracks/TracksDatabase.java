@@ -27,6 +27,10 @@ public class TracksDatabase implements Serializable {
         else return true;
     }
 
+    public int homMuchSavedTracks() {
+        return savedTracks.size();
+    }
+
     public LinkedList<GeoTrack> deleteTrackByName (String nameToBeingDeleted) {
         for (int i = 0; i < savedTracks.size(); i++) {
             if (savedTracks.get(i).getTrackName() == nameToBeingDeleted) {
