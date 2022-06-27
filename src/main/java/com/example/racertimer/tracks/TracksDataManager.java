@@ -105,7 +105,7 @@ public class TracksDataManager {
         Log.i("bugfix", "Manager: saving track by name " + trackNameToBeSaved);
         GeoTrack trackToBeSaved = new GeoTrack();
         trackToBeSaved.setTrackName(trackNameToBeSaved);
-        trackToBeSaved.setPointsList(trackPoints);
+        trackToBeSaved.setPointsListToSave(trackPoints);
 
         TracksDatabase writedTracks = loadTracksDatabase();
         writedTracks.addTrack(trackToBeSaved);

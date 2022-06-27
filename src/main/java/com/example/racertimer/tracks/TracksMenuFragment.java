@@ -64,16 +64,12 @@ public class TracksMenuFragment extends Fragment {
     }
 
     private void fillListInView() {
-        Log.i("bugfix", "fragment: starting fill the track list ");
         if (tracksDatabase == null) {
             fillNextLine("no saved tracks", "");
         } else {
-            Log.i("bugfix", "fragment: database size = " + tracksDatabase.getSavedTracks().size());
             if (tracksDatabase.isItAnyTracks()) {
-                Log.i("bugfix", "fragment: the tracks are founded in the database ");
                 LinkedList<GeoTrack> tracksArray = tracksDatabase.getSavedTracks();
                 for (GeoTrack currentTrack: tracksArray) {
-                    Log.i("bugfix", "fragment: filling next line with name = " + currentTrack.getTrackName() );
                     String trackName = currentTrack.getTrackName();
 
                     String trackDuration = durationToString(currentTrack.getDuration());
@@ -88,7 +84,7 @@ public class TracksMenuFragment extends Fragment {
     private String durationToString (long durationTime) {
         String durationString = "0";
         if (durationTime != 0) {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm:ss");
+            SimpleDateFormat timeFormat = new SimpleDateFormat("mm:ss");
             durationString = timeFormat.format(durationTime);
         }
         return durationString;
