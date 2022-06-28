@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class TracksMenuFragment extends Fragment {
+    private ActivityRace activityRace;
     private TracksDataManager tracksDataManager;
     private GPSTrackLoader gpsTrackLoader;
     private TracksDatabase tracksDatabase;
@@ -49,7 +50,7 @@ public class TracksMenuFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracks_menu, null);
-        ActivityRace activityRace = (ActivityRace) getActivity();
+        activityRace = (ActivityRace) getActivity();
         trackInList = new ArrayList<>();
         tracksDataManager = new TracksDataManager((ActivityRace) getActivity(), "");
         gpsTrackLoader = new GPSTrackLoader(activityRace, activityRace.getTracksPackage());
@@ -65,8 +66,17 @@ public class TracksMenuFragment extends Fragment {
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ActivityRace activityRace = (ActivityRace) getActivity();
                 activityRace.undeployTracksMenu();
+            }
+        });
+
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView trackName = selectedLine.findViewById(R.id.tracks_name);
+                String nameToDelete = (String) trackName.getText();
+                tracksDataManager.deleteTrackByName(nameToDelete);
+                updateTrackList();
             }
         });
     }
@@ -147,15 +157,9 @@ public class TracksMenuFragment extends Fragment {
         else {
             clearAnySelectedLines();
             selectedLine = clickedItem;
-            listItemWasSelected(clickedItem);
+            selectedLine.setBackgroundColor(Color.BLUE);
             setButtonsVisibility(View.VISIBLE);
         }
-    }
-
-    private void listItemWasSelected(View currentLine) {
-        TextView trackName = currentLine.findViewById(R.id.tracks_name);
-        String name = (String) trackName.getText();
-        currentLine.setBackgroundColor(Color.BLUE);
     }
 
     private void clearAnySelectedLines() {

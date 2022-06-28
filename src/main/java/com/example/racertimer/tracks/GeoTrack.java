@@ -1,7 +1,6 @@
 package com.example.racertimer.tracks;
 
 import android.location.Location;
-import android.util.Log;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -57,8 +56,6 @@ public class GeoTrack implements Serializable {
             long timeStart = geoPoint.getTime();
             geoPoint = pointsList.get(pointsList.size() - 1);
             long timeEnd = geoPoint.getTime();
-            Log.i("bugfix", "fragment: start time = " + timeStart +", end time = " + timeEnd+
-                    ", duration = "+(timeEnd - timeStart));
             duration = timeEnd - timeStart;
         }
         return duration;

@@ -33,7 +33,9 @@ public class TracksDatabase implements Serializable {
 
     public LinkedList<GeoTrack> deleteTrackByName (String nameToBeingDeleted) {
         for (int i = 0; i < savedTracks.size(); i++) {
-            if (savedTracks.get(i).getTrackName() == nameToBeingDeleted) {
+            String nextTrackName = savedTracks.get(i).getTrackName();
+
+            if (nextTrackName.equals(nameToBeingDeleted)) {
                 savedTracks.remove(i);
                 break;
             }

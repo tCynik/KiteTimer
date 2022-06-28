@@ -113,9 +113,9 @@ public class TracksDataManager {
     }
 
     public void deleteTrackByName (String nameTractToBeDeleted) {
-        TracksDatabase writedTracks = gpsTrackLoader.getSavedTracks();
-        writedTracks.deleteTrackByName(nameTractToBeDeleted);
-        tracksSaver.saveTracksDatabase(writedTracks);
+        TracksDatabase writtenTracks = gpsTrackLoader.getSavedTracks();
+        writtenTracks.deleteTrackByName(nameTractToBeDeleted);
+        tracksSaver.saveTracksDatabase(writtenTracks);
     }
 
     private void askUserToSave (String trackNameToBeChecked) {
