@@ -1,10 +1,12 @@
 package com.example.racertimer.tracks;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -14,6 +16,7 @@ import com.example.racertimer.ActivityRace;
 import com.example.racertimer.R;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class TracksMenuFragment extends Fragment {
@@ -22,6 +25,12 @@ public class TracksMenuFragment extends Fragment {
     private TracksDatabase tracksDatabase;
 
     private LinearLayout trackLineToBeFilled;
+
+    private Button btnDelete, btnShow;
+
+    private View selectedLine;
+
+    private ArrayList<View> trackInList;
 
     public TracksMenuFragment() {
         // Required empty public constructor
@@ -39,9 +48,12 @@ public class TracksMenuFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracks_menu, null);
         ActivityRace activityRace = (ActivityRace) getActivity();
+        trackInList = new ArrayList<>();
         tracksDataManager = new TracksDataManager((ActivityRace) getActivity(), "");
         gpsTrackLoader = new GPSTrackLoader(activityRace, activityRace.getTracksPackage());
         trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
+        btnDelete = view.findViewById(R.id.button_delete_track);
+        btnShow = view.findViewById(R.id.button_show_track);
         return view;
     }
 
@@ -97,12 +109,46 @@ public class TracksMenuFragment extends Fragment {
 
     private void fillNextLine(String name, String duration) {
         LayoutInflater layoutInflater = getLayoutInflater();
-        View item = layoutInflater.inflate(R.layout.tracks_list_line, trackLineToBeFilled, false);
-        TextView trackName = item.findViewById(R.id.tracks_name);
-        TextView trackDuration = item.findViewById(R.id.track_duration);
+        View currentLine = layoutInflater.inflate(R.layout.tracks_list_line, trackLineToBeFilled, false);
+        TextView trackName = currentLine.findViewById(R.id.tracks_name);
+        TextView trackDuration = currentLine.findViewById(R.id.track_duration);
         trackName.setText(name);
         trackDuration.setText(duration);
+        trackInList.add(currentLine);
+        currentLine.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v == selectedLine) {
+                    v.setBackgroundColor(Color.WHITE);
+                    selectedLine = null;
+                    setButtonsVisibility(View.INVISIBLE);
+                }
+                else {
+                    clearAnySelectedLines();
+                    selectedLine = v;
+                    listItemIsPressed(v);
+                    setButtonsVisibility(View.VISIBLE);
+                }
+            }
+        });
+        trackLineToBeFilled.addView(currentLine);
+    }
+    private void listItemIsPressed (View currentLine) {
+        TextView trackName = currentLine.findViewById(R.id.tracks_name);
+        String name = (String) trackName.getText();
+        currentLine.setBackgroundColor(Color.BLUE);
+        Log.i("bugfix", "pressed the item named " + name);
+    }
 
-        trackLineToBeFilled.addView(item);
+    private void clearAnySelectedLines() {
+        setButtonsVisibility(View.INVISIBLE);
+        for (View currentLine: trackInList) {
+            currentLine.setBackgroundColor(Color.WHITE);
+        }
+    }
+
+    private void setButtonsVisibility(int visibility) {
+        btnShow.setVisibility(visibility);
+        btnDelete.setVisibility(visibility);
     }
 }
