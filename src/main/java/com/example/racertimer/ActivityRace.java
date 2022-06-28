@@ -235,6 +235,7 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     /** модуль методов выгрузки фрагментов */
+    //TODO: make subclass FragmentDeployer, which will able to deploy and undeploy all fragments
     public void deployTimerFragment() { // создание фрагмента для таймера
         if (timerFragment == null) timerFragment = new TimerFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -260,12 +261,12 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void deployMenuFragment () { // выгрузка фрагмена меню
-        menuPlace.setVisibility(View.VISIBLE);
         if (menuFragment == null) menuFragment = new MenuFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_menu_place, menuFragment);
         fragmentTransaction.commit();
+        menuPlace.setVisibility(View.VISIBLE);
     }
 
     public void deployDeveloperTools () { // выгрузка фрагмена меню
@@ -277,12 +278,16 @@ public class ActivityRace extends AppCompatActivity implements
     }
 
     public void deployTracksMenuFragment() {
-        menuPlace.setVisibility(View.VISIBLE);
         FragmentManager fragmentManager = getSupportFragmentManager();
         tracksMenuFragment = new TracksMenuFragment();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_menu_place, tracksMenuFragment);
         fragmentTransaction.commit();
+        menuPlace.setVisibility(View.VISIBLE);
+    }
+
+    public void undeployTracksMenu(){
+        menuPlace.setVisibility(View.INVISIBLE);
     }
 
     public Location getCurrentLocation () {

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ public class TracksMenuFragment extends Fragment {
     private LinearLayout trackLineToBeFilled;
 
     private Button btnDelete, btnShow;
+    private ImageButton btnClose;
 
     private View selectedLine;
 
@@ -54,7 +56,19 @@ public class TracksMenuFragment extends Fragment {
         trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
         btnDelete = view.findViewById(R.id.button_delete_track);
         btnShow = view.findViewById(R.id.button_show_track);
+        btnClose = view.findViewById(R.id.btn_close_trackList);
+        setOnClickListeners();
         return view;
+    }
+
+    private void setOnClickListeners() {
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ActivityRace activityRace = (ActivityRace) getActivity();
+                activityRace.undeployTracksMenu();
+            }
+        });
     }
 
     @Override
@@ -118,26 +132,30 @@ public class TracksMenuFragment extends Fragment {
         currentLine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v == selectedLine) {
-                    v.setBackgroundColor(Color.WHITE);
-                    selectedLine = null;
-                    setButtonsVisibility(View.INVISIBLE);
-                }
-                else {
-                    clearAnySelectedLines();
-                    selectedLine = v;
-                    listItemIsPressed(v);
-                    setButtonsVisibility(View.VISIBLE);
-                }
+                listItemClicked(v);
             }
         });
         trackLineToBeFilled.addView(currentLine);
     }
-    private void listItemIsPressed (View currentLine) {
+
+    private void listItemClicked(View clickedItem) {
+        if (clickedItem == selectedLine) {
+            clickedItem.setBackgroundColor(Color.WHITE);
+            selectedLine = null;
+            setButtonsVisibility(View.INVISIBLE);
+        }
+        else {
+            clearAnySelectedLines();
+            selectedLine = clickedItem;
+            listItemWasSelected(clickedItem);
+            setButtonsVisibility(View.VISIBLE);
+        }
+    }
+
+    private void listItemWasSelected(View currentLine) {
         TextView trackName = currentLine.findViewById(R.id.tracks_name);
         String name = (String) trackName.getText();
         currentLine.setBackgroundColor(Color.BLUE);
-        Log.i("bugfix", "pressed the item named " + name);
     }
 
     private void clearAnySelectedLines() {
