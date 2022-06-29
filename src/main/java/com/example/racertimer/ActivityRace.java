@@ -69,7 +69,7 @@ public class ActivityRace extends AppCompatActivity implements
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
     public TracksDataManager tracksDataManager;
-    private MapManager mapManager;
+    public MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 
     private ImageView arrowDirectionOnMap, arrowWindOnMap;
@@ -520,7 +520,7 @@ public class ActivityRace extends AppCompatActivity implements
 
         if (location.hasSpeed()) {
             Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
-            mapManager.onLocatoinChanged(location);
+            mapManager.onLocationChanged(location);
             tracksDataManager.onLocationChanged(location);
 
             //mapFragment.locationIsChanged(location);

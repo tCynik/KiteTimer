@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.ActivityRace;
 import com.example.racertimer.R;
+import com.example.racertimer.map.MapManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.LinkedList;
 public class TracksMenuFragment extends Fragment {
     private ActivityRace activityRace;
     private TracksDataManager tracksDataManager;
+    private MapManager mapManager;
     private GPSTrackLoader gpsTrackLoader;
     private TracksDatabase tracksDatabase;
 
@@ -52,7 +54,9 @@ public class TracksMenuFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_tracks_menu, null);
         activityRace = (ActivityRace) getActivity();
         trackInList = new ArrayList<>();
-        tracksDataManager = new TracksDataManager((ActivityRace) getActivity(), "");
+        tracksDataManager = new TracksDataManager(activityRace, "");
+        // todo: убрать ненужные пакеты из всех конструкторов
+        mapManager = activityRace.mapManager;
         gpsTrackLoader = new GPSTrackLoader(activityRace, activityRace.getTracksPackage());
         trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
         btnDelete = view.findViewById(R.id.button_delete_track);
@@ -73,10 +77,21 @@ public class TracksMenuFragment extends Fragment {
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TextView trackName = selectedLine.findViewById(R.id.tracks_name);
-                String nameToDelete = (String) trackName.getText();
+                TextView trackNameTV = selectedLine.findViewById(R.id.tracks_name);
+                String nameToDelete = (String) trackNameTV.getText();
                 tracksDataManager.deleteTrackByName(nameToDelete);
                 updateTrackList();
+            }
+        });
+
+        btnShow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView trackNameTV = selectedLine.findViewById(R.id.tracks_name);
+                String nameToShow = (String) trackNameTV.getText();
+                GeoTrack geoTrackToBeShown = tracksDataManager.getGeoTrackByName(nameToShow);
+                if (geoTrackToBeShown != null) mapManager.showTrackOnMap(geoTrackToBeShown);
+                clearAnySelectedLines();
             }
         });
     }

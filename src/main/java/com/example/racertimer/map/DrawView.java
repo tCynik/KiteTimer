@@ -44,11 +44,9 @@ public class DrawView extends View {
         canvas.drawPath(path, paint);
     }
 
-    public void onLocationChanged (Location location) {
+    public void drawNextSegmentByLocation(Location location) {
         calculateCoordinates(location);
         drawLine();
-        recordWaypoint(location);
-        //if (screenCenterOnLocation) moveScreenToCoordinate();
     }
 
     public void calculateCoordinates(Location location) {
@@ -70,10 +68,6 @@ public class DrawView extends View {
 
         lastCoordinateX = currentCoordinateX;
         lastCoordinateY = currentCoordinateY;
-    }
-
-    private void recordWaypoint(Location location) {
-        // TODO: recording the location into array
     }
 
     public void setScreenCenterCoordinates (float viewCenterX, float viewCenterY, float windowCenterX, float windowCenterY) {

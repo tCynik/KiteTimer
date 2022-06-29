@@ -54,10 +54,6 @@ public class TracksDataManager {
      * сохранить трек - записываем трекс указанным именем.
      */
 
-//    public void stopRecordTrack () {
-//        initSavingRecordedTrack();
-//    }
-
     public void clearTheTrack () {
         trackPoints.clear();
         isTrackRecordingProgress = false;
@@ -129,5 +125,15 @@ public class TracksDataManager {
     public TracksDatabase loadTracksDatabase () {
         Log.i("bugfix", "Manager: loading the tracks. number is: "+ gpsTrackLoader.getSavedTracks().homMuchSavedTracks());
         return gpsTrackLoader.getSavedTracks();
+    }
+
+    public GeoTrack getGeoTrackByName (String trackName) {
+        GeoTrack trackToBeReturned = null;
+        LinkedList<GeoTrack> existedTracks = loadTracksDatabase().getSavedTracks();
+        for (GeoTrack currentTrack: existedTracks) {
+            String currentTrackName = currentTrack.getTrackName();
+            if (currentTrackName.equals(trackName)) trackToBeReturned = currentTrack;
+        }
+        return trackToBeReturned;
     }
 }
