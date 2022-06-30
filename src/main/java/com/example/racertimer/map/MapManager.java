@@ -43,7 +43,7 @@ public class MapManager {
     public MapManager(Context context) {
         this.context = context;
         trackGridCalculator = new TrackGridCalculator(this);
-
+        loadedAndDisplayedTracks = new LinkedList<>();
     }
 
     public void beginNewTrackDrawing (Location location) {
@@ -74,11 +74,15 @@ public class MapManager {
         trackPaintingView.setScreenCenterCoordinates(screenCenterX, screenCenterY, windowCenterX, windowCenterY);
     }
 
-    public void endTrackDrawing() {
+    public void stopAndSaveTrack() {
         recordingInProgress = false;
         //TODO: change the color/alfa of just painted track
         //  maby ask to save the track or not to save (if track time is to short)
+    }
 
+    public void stopAndDeleteTrack() {
+        recordingInProgress = false;
+        currentTrackPaintingView.setVisibility(View.INVISIBLE);
     }
 
     public void onLocationChanged(Location location) {
@@ -164,8 +168,9 @@ public class MapManager {
         }
     }
 
-    public void showTrackOnMap (GeoTrack geoTrack) {
+    public void showNextTrackOnMap(GeoTrack geoTrack) {
         loadedTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
+        loadedTrackPaintingView.setTrackName(geoTrack.getTrackName());
         loadedTrackPaintingView.setMapManager(this);
         tracksLayout.addView(loadedTrackPaintingView);
 
@@ -176,6 +181,7 @@ public class MapManager {
         for (Location location: locations) {
             loadedTrackPaintingView.drawNextSegmentByLocation(location);
         }
+        loadedAndDisplayedTracks.add(loadedTrackPaintingView);
     }
 }
 //Log.i("bugfix", "fixPosition is working2. pinned = "+ screenCenterPinnedOnPosition );

@@ -90,7 +90,7 @@ public class TracksMenuFragment extends Fragment {
                 TextView trackNameTV = selectedLine.findViewById(R.id.tracks_name);
                 String nameToShow = (String) trackNameTV.getText();
                 GeoTrack geoTrackToBeShown = tracksDataManager.getGeoTrackByName(nameToShow);
-                if (geoTrackToBeShown != null) mapManager.showTrackOnMap(geoTrackToBeShown);
+                if (geoTrackToBeShown != null) mapManager.showNextTrackOnMap(geoTrackToBeShown);
                 clearAnySelectedLines();
             }
         });
@@ -189,3 +189,5 @@ public class TracksMenuFragment extends Fragment {
         btnDelete.setVisibility(visibility);
     }
 }
+
+// TODO: обеспечить переключение кнопки stop race при успешной остановке трека

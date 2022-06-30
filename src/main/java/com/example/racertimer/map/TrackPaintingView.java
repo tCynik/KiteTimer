@@ -14,6 +14,8 @@ public class TrackPaintingView extends View {
 
     MapManager mapManager;
 
+    private String trackName;
+
     private TrackGridCalculator trackGridCalculator;
 
     private Paint paint;
@@ -92,7 +94,15 @@ public class TrackPaintingView extends View {
         this.mapManager = mapManager;
     }
 
-// TODO: 1. в рамках обьекта храним в массиве все точки трека (как location)
+    public String getTrackName() {
+        return trackName;
+    }
+
+    public void setTrackName(String trackName) {
+        this.trackName = trackName;
+    }
+
+    // TODO: 1. в рамках обьекта храним в массиве все точки трека (как location)
 //2. в случае выхода координат точки за -0 меняем стартовую точку, и от нее перестраиваем весь трек
 //
 //ОДНАКО в этом случае получится странная история со смещением экрана. в идеале свой экран должна смещать сама вьюшка

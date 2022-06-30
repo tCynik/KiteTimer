@@ -188,7 +188,7 @@ public class ActivityRace extends AppCompatActivity implements
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         tracksDataManager.saveCurrentTrackByName(trackName);
-                        mapManager.endTrackDrawing();
+                        mapManager.stopAndDeleteTrack();
                         isTrackRecorded = false;
                         btnStartRecordTrack.setText("START");
                     }
@@ -203,6 +203,7 @@ public class ActivityRace extends AppCompatActivity implements
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
                         tracksDataManager.clearTheTrack();
+                        mapManager.stopAndDeleteTrack();
                         dialogInterface.cancel();
                     }
                 });
