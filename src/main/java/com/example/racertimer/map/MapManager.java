@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.example.racertimer.tracks.GeoTrack;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class MapManager {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_manager";
@@ -20,7 +21,8 @@ public class MapManager {
     private Context context;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
-    public DrawView currentTrackPaintingView, loadedTrackPaintingView;
+    public TrackPaintingView currentTrackPaintingView, loadedTrackPaintingView;
+    private LinkedList<TrackPaintingView> loadedAndDisplayedTracks;
     TrackGridCalculator trackGridCalculator;
     private ScreenWindowShifter screenWindowShifter;
     private ArrowMover arrowMover;
@@ -48,7 +50,7 @@ public class MapManager {
         Log.i(PROJECT_LOG_TAG, "Map Manager is starting new track drawing");
         trackGridCalculator.onTrackStarted(location);
 
-        currentTrackPaintingView = new DrawView(context, trackGridCalculator);
+        currentTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
         tracksLayout.addView(currentTrackPaintingView);
         arrowPosition.bringToFront();
 
@@ -64,12 +66,12 @@ public class MapManager {
         recordingInProgress = true;
     }
 
-    public void setScreenCenterToView () {
+    public void setScreenCenterToView (TrackPaintingView trackPaintingView) {
         float screenCenterX = tracksLayout.getWidth() / 2;
         float screenCenterY = tracksLayout.getHeight() / 2;
         float windowCenterX = windowMap.getWidth() / 2;
         float windowCenterY = windowMap.getHeight() / 2;
-        currentTrackPaintingView.setScreenCenterCoordinates(screenCenterX, screenCenterY, windowCenterX, windowCenterY);
+        trackPaintingView.setScreenCenterCoordinates(screenCenterX, screenCenterY, windowCenterX, windowCenterY);
     }
 
     public void endTrackDrawing() {
@@ -163,7 +165,8 @@ public class MapManager {
     }
 
     public void showTrackOnMap (GeoTrack geoTrack) {
-        loadedTrackPaintingView = new DrawView(context, trackGridCalculator);
+        loadedTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
+        loadedTrackPaintingView.setMapManager(this);
         tracksLayout.addView(loadedTrackPaintingView);
 
         if (arrowPosition != null) arrowPosition.bringToFront();
@@ -173,7 +176,6 @@ public class MapManager {
         for (Location location: locations) {
             loadedTrackPaintingView.drawNextSegmentByLocation(location);
         }
-
     }
 }
 //Log.i("bugfix", "fixPosition is working2. pinned = "+ screenCenterPinnedOnPosition );

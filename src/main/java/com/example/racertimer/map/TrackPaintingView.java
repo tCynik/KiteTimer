@@ -9,7 +9,7 @@ import android.location.Location;
 import android.util.Log;
 import android.view.View;
 
-public class DrawView extends View {
+public class TrackPaintingView extends View {
     private final static String PROJECT_LOG_TAG = "racer_timer_draw";
 
     MapManager mapManager;
@@ -26,7 +26,7 @@ public class DrawView extends View {
     private float currentCoordinateX, currentCoordinateY;
     private float coordinateXToDraw, coordinateYToDraw;
 
-    public DrawView (Context context, TrackGridCalculator trackGridCalculator) {
+    public TrackPaintingView(Context context, TrackGridCalculator trackGridCalculator) {
         super (context);
         Log.i(PROJECT_LOG_TAG, "draw view instance was created");
         this.trackGridCalculator = trackGridCalculator;
@@ -53,7 +53,7 @@ public class DrawView extends View {
         currentCoordinateX = trackGridCalculator.calculateLocalX(location); // нынешние координаты в системе координат лайаута
         currentCoordinateY = trackGridCalculator.calculateLocalY(location);
 
-        if (centerOfViewX == 0) mapManager.setScreenCenterToView();
+        if (centerOfViewX == 0) mapManager.setScreenCenterToView(this);
         coordinateXToDraw = centerOfViewX + currentCoordinateX;
         coordinateYToDraw = centerOfViewY + currentCoordinateY;
     }
