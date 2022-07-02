@@ -59,7 +59,6 @@ public class MapManager {
 
         screenWindowShifter = new ScreenWindowShifter(this, location, trackGridCalculator, tracksLayout,  windowMap, horizontalMapScroll, scale);
         if (location != null) {
-            //setStartCoordinates(location);
             Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 

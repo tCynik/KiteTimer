@@ -19,7 +19,7 @@ import com.example.racertimer.map.MapScrollView;
 public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
 
-    private ActivityRace activityRace;
+    private MainActivity mainActivity;
 
     private ConstraintLayout tracksLayout;
     private MapScrollView windowMap;
@@ -68,18 +68,18 @@ public class MapFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        activityRace = (ActivityRace) getActivity();
+        mainActivity = (MainActivity) getActivity();
         exportViewsIntoSailingTools();
         exportTracksLayoutIntoTrackPainter();
     }
 
     private void exportViewsIntoSailingTools() {
-        assert activityRace != null;
-        activityRace.uploadMapUIIntoTools(arrowPosition, arrowWind, btnIncScale, btnDecScale, btnFixPosition, btnMenuTracks);
+        assert mainActivity != null;
+        mainActivity.uploadMapUIIntoTools(arrowPosition, arrowWind, btnIncScale, btnDecScale, btnFixPosition, btnMenuTracks);
     }
 
     private void exportTracksLayoutIntoTrackPainter() {
-        activityRace.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition, arrowPosition);
+        mainActivity.uploadTrackLayout(windowMap, horizontalScroll, tracksLayout, btnFixPosition, arrowPosition);
     }
 }
 

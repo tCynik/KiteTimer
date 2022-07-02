@@ -3,7 +3,7 @@ package com.example.racertimer.tracks;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.racertimer.ActivityRace;
+import com.example.racertimer.MainActivity;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,16 +13,16 @@ import java.io.ObjectOutputStream;
 public class TracksSaver {
     private final static String PROJECT_LOG_TAG = "racer_timer_saver";
 
-    private ActivityRace activityRace;
+    private MainActivity mainActivity;
 
-    public TracksSaver(ActivityRace activityRace) {
-        this.activityRace = activityRace;
+    public TracksSaver(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
     }
 
     public void saveTracksDatabase(TracksDatabase tracksDatabase) {
         try {
             Log.i("bugfix", "Manager: saving database " );
-            FileOutputStream fileOutputStream = activityRace.openFileOutput("saved.saved_tracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
+            FileOutputStream fileOutputStream = mainActivity.openFileOutput("saved.saved_tracks.bin", Context.MODE_PRIVATE);//packageAddress + "savedTracks.bin");
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(tracksDatabase);
             objectOutputStream.close();

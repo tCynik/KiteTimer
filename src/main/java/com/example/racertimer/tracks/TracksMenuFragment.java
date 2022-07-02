@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.racertimer.ActivityRace;
+import com.example.racertimer.MainActivity;
 import com.example.racertimer.R;
 import com.example.racertimer.map.MapManager;
 
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class TracksMenuFragment extends Fragment {
-    private ActivityRace activityRace;
+    private MainActivity mainActivity;
     private TracksDataManager tracksDataManager;
     private MapManager mapManager;
     private GPSTrackLoader gpsTrackLoader;
@@ -52,12 +52,12 @@ public class TracksMenuFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracks_menu, null);
-        activityRace = (ActivityRace) getActivity();
+        mainActivity = (MainActivity) getActivity();
         trackInList = new ArrayList<>();
-        tracksDataManager = new TracksDataManager(activityRace, "");
+        tracksDataManager = new TracksDataManager(mainActivity, "");
         // todo: убрать ненужные пакеты из всех конструкторов
-        mapManager = activityRace.mapManager;
-        gpsTrackLoader = new GPSTrackLoader(activityRace, activityRace.getTracksPackage());
+        mapManager = mainActivity.mapManager;
+        gpsTrackLoader = new GPSTrackLoader(mainActivity, mainActivity.getTracksPackage());
         trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
         btnDelete = view.findViewById(R.id.button_delete_track);
         btnShow = view.findViewById(R.id.button_show_track);
@@ -70,7 +70,7 @@ public class TracksMenuFragment extends Fragment {
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activityRace.undeployTracksMenu();
+                mainActivity.undeployTracksMenu();
             }
         });
 
@@ -81,6 +81,7 @@ public class TracksMenuFragment extends Fragment {
                 String nameToDelete = (String) trackNameTV.getText();
                 tracksDataManager.deleteTrackByName(nameToDelete);
                 updateTrackList();
+                setButtonsVisibility(View.INVISIBLE);
             }
         });
 

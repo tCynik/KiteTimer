@@ -14,7 +14,7 @@ public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChan
 
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
-    private ActivityRace activityRace;
+    private MainActivity mainActivity;
 
     private SeekBar bearingSB, velocitySB;
 
@@ -27,7 +27,7 @@ public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChan
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        activityRace = (ActivityRace) this.getActivity();
+        mainActivity = (MainActivity) this.getActivity();
         super.onCreate(savedInstanceState);
     }
 
@@ -48,14 +48,14 @@ public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChan
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityRace.deployMenuFragment();
+                mainActivity.deployMenuFragment();
             }
         });
 
         btnUpdateWind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityRace.updateWindDirection();
+                mainActivity.updateWindDirection();
             }
         });
 
@@ -65,12 +65,12 @@ public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChan
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         if (seekBar == bearingSB) {
             int bearing = i;
-            activityRace.sailingToolsFragment.onBearingChanged(bearing);
-            activityRace.mapUITools.onBearingChanged(bearing);
+            mainActivity.sailingToolsFragment.onBearingChanged(bearing);
+            mainActivity.mapUITools.onBearingChanged(bearing);
         }
         if (seekBar == velocitySB) {
             int velocity = i;
-            activityRace.sailingToolsFragment.onVelocityChanged(velocity);
+            mainActivity.sailingToolsFragment.onVelocityChanged(velocity);
         }
     }
 

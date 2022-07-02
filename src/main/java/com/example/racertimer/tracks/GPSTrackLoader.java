@@ -2,7 +2,7 @@ package com.example.racertimer.tracks;
 
 import android.util.Log;
 
-import com.example.racertimer.ActivityRace;
+import com.example.racertimer.MainActivity;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,19 +12,19 @@ import java.io.ObjectInputStream;
 public class GPSTrackLoader {
     private final static String PROJECT_LOG_TAG = "tracks_loader";
 
-    private ActivityRace activityRace;
+    private MainActivity mainActivity;
     private String listPackageAddress;
     private TracksDatabase tracksDatabase;
 
-    public GPSTrackLoader (ActivityRace activityRace, String listPackageAddress) {
-        this.activityRace = activityRace;
+    public GPSTrackLoader (MainActivity mainActivity, String listPackageAddress) {
+        this.mainActivity = mainActivity;
         this.listPackageAddress = listPackageAddress;
         this.tracksDatabase = new TracksDatabase();
     }
 
     public TracksDatabase getSavedTracks() {
         try {
-            FileInputStream trackListFile = activityRace.openFileInput("saved.saved_tracks.bin");
+            FileInputStream trackListFile = mainActivity.openFileInput("saved.saved_tracks.bin");
             ObjectInputStream inputObject = new ObjectInputStream(trackListFile);
             tracksDatabase = (TracksDatabase) inputObject.readObject();
             inputObject.close();

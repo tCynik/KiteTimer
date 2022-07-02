@@ -45,13 +45,13 @@ import com.example.racertimer.multimedia.Voiceover;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
 
-public class ActivityRace extends AppCompatActivity implements
+public class MainActivity extends AppCompatActivity implements
         TimerFragment.CloserTimerInterface {
 
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
-    private Button btnReset, btnStopwach;
+    private Button btnStopwach;
     private Button btnStartRecordTrack;
     private boolean isTrackRecorded = false;
 
@@ -204,7 +204,9 @@ public class ActivityRace extends AppCompatActivity implements
                     public void onClick(DialogInterface dialogInterface, int which) {
                         tracksDataManager.clearTheTrack();
                         mapManager.stopAndDeleteTrack();
+                        isTrackRecorded = false;
                         dialogInterface.cancel();
+                        btnStartRecordTrack.setText("START");
                     }
                 });
         AlertDialog alertDialog = confirmSaveTrack.create(); // создание диалога

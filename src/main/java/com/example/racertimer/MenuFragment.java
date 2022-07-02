@@ -17,7 +17,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
 
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
-    private ActivityRace activityRace;
+    private MainActivity mainActivity;
     private Button btnForecast, btnWindCalc, btnResetMax, btnDeveloper;
     private ImageButton btnClose;
     private SwitchCompat switchMuteVMG;
@@ -28,7 +28,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        activityRace = (ActivityRace) this.getActivity();
+        mainActivity = (MainActivity) this.getActivity();
         super.onCreate(savedInstanceState);
     }
 
@@ -50,7 +50,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
         btnClose.setOnClickListener(new View.OnClickListener() { // кнопка закрытия меню
             @Override
             public void onClick(View view) {
-                activityRace.closeMenu();
+                mainActivity.closeMenu();
             }
         });
 
@@ -64,7 +64,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
         btnDeveloper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityRace.deployDeveloperTools();
+                mainActivity.deployDeveloperTools();
                 //deployDeveloperTools();
             }
         });
@@ -72,7 +72,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
         btnResetMax.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityRace.resetAllMaximums();
+                mainActivity.resetAllMaximums();
             }
         });
 
@@ -81,9 +81,9 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
     }
 
     private void runForecast () { // обработка запуска активити прогноза
-        activityRace.closeMenu();
+        mainActivity.closeMenu();
 
-        Location location = activityRace.getCurrentLocation();
+        Location location = mainActivity.getCurrentLocation();
         double longitude = location.getLongitude();
         double latitude = location.getLatitude();
         Intent intent = new Intent(getActivity(), ActivityForecast.class);
@@ -94,7 +94,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        activityRace.muteChangedStatus(b);
+        mainActivity.muteChangedStatus(b);
     }
 
 //    public void deployDeveloperTools () { // выгрузка фрагмена меню

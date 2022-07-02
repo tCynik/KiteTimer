@@ -78,8 +78,8 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    ActivityRace activityRace = (ActivityRace) getActivity();
-                    activityRace.manuallyWindManager();
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    mainActivity.manuallyWindManager();
                     Log.i("racer_timer_tools_fragment", " windManager in fragment pressed ");
                 } catch (Exception e) {
                     e.printStackTrace();

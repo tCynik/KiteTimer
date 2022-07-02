@@ -3,7 +3,7 @@ package com.example.racertimer.tracks;
 import android.location.Location;
 import android.util.Log;
 
-import com.example.racertimer.ActivityRace;
+import com.example.racertimer.MainActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,16 +19,16 @@ public class TracksDataManager {
     private GPSTrackLoader gpsTrackLoader;
     private TracksSaver tracksSaver;
 
-    private ActivityRace activityRace;
+    private MainActivity mainActivity;
 
     private Long currentDate;
 
-    public TracksDataManager(ActivityRace activityRace, String packageAddress) {
-        this.activityRace = activityRace;
+    public TracksDataManager(MainActivity mainActivity, String packageAddress) {
+        this.mainActivity = mainActivity;
         this.packageAddress = packageAddress;
         trackPoints = new ArrayList<>();
-        gpsTrackLoader = new GPSTrackLoader(activityRace, packageAddress);
-        tracksSaver = new TracksSaver(activityRace);
+        gpsTrackLoader = new GPSTrackLoader(mainActivity, packageAddress);
+        tracksSaver = new TracksSaver(mainActivity);
     }
 
     public void onLocationChanged (Location location) {
@@ -51,7 +51,7 @@ public class TracksDataManager {
      * Остановить запись? Варианты ответа: отмена, удалить трек, сохранить трек с именем таким-то.
      * отмена - убираем окно, ничего не меняется.
      * Удалить трек - переспрашиваем, вызываем обнуление трека
-     * сохранить трек - записываем трекс указанным именем.
+     * сохранить трек - записываем трек с указанным именем.
      */
 
     public void clearTheTrack () {
@@ -115,7 +115,7 @@ public class TracksDataManager {
     }
 
     private void askUserToSave (String trackNameToBeChecked) {
-        activityRace.askToSaveTrack(trackNameToBeChecked);
+        mainActivity.askToSaveTrack(trackNameToBeChecked);
         // TODO: make request to user by dialogMenu to save the track with the current name.
         //  if user pressed Y save the file. If user cancelled - clear the arraylist
     }

@@ -36,8 +36,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/tracks_layout"
                 android:layout_width="1000dp"
-                android:layout_height="1000dp"
-                android:background="#465270">
+                android:layout_height="1000dp">
 
                 <ImageView
                     android:id="@+id/arrow_position_on_map"
