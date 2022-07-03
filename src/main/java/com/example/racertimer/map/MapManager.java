@@ -8,6 +8,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.racertimer.tracks.GeoTrack;
@@ -42,13 +43,26 @@ public class MapManager {
 
     public MapManager(Context context) {
         this.context = context;
-        trackGridCalculator = new TrackGridCalculator(this);
+//        trackGridCalculator = new TrackGridCalculator(this);
         loadedAndDisplayedTracks = new LinkedList<>();
     }
 
+    private void makeTrackGirdCalculator (Location location) {
+        trackGridCalculator = new TrackGridCalculator(this, location);
+        trackGridCalculator.setTracksLayout(tracksLayout);
+    }
+    //TODO: BUGREPORT1 сначала рисуется приямая из центра вьюшки в нашу точку где мы находимся!
+    //TODO: BUGREPORT2 после соханения трека он удаляется
+    //TODO: BUGREPORT2 при загрузке трека установить экран на трек
+
+    // в методе onTrackStarted мы передаем в trackGirdCalculator координаты первой точки. При этом из
+    // этой координаты далее высчитываются координаты во вьюшке. Т.е. эти координаты должны
+    // передаваться единожды, при первой отрисовке: Либо ведением трека, либо отображением трека.
+    // При любой дальнейшей отрисовке каждого нового трека из любого источника стартовые координаты должы использоваться те же.
+
     public void beginNewTrackDrawing (Location location) {
         Log.i(PROJECT_LOG_TAG, "Map Manager is starting new track drawing");
-        trackGridCalculator.onTrackStarted(location);
+//        trackGridCalculator.onTrackStarted(location);
 
         currentTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
         tracksLayout.addView(currentTrackPaintingView);
@@ -63,6 +77,29 @@ public class MapManager {
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 
         recordingInProgress = true;
+    }
+
+    public void showNextTrackOnMap(@NonNull GeoTrack geoTrack) {
+        if (trackGridCalculator == null) {
+            Location firstLocation = geoTrack.getPointsList().get(0);
+            makeTrackGirdCalculator(firstLocation);
+        }
+
+            //trackGridCalculator = new TrackGridCalculator(this, geoTrack.getPointsList().get(0));
+
+        loadedTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
+        loadedTrackPaintingView.setTrackName(geoTrack.getTrackName());
+        loadedTrackPaintingView.setMapManager(this);
+        tracksLayout.addView(loadedTrackPaintingView);
+
+        if (arrowPosition != null) arrowPosition.bringToFront();
+        if (currentTrackPaintingView != null) currentTrackPaintingView.bringToFront();
+
+        ArrayList<Location> locations = geoTrack.getPointsList();
+        for (Location location: locations) {
+            loadedTrackPaintingView.drawNextSegmentByLocation(location);
+        }
+        loadedAndDisplayedTracks.add(loadedTrackPaintingView);
     }
 
     public void setScreenCenterToView (TrackPaintingView trackPaintingView) {
@@ -88,6 +125,9 @@ public class MapManager {
         Log.i(PROJECT_LOG_TAG, "new location in Track Painter, speed is: " +location.getSpeed());
         currentLocation = location;
         if (recordingInProgress) {
+            if (trackGridCalculator == null)
+                makeTrackGirdCalculator(location);
+                //trackGridCalculator = new TrackGridCalculator(this, location);
             currentTrackPaintingView.drawNextSegmentByLocation(location);
 
             if (screenCenterPinnedOnPosition) {
@@ -96,14 +136,14 @@ public class MapManager {
                 scrollingIsManual = true;
             }
         }
-        arrowMover.moveArrowToPosition(location);
+        if (trackGridCalculator != null) arrowMover.moveArrowToPosition(location);
     }
 
     public void setTracksLayout(MapScrollView windowMap, MapHorizontalScrollView horizontalMapScroll,
                                 ConstraintLayout tracksLayout, ImageButton btnFixPosition, ImageView arrowPosition) {
         this.tracksLayout = tracksLayout;
         this.arrowPosition = arrowPosition;
-        trackGridCalculator.setTracksLayout(tracksLayout);
+        //trackGridCalculator.setTracksLayout(tracksLayout);
 
         windowMap.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
@@ -167,21 +207,6 @@ public class MapManager {
         }
     }
 
-    public void showNextTrackOnMap(GeoTrack geoTrack) {
-        loadedTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
-        loadedTrackPaintingView.setTrackName(geoTrack.getTrackName());
-        loadedTrackPaintingView.setMapManager(this);
-        tracksLayout.addView(loadedTrackPaintingView);
-
-        if (arrowPosition != null) arrowPosition.bringToFront();
-        if (currentTrackPaintingView != null) currentTrackPaintingView.bringToFront();
-
-        ArrayList<Location> locations = geoTrack.getPointsList();
-        for (Location location: locations) {
-            loadedTrackPaintingView.drawNextSegmentByLocation(location);
-        }
-        loadedAndDisplayedTracks.add(loadedTrackPaintingView);
-    }
 }
 //Log.i("bugfix", "fixPosition is working2. pinned = "+ screenCenterPinnedOnPosition );
 

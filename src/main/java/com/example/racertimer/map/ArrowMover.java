@@ -33,6 +33,7 @@ public class ArrowMover {
     }
 
     public void moveArrowToPosition (Location location) {
+        if (trackGridCalculator == null) trackGridCalculator = mapManager.trackGridCalculator;
         int currentCoordinateX = trackGridCalculator.calculateCoordXInView(location); // нынешние координаты в системе координат лайаута
         int currentCoordinateY = trackGridCalculator.calculateCoordYInView(location);
 

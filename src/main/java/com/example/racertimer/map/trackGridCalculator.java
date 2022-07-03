@@ -16,8 +16,10 @@ class TrackGridCalculator {
     private ConstraintLayout tracksLayout;
     private int centerOfViewX, centerOfViewY;
 
-    public TrackGridCalculator (MapManager mapManager){
+    public TrackGridCalculator (MapManager mapManager, Location location){
         this.mapManager = mapManager;
+        trackStartLatitude = location.getLatitude();
+        trackStartLongitude = location.getLongitude();
     }
 
     public void onTrackStarted(Location location) {
@@ -25,13 +27,11 @@ class TrackGridCalculator {
         trackStartLongitude = location.getLongitude();
     }
 
-
     public int calculateCoordXInView(Location location) {
         if (centerOfViewX == 0) calculateCenterOfView();
 
         int coordinateInView = centerOfViewX + calculateLocalX(location);
         // TODO: если будет ошибка с не нейденными параметрами, нужно запилить коллбек для получения лайаута
-        Log.i("bugfix", " coordinate = " + coordinateInView );
 
         return coordinateInView;
     }

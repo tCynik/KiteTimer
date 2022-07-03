@@ -89,11 +89,9 @@ public class TracksDataManager {
             String nextTrackName = nextTrack.getTrackName();
             if (uniqueName.equals(nextTrackName)) {
                 modifier++;
-
                 uniqueName  = trackNameToBeChecked + "_" + modifier;
             }
         }
-
         return uniqueName;
     }
 

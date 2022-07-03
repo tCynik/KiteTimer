@@ -55,7 +55,7 @@ public class TracksMenuFragment extends Fragment {
         mainActivity = (MainActivity) getActivity();
         trackInList = new ArrayList<>();
         tracksDataManager = new TracksDataManager(mainActivity, "");
-        // todo: убрать ненужные пакеты из всех конструкторов
+        // todo: убрать ненужные адреса пакетов из всех конструкторов
         mapManager = mainActivity.mapManager;
         gpsTrackLoader = new GPSTrackLoader(mainActivity, mainActivity.getTracksPackage());
         trackLineToBeFilled = view.findViewById(R.id.tracks_line_to_fill);
@@ -190,5 +190,3 @@ public class TracksMenuFragment extends Fragment {
         btnDelete.setVisibility(visibility);
     }
 }
-
-// TODO: обеспечить переключение кнопки stop race при успешной остановке трека
