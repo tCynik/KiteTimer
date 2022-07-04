@@ -23,13 +23,12 @@ public class ScreenWindowShifter {
 
     private Location lastLocation;
 
-    public ScreenWindowShifter(MapManager mapManager, Location location, TrackGridCalculator trackGridCalculator,
+    public ScreenWindowShifter(MapManager mapManager, TrackGridCalculator trackGridCalculator,
                                ConstraintLayout tracksLayout, ScrollView verticalMapScroll, HorizontalScrollView horizontalMapScroll,
                                double scale) {
         this.mapManager = mapManager;
         setLayout(tracksLayout, verticalMapScroll, horizontalMapScroll);
         this.trackGridCalculator = trackGridCalculator;
-        lastLocation = location;
 
         this.scale = scale;
     }
@@ -45,8 +44,9 @@ public class ScreenWindowShifter {
     }
 
     private void calculateLayoutShifts(Location location) {
-        int localX = trackGridCalculator.calculateLocalX(location);
-        int localY = trackGridCalculator.calculateLocalY(location);
+        if (trackGridCalculator == null) trackGridCalculator = mapManager.trackGridCalculator;
+        int localX = mapManager.trackGridCalculator.calculateLocalX(location);
+        int localY = mapManager.trackGridCalculator.calculateLocalY(location);
 
         layoutShiftX = (int) ((layoutSizeX / 2) + (localX * scale) - (windowSizeX / 2));
         layoutShiftY = (int) ((layoutSizeY / 2) + (localY * scale) - (windowSizeY / 2));

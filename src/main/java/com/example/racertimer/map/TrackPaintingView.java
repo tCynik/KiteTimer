@@ -14,6 +14,8 @@ public class TrackPaintingView extends View {
 
     MapManager mapManager;
 
+    private Location lastLocation;
+
     private String trackName;
 
     private TrackGridCalculator trackGridCalculator;
@@ -28,22 +30,29 @@ public class TrackPaintingView extends View {
     private float currentCoordinateX, currentCoordinateY;
     private float coordinateXToDraw, coordinateYToDraw;
 
-    public TrackPaintingView(Context context, TrackGridCalculator trackGridCalculator) {
+    public TrackPaintingView(Context context, MapManager mapManager, TrackGridCalculator trackGridCalculator, Location location) {
         super (context);
         Log.i(PROJECT_LOG_TAG, "draw view instance was created");
         this.trackGridCalculator = trackGridCalculator;
-
+        this.mapManager = mapManager;
         paint = new Paint();
         paint.setColor(Color.RED);
         paint.setStrokeWidth(20);
         paint.setStyle(Paint.Style.STROKE);
 
         path = new Path();
+
+        setToStartPosition(location);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawPath(path, paint);
+    }
+
+    private void setToStartPosition(Location location){
+        calculateCoordinates(location);
+        path.moveTo(coordinateXToDraw, coordinateYToDraw);
     }
 
     public void drawNextSegmentByLocation(Location location) {
@@ -52,10 +61,14 @@ public class TrackPaintingView extends View {
     }
 
     public void calculateCoordinates(Location location) {
+        if (trackGridCalculator == null) {
+            trackGridCalculator = mapManager.trackGridCalculator;
+        }
+        if (centerOfViewX == 0) mapManager.setScreenCenterToPaintingView(this);
+
         currentCoordinateX = trackGridCalculator.calculateLocalX(location); // нынешние координаты в системе координат лайаута
         currentCoordinateY = trackGridCalculator.calculateLocalY(location);
 
-        if (centerOfViewX == 0) mapManager.setScreenCenterToView(this);
         coordinateXToDraw = centerOfViewX + currentCoordinateX;
         coordinateYToDraw = centerOfViewY + currentCoordinateY;
     }
@@ -65,8 +78,8 @@ public class TrackPaintingView extends View {
         //  установлены огромные границы. В будущем потребуется их динамическое определение (при дальних поездках, марафонах, итд)
 
         path.lineTo(coordinateXToDraw, coordinateYToDraw); // пока все вычисления для теста отрисовки
-        invalidate();
         path.moveTo(coordinateXToDraw, coordinateYToDraw);
+        invalidate();
 
         lastCoordinateX = currentCoordinateX;
         lastCoordinateY = currentCoordinateY;
@@ -77,11 +90,7 @@ public class TrackPaintingView extends View {
         this.centerOfViewY = viewCenterY;
         this.windowCenterX = windowCenterX;
         this.windowCenterY = windowCenterY;
-
-        path.moveTo(viewCenterX, viewCenterY); //TODO: wtf? не этот метод должен двигать экран
     }
-
-    // TODO: надо разбираться с расчетом координат. Сейчас бардак: двухстадийный расчет отдельно для трека, отдельно для смещения экрана.
 
     // TODO: когда кончается вьюшка, она не хочет менять размер! Придется составлять трек из массива вьюшек?
 

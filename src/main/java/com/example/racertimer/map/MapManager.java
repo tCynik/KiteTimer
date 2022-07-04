@@ -51,28 +51,16 @@ public class MapManager {
         trackGridCalculator = new TrackGridCalculator(this, location);
         trackGridCalculator.setTracksLayout(tracksLayout);
     }
-    //TODO: BUGREPORT1 сначала рисуется приямая из центра вьюшки в нашу точку где мы находимся!
-    //TODO: BUGREPORT2 после соханения трека он удаляется
-    //TODO: BUGREPORT2 при загрузке трека установить экран на трек
 
-    // в методе onTrackStarted мы передаем в trackGirdCalculator координаты первой точки. При этом из
-    // этой координаты далее высчитываются координаты во вьюшке. Т.е. эти координаты должны
-    // передаваться единожды, при первой отрисовке: Либо ведением трека, либо отображением трека.
-    // При любой дальнейшей отрисовке каждого нового трека из любого источника стартовые координаты должы использоваться те же.
+    public void beginNewTrackDrawing () {
+        Log.i(PROJECT_LOG_TAG+"/MapManager", " starting new track drawing");
 
-    public void beginNewTrackDrawing (Location location) {
-        Log.i(PROJECT_LOG_TAG, "Map Manager is starting new track drawing");
-//        trackGridCalculator.onTrackStarted(location);
-
-        currentTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
+        currentTrackPaintingView = new TrackPaintingView(context, this, trackGridCalculator, currentLocation);
         tracksLayout.addView(currentTrackPaintingView);
         arrowPosition.bringToFront();
-
-        currentTrackPaintingView.setMapManager(this); // TODO: what will be when location = null?!! service the case!
         Log.i(PROJECT_LOG_TAG, "view sizes: X ="+ currentTrackPaintingView.getWidth()+", Y ="+ currentTrackPaintingView.getHeight());
 
-        screenWindowShifter = new ScreenWindowShifter(this, location, trackGridCalculator, tracksLayout,  windowMap, horizontalMapScroll, scale);
-        if (location != null) {
+        if (currentLocation != null) {
             Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 
@@ -85,9 +73,7 @@ public class MapManager {
             makeTrackGirdCalculator(firstLocation);
         }
 
-            //trackGridCalculator = new TrackGridCalculator(this, geoTrack.getPointsList().get(0));
-
-        loadedTrackPaintingView = new TrackPaintingView(context, trackGridCalculator);
+        loadedTrackPaintingView = new TrackPaintingView(context, this, trackGridCalculator, geoTrack.getPointsList().get(0));
         loadedTrackPaintingView.setTrackName(geoTrack.getTrackName());
         loadedTrackPaintingView.setMapManager(this);
         tracksLayout.addView(loadedTrackPaintingView);
@@ -102,18 +88,12 @@ public class MapManager {
         loadedAndDisplayedTracks.add(loadedTrackPaintingView);
     }
 
-    public void setScreenCenterToView (TrackPaintingView trackPaintingView) {
+    public void setScreenCenterToPaintingView(TrackPaintingView trackPaintingView) {
         float screenCenterX = tracksLayout.getWidth() / 2;
         float screenCenterY = tracksLayout.getHeight() / 2;
         float windowCenterX = windowMap.getWidth() / 2;
         float windowCenterY = windowMap.getHeight() / 2;
         trackPaintingView.setScreenCenterCoordinates(screenCenterX, screenCenterY, windowCenterX, windowCenterY);
-    }
-
-    public void stopAndSaveTrack() {
-        recordingInProgress = false;
-        //TODO: change the color/alfa of just painted track
-        //  maby ask to save the track or not to save (if track time is to short)
     }
 
     public void stopAndDeleteTrack() {
@@ -122,28 +102,35 @@ public class MapManager {
     }
 
     public void onLocationChanged(Location location) {
-        Log.i(PROJECT_LOG_TAG, "new location in Track Painter, speed is: " +location.getSpeed());
-        currentLocation = location;
-        if (recordingInProgress) {
-            if (trackGridCalculator == null)
-                makeTrackGirdCalculator(location);
-                //trackGridCalculator = new TrackGridCalculator(this, location);
-            currentTrackPaintingView.drawNextSegmentByLocation(location);
+        Log.i(PROJECT_LOG_TAG+"/MapManager", "new location in Track Painter, speed is: " +location.getSpeed());
 
+        int speed = (int) (location.getSpeed()*3.6);
+        if (speed > 5) {
+            if (trackGridCalculator == null) {
+                Log.i(PROJECT_LOG_TAG+"/MapManager", " trackGirdCalculator is null, making new one ");
+                makeTrackGirdCalculator(location);
+                screenWindowShifter = new ScreenWindowShifter(this, trackGridCalculator, tracksLayout,  windowMap, horizontalMapScroll, scale);
+            }
+        }
+
+        if (trackGridCalculator != null) {
+            arrowMover.moveArrowToPosition(location);
             if (screenCenterPinnedOnPosition) {
                 scrollingIsManual = false;
                 screenWindowShifter.moveWindowCenterToPosition(location);
                 scrollingIsManual = true;
             }
+            if (recordingInProgress) {
+                currentTrackPaintingView.drawNextSegmentByLocation(location);
+            }
         }
-        if (trackGridCalculator != null) arrowMover.moveArrowToPosition(location);
+        currentLocation = location;
     }
 
     public void setTracksLayout(MapScrollView windowMap, MapHorizontalScrollView horizontalMapScroll,
                                 ConstraintLayout tracksLayout, ImageButton btnFixPosition, ImageView arrowPosition) {
         this.tracksLayout = tracksLayout;
         this.arrowPosition = arrowPosition;
-        //trackGridCalculator.setTracksLayout(tracksLayout);
 
         windowMap.setOnScrollChangeListener(new View.OnScrollChangeListener() {
             @Override
@@ -181,7 +168,7 @@ public class MapManager {
             }
         });
 
-        arrowMover = new ArrowMover(this, arrowPosition, trackGridCalculator);
+        arrowMover = new ArrowMover(this, arrowPosition);
     }
 
     public void onScaleChanged (double scale) {
@@ -206,16 +193,10 @@ public class MapManager {
             screenCenterPinnedOnPosition = false;
         }
     }
-
 }
 //Log.i("bugfix", "fixPosition is working2. pinned = "+ screenCenterPinnedOnPosition );
 
-
 //TODO: разобраться с алгоритмом начала запука трека (совместно с таймером)
 
-// TODO: сделать сохранение точек трека в массив. Сделать сохранение и загрузку треков. Сделать отображении сохраненных треков
-//  отрисовку ранее загруженных треков производить методом canvas.drawLines("массив с координатами", paint) - см. урок 142
-
-// TODO: переработать отображение маркера позиции. Маркер - не по центру экрана, а на текущей позиции.
-//  Расчет позиции маркера - в отдельном классе
-//
+//TODO: BUGREPORT1 после соханения трека он удаляется
+//TODO: BUGREPORT2 при загрузке трека установить центр экрана на трек (если включена центровка?)

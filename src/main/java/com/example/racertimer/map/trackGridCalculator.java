@@ -22,11 +22,6 @@ class TrackGridCalculator {
         trackStartLongitude = location.getLongitude();
     }
 
-    public void onTrackStarted(Location location) {
-        trackStartLatitude = location.getLatitude();
-        trackStartLongitude = location.getLongitude();
-    }
-
     public int calculateCoordXInView(Location location) {
         if (centerOfViewX == 0) calculateCenterOfView();
 
