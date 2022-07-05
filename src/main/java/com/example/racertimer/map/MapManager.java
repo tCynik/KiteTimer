@@ -104,6 +104,12 @@ public class MapManager {
         currentTrackLine.setVisibility(View.INVISIBLE);
     }
 
+    public void stopAndSaveTrack(GeoTrack geoTrack) {
+        recordingInProgress = false;
+        currentTrackLine.setVisibility(View.INVISIBLE);
+        showNextTrackOnMap(geoTrack);
+    }
+
     public void onLocationChanged(Location location) {
         Log.i(PROJECT_LOG_TAG+"/MapManager", "new location in Track Painter, speed is: " +location.getSpeed());
 

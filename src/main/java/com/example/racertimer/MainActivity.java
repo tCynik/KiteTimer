@@ -42,6 +42,7 @@ import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
 import com.example.racertimer.map.MapUITools;
 import com.example.racertimer.multimedia.Voiceover;
+import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
 
@@ -187,8 +188,8 @@ public class MainActivity extends AppCompatActivity implements
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        tracksDataManager.saveCurrentTrackByName(trackName);
-                        mapManager.stopAndDeleteTrack();
+                        GeoTrack geoTrack = tracksDataManager.saveCurrentTrackByName(trackName);
+                        mapManager.stopAndSaveTrack(geoTrack);
                         isTrackRecorded = false;
                         btnStartRecordTrack.setText("START");
                     }

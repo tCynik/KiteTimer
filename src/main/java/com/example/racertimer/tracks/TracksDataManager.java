@@ -95,7 +95,7 @@ public class TracksDataManager {
         return uniqueName;
     }
 
-    public void saveCurrentTrackByName(String trackNameToBeSaved) {
+    public GeoTrack saveCurrentTrackByName(String trackNameToBeSaved) {
         Log.i("bugfix", "Manager: saving track by name " + trackNameToBeSaved);
         GeoTrack trackToBeSaved = new GeoTrack();
         trackToBeSaved.setTrackName(trackNameToBeSaved);
@@ -104,6 +104,7 @@ public class TracksDataManager {
         TracksDatabase writedTracks = loadTracksDatabase();
         writedTracks.addTrack(trackToBeSaved);
         tracksSaver.saveTracksDatabase(writedTracks);
+        return trackToBeSaved;
     }
 
     public void deleteTrackByName (String nameTractToBeDeleted) {
