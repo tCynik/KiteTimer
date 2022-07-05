@@ -22,7 +22,10 @@ public class MapManager {
     private Context context;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
-    public TrackPaintingView currentTrackPaintingView, loadedTrackPaintingView;
+    private CurrentTrackLine currentTrackLine;
+    private LoadedTrackLine loadedTrackLine;
+    private DutyTrackLine dutyTrackLine;
+
     private LinkedList<TrackPaintingView> loadedAndDisplayedTracks;
     TrackGridCalculator trackGridCalculator;
     private ScreenWindowShifter screenWindowShifter;
@@ -55,10 +58,10 @@ public class MapManager {
     public void beginNewTrackDrawing () {
         Log.i(PROJECT_LOG_TAG+"/MapManager", " starting new track drawing");
 
-        currentTrackPaintingView = new TrackPaintingView(context, this, trackGridCalculator, currentLocation);
-        tracksLayout.addView(currentTrackPaintingView);
+        currentTrackLine = new CurrentTrackLine(context, this, trackGridCalculator, currentLocation);
+        tracksLayout.addView(currentTrackLine);
         arrowPosition.bringToFront();
-        Log.i(PROJECT_LOG_TAG, "view sizes: X ="+ currentTrackPaintingView.getWidth()+", Y ="+ currentTrackPaintingView.getHeight());
+        Log.i(PROJECT_LOG_TAG, "view sizes: X ="+ currentTrackLine.getWidth()+", Y ="+ currentTrackLine.getHeight());
 
         if (currentLocation != null) {
             Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
@@ -73,19 +76,19 @@ public class MapManager {
             makeTrackGirdCalculator(firstLocation);
         }
 
-        loadedTrackPaintingView = new TrackPaintingView(context, this, trackGridCalculator, geoTrack.getPointsList().get(0));
-        loadedTrackPaintingView.setTrackName(geoTrack.getTrackName());
-        loadedTrackPaintingView.setMapManager(this);
-        tracksLayout.addView(loadedTrackPaintingView);
+        loadedTrackLine = new LoadedTrackLine(context, this, trackGridCalculator, geoTrack.getPointsList().get(0));
+        loadedTrackLine.setTrackName(geoTrack.getTrackName());
+        loadedTrackLine.setMapManager(this);
+        tracksLayout.addView(loadedTrackLine);
 
         if (arrowPosition != null) arrowPosition.bringToFront();
-        if (currentTrackPaintingView != null) currentTrackPaintingView.bringToFront();
+        if (currentTrackLine != null) currentTrackLine.bringToFront();
 
         ArrayList<Location> locations = geoTrack.getPointsList();
         for (Location location: locations) {
-            loadedTrackPaintingView.drawNextSegmentByLocation(location);
+            loadedTrackLine.drawNextSegmentByLocation(location);
         }
-        loadedAndDisplayedTracks.add(loadedTrackPaintingView);
+        loadedAndDisplayedTracks.add(loadedTrackLine);
     }
 
     public void setScreenCenterToPaintingView(TrackPaintingView trackPaintingView) {
@@ -98,7 +101,7 @@ public class MapManager {
 
     public void stopAndDeleteTrack() {
         recordingInProgress = false;
-        currentTrackPaintingView.setVisibility(View.INVISIBLE);
+        currentTrackLine.setVisibility(View.INVISIBLE);
     }
 
     public void onLocationChanged(Location location) {
@@ -121,7 +124,7 @@ public class MapManager {
                 scrollingIsManual = true;
             }
             if (recordingInProgress) {
-                currentTrackPaintingView.drawNextSegmentByLocation(location);
+                currentTrackLine.drawNextSegmentByLocation(location);
             }
         }
         currentLocation = location;

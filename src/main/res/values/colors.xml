@@ -15,5 +15,8 @@
     <color name="race_secondary_signs">#8F8E8E</color>
     <color name="race_last_signs">#465270</color>
     <color name="vmg_line">#E80101</color>
+    <color name="current_track_line">#ff0000</color>
+    <color name="loaded_track_line">#6A90FF</color>
+    <color name="duty_track_line">#64FF64</color>
 
 </resources>

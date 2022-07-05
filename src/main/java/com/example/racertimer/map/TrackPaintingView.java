@@ -14,8 +14,6 @@ public class TrackPaintingView extends View {
 
     MapManager mapManager;
 
-    private Location lastLocation;
-
     private String trackName;
 
     private TrackGridCalculator trackGridCalculator;
@@ -24,8 +22,6 @@ public class TrackPaintingView extends View {
     private Path path;
 
     float centerOfViewX, centerOfViewY, windowCenterX, windowCenterY;
-
-    private float lastCoordinateX, lastCoordinateY;
 
     private float currentCoordinateX, currentCoordinateY;
     private float coordinateXToDraw, coordinateYToDraw;
@@ -36,13 +32,17 @@ public class TrackPaintingView extends View {
         this.trackGridCalculator = trackGridCalculator;
         this.mapManager = mapManager;
         paint = new Paint();
-        paint.setColor(Color.RED);
-        paint.setStrokeWidth(20);
+        //paint.setStrokeWidth(20);
         paint.setStyle(Paint.Style.STROKE);
 
         path = new Path();
 
         setToStartPosition(location);
+    }
+
+    protected void setPathAttributes (int color, int width) {
+        paint.setColor(color);
+        paint.setStrokeWidth(width);
     }
 
     @Override
@@ -80,9 +80,6 @@ public class TrackPaintingView extends View {
         path.lineTo(coordinateXToDraw, coordinateYToDraw); // пока все вычисления для теста отрисовки
         path.moveTo(coordinateXToDraw, coordinateYToDraw);
         invalidate();
-
-        lastCoordinateX = currentCoordinateX;
-        lastCoordinateY = currentCoordinateY;
     }
 
     public void setScreenCenterCoordinates (float viewCenterX, float viewCenterY, float windowCenterX, float windowCenterY) {
@@ -93,11 +90,6 @@ public class TrackPaintingView extends View {
     }
 
     // TODO: когда кончается вьюшка, она не хочет менять размер! Придется составлять трек из массива вьюшек?
-
-
-    //TODO: пока начало рисования в нулевой точке (грубо, где создается карта) При рисовании со старта норм,
-    // но если запускаем не сразу (через стартовую процедуру), будем связыватсья с 0? Или при импорте трека для прорисовки
-    // нужно в первую точку линию не рисовать! И при этом обойти частный случае если посреди трека появятся координаты 0, 0
 
     public void setMapManager(MapManager mapManager) {
         this.mapManager = mapManager;
@@ -118,3 +110,32 @@ public class TrackPaintingView extends View {
 //надо разбиратсья с делегирвоанием
 }
 
+class CurrentTrackLine extends TrackPaintingView {
+    int trackColor = Color.WHITE;//R.color.current_track_line;
+    int trackLineWidth = 20;
+
+    public CurrentTrackLine(Context context, MapManager mapManager, TrackGridCalculator trackGridCalculator, Location location) {
+        super(context, mapManager, trackGridCalculator, location);
+        super.setPathAttributes(trackColor, trackLineWidth);
+    }
+}
+
+class LoadedTrackLine extends TrackPaintingView {
+    int trackColor = Color.GREEN;//R.color.loaded_track_line;
+    int trackLineWidth = 10;
+
+    public LoadedTrackLine(Context context, MapManager mapManager, TrackGridCalculator trackGridCalculator, Location location) {
+        super(context, mapManager, trackGridCalculator, location);
+        super.setPathAttributes(trackColor, trackLineWidth);
+    }
+}
+
+class DutyTrackLine extends TrackPaintingView {
+    int trackColor = Color.GRAY;//R.color.duty_track_line;
+    int trackLineWidth = 10;
+
+    public DutyTrackLine(Context context, MapManager mapManager, TrackGridCalculator trackGridCalculator, Location location) {
+        super(context, mapManager, trackGridCalculator, location);
+        super.setPathAttributes(trackColor, trackLineWidth);
+    }
+}
