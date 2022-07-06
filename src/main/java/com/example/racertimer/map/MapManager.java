@@ -55,7 +55,7 @@ public class MapManager {
         trackGridCalculator.setTracksLayout(tracksLayout);
     }
 
-    public void beginNewTrackDrawing () {
+    public void beginNewCurrentTrackDrawing() {
         Log.i(PROJECT_LOG_TAG+"/MapManager", " starting new track drawing");
 
         currentTrackLine = new CurrentTrackLine(context, this, trackGridCalculator, currentLocation);
@@ -68,6 +68,12 @@ public class MapManager {
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 
         recordingInProgress = true;
+    }
+
+    public void beginNewDutyTrackDrawing(Location location) {
+        dutyTrackLine = new DutyTrackLine(context, this, trackGridCalculator, location);
+        tracksLayout.addView(dutyTrackLine);
+        arrowPosition.bringToFront();
     }
 
     public void showNextTrackOnMap(@NonNull GeoTrack geoTrack) {
@@ -131,6 +137,13 @@ public class MapManager {
             }
             if (recordingInProgress) {
                 currentTrackLine.drawNextSegmentByLocation(location);
+            } else {
+                if (speed >5) {
+                    if (dutyTrackLine == null) {
+                        beginNewDutyTrackDrawing(location);
+                    }
+                    dutyTrackLine.drawNextSegmentByLocation(location);
+                }
             }
         }
         currentLocation = location;

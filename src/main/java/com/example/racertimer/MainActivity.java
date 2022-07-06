@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements
                     tracksDataManager.beginRecordTrack();
                     isTrackRecorded = true;
                     btnStartRecordTrack.setText("STOP");
-                    mapManager.beginNewTrackDrawing();
+                    mapManager.beginNewCurrentTrackDrawing();
                     Log.i("racer_timer_painter", "track drawing is beginning");
                 }
             }
