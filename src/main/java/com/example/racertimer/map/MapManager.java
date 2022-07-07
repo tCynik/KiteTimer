@@ -46,7 +46,6 @@ public class MapManager {
 
     public MapManager(Context context) {
         this.context = context;
-//        trackGridCalculator = new TrackGridCalculator(this);
         loadedAndDisplayedTracks = new LinkedList<>();
     }
 
@@ -68,6 +67,11 @@ public class MapManager {
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 
         recordingInProgress = true;
+
+        if (dutyTrackLine != null) {
+            dutyTrackLine.setVisibility(View.INVISIBLE);
+            dutyTrackLine = null;
+        }
     }
 
     public void beginNewDutyTrackDrawing(Location location) {

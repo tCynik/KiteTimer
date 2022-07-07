@@ -63,7 +63,6 @@ public class Voiceover {
                 .setAudioAttributes(audioAttributes)
                 .build();
 
-        /** блок подгрузки ассетов озвучки (загружаем в порядке обсявления переменных SOUND_ASSET_...) */
         soundPool.load(context, R.raw.start_cow_bell, PRIORITY_TIMER); // 1
         soundPool.load(context, R.raw.eng_one, PRIORITY_TIMER); // 2
         soundPool.load(context, R.raw.eng_two, PRIORITY_TIMER); // 3
@@ -88,6 +87,7 @@ public class Voiceover {
 
         soundPool.load(context, R.raw.beep, PRIORITY_BEEP); // 22
         soundPool.load(context, R.raw.patch_beep, (PRIORITY_BEEP +1)); // 23
+        //loadSoundAssets();
 
         this.context = context;
     }
