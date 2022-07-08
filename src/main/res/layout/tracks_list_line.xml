@@ -25,5 +25,13 @@
         android:textSize="20sp"
         android:textColor="@color/black"
         android:text="duration" />
+    <TextView
+        android:layout_marginStart="10dp"
+        android:id="@+id/track_is_displayed"
+        android:layout_width="40sp"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:text="map"/>
 
 </LinearLayout>

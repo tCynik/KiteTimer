@@ -93,6 +93,7 @@ public class TracksMenuFragment extends Fragment {
                 GeoTrack geoTrackToBeShown = tracksDataManager.getGeoTrackByName(nameToShow);
                 if (geoTrackToBeShown != null) mapManager.showNextTrackOnMap(geoTrackToBeShown);
                 clearAnySelectedLines();
+                updateTrackList();
             }
         });
     }
@@ -117,7 +118,7 @@ public class TracksMenuFragment extends Fragment {
 
     private void fillListInView() {
         if (tracksDatabase == null) {
-            fillNextLine("no saved tracks", "");
+            fillNextLine("no saved tracks", "", "");
         } else {
             if (tracksDatabase.isItAnyTracks()) {
                 LinkedList<GeoTrack> tracksArray = tracksDatabase.getSavedTracks();
@@ -125,12 +126,27 @@ public class TracksMenuFragment extends Fragment {
                     String trackName = currentTrack.getTrackName();
 
                     String trackDuration = durationToString(currentTrack.getDuration());
-                    fillNextLine(trackName, trackDuration);
+
+                    String trackDiplayedStatus = "no";
+                    if (checkIsTrackDisplayed(trackName)) trackDiplayedStatus = "yes";
+                    fillNextLine(trackName, trackDuration, trackDiplayedStatus);
                 }
             } else {
-                fillNextLine("no saved tracks", "");
+                fillNextLine("no saved tracks", "", "");
             }
         }
+    }
+
+    private boolean checkIsTrackDisplayed(String trackName) {
+        boolean alreadyDisplayed = false;
+        ArrayList<String> listDisplayedTracks = mapManager.getAlreadyDisplayedLoadedTracks();
+        for (String currentTrackName: listDisplayedTracks) {
+            if (trackName.equals(currentTrackName)) {
+                alreadyDisplayed = true;
+                break;
+            }
+        }
+        return alreadyDisplayed;
     }
 
     private String durationToString (long durationTime) {
@@ -144,16 +160,23 @@ public class TracksMenuFragment extends Fragment {
 
     private void clearListAndFillTop () {
         trackLineToBeFilled.removeAllViewsInLayout();
-        fillNextLine("name", "duration");
+        fillListTitle();
+        fillNextLine("name", "duration", "on map");
     }
 
-    private void fillNextLine(String name, String duration) {
+    private void fillListTitle() {
+
+    }
+
+    private void fillNextLine(String name, String duration, String displayedStatus) {
         LayoutInflater layoutInflater = getLayoutInflater();
         View currentLine = layoutInflater.inflate(R.layout.tracks_list_line, trackLineToBeFilled, false);
         TextView trackName = currentLine.findViewById(R.id.tracks_name);
         TextView trackDuration = currentLine.findViewById(R.id.track_duration);
+        TextView isTrackOnMapTV = currentLine.findViewById(R.id.track_is_displayed);
         trackName.setText(name);
         trackDuration.setText(duration);
+        isTrackOnMapTV.setText(displayedStatus);
         trackInList.add(currentLine);
         currentLine.setOnClickListener(new View.OnClickListener() {
             @Override

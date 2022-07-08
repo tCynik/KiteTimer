@@ -25,6 +25,7 @@ public class MapManager {
     private CurrentTrackLine currentTrackLine;
     private LoadedTrackLine loadedTrackLine;
     private DutyTrackLine dutyTrackLine;
+    private ArrayList<String> alreadyDisplayedLoadedTracks;
 
     private LinkedList<TrackPaintingView> loadedAndDisplayedTracks;
     TrackGridCalculator trackGridCalculator;
@@ -47,6 +48,7 @@ public class MapManager {
     public MapManager(Context context) {
         this.context = context;
         loadedAndDisplayedTracks = new LinkedList<>();
+        alreadyDisplayedLoadedTracks = new ArrayList<>();
     }
 
     private void makeTrackGirdCalculator (Location location) {
@@ -99,6 +101,11 @@ public class MapManager {
             loadedTrackLine.drawNextSegmentByLocation(location);
         }
         loadedAndDisplayedTracks.add(loadedTrackLine);
+        alreadyDisplayedLoadedTracks.add(geoTrack.getTrackName());
+    }
+
+    public ArrayList<String> getAlreadyDisplayedLoadedTracks() {
+        return alreadyDisplayedLoadedTracks;
     }
 
     public void setScreenCenterToPaintingView(TrackPaintingView trackPaintingView) {
