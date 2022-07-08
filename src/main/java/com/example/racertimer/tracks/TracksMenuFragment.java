@@ -44,8 +44,6 @@ public class TracksMenuFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
     }
 
     @Override
@@ -89,10 +87,17 @@ public class TracksMenuFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 TextView trackNameTV = selectedLine.findViewById(R.id.tracks_name);
-                String nameToShow = (String) trackNameTV.getText();
-                GeoTrack geoTrackToBeShown = tracksDataManager.getGeoTrackByName(nameToShow);
-                if (geoTrackToBeShown != null) mapManager.showNextTrackOnMap(geoTrackToBeShown);
-                clearAnySelectedLines();
+                String nameOfTheTrack = (String) trackNameTV.getText();
+
+                boolean trackShownOnMap = checkIsTrackOnMap(selectedLine);
+                if (trackShownOnMap) {
+                    mapManager.hideTrackOnMap(nameOfTheTrack);
+                }
+                else {
+                    GeoTrack geoTrackToBeShown = tracksDataManager.getGeoTrackByName(nameOfTheTrack);
+                    if (geoTrackToBeShown != null) mapManager.showSavedGeoTrackOnMap(geoTrackToBeShown);
+                    clearAnySelectedLines();
+                }
                 updateTrackList();
             }
         });
@@ -160,12 +165,7 @@ public class TracksMenuFragment extends Fragment {
 
     private void clearListAndFillTop () {
         trackLineToBeFilled.removeAllViewsInLayout();
-        fillListTitle();
         fillNextLine("name", "duration", "on map");
-    }
-
-    private void fillListTitle() {
-
     }
 
     private void fillNextLine(String name, String duration, String displayedStatus) {
@@ -198,7 +198,18 @@ public class TracksMenuFragment extends Fragment {
             selectedLine = clickedItem;
             selectedLine.setBackgroundColor(Color.BLUE);
             setButtonsVisibility(View.VISIBLE);
+            if (checkIsTrackOnMap(selectedLine)) btnShow.setText("Hide");
+            else btnShow.setText("Show");
         }
+    }
+
+    private boolean checkIsTrackOnMap(View currentLine) {
+        boolean flag = false;
+        TextView displayedOnMap = currentLine.findViewById(R.id.track_is_displayed);
+        String displayedMark = (String) displayedOnMap.getText();
+        //Log.i("bugfix", "fragment: mark is = "+displayedMark);
+        if (displayedMark.equals("yes")) flag = true;
+        return flag;
     }
 
     private void clearAnySelectedLines() {

@@ -25,7 +25,6 @@ public class MapManager {
     private CurrentTrackLine currentTrackLine;
     private LoadedTrackLine loadedTrackLine;
     private DutyTrackLine dutyTrackLine;
-    private ArrayList<String> alreadyDisplayedLoadedTracks;
 
     private LinkedList<TrackPaintingView> loadedAndDisplayedTracks;
     TrackGridCalculator trackGridCalculator;
@@ -48,7 +47,6 @@ public class MapManager {
     public MapManager(Context context) {
         this.context = context;
         loadedAndDisplayedTracks = new LinkedList<>();
-        alreadyDisplayedLoadedTracks = new ArrayList<>();
     }
 
     private void makeTrackGirdCalculator (Location location) {
@@ -82,7 +80,7 @@ public class MapManager {
         arrowPosition.bringToFront();
     }
 
-    public void showNextTrackOnMap(@NonNull GeoTrack geoTrack) {
+    public void showSavedGeoTrackOnMap(@NonNull GeoTrack geoTrack) {
         if (trackGridCalculator == null) {
             Location firstLocation = geoTrack.getPointsList().get(0);
             makeTrackGirdCalculator(firstLocation);
@@ -101,11 +99,28 @@ public class MapManager {
             loadedTrackLine.drawNextSegmentByLocation(location);
         }
         loadedAndDisplayedTracks.add(loadedTrackLine);
-        alreadyDisplayedLoadedTracks.add(geoTrack.getTrackName());
+    }
+
+    public void hideTrackOnMap(String trackName) {
+        for(int i = 0; i < loadedAndDisplayedTracks.size(); i++) {
+            TrackPaintingView currentTrackPaintingView = loadedAndDisplayedTracks.get(i);
+            String nameCurrentTrack = currentTrackPaintingView.getTrackName();
+            if (nameCurrentTrack.equals(trackName)) {
+                loadedAndDisplayedTracks.get(i).setVisibility(View.INVISIBLE);
+                // TODO: сейчас вьюшка просто становится невидимой. Нужно ее полностью удалять
+
+                loadedAndDisplayedTracks.remove(i);
+            }
+        }
     }
 
     public ArrayList<String> getAlreadyDisplayedLoadedTracks() {
-        return alreadyDisplayedLoadedTracks;
+        ArrayList<String> displayedTracksNameList = new ArrayList<>();
+        for (TrackPaintingView currentTrackPaintingView: loadedAndDisplayedTracks) {
+            String currentName = currentTrackPaintingView.getTrackName();
+            displayedTracksNameList.add(currentName);
+        }
+        return displayedTracksNameList;
     }
 
     public void setScreenCenterToPaintingView(TrackPaintingView trackPaintingView) {
@@ -124,7 +139,7 @@ public class MapManager {
     public void stopAndSaveTrack(GeoTrack geoTrack) {
         recordingInProgress = false;
         currentTrackLine.setVisibility(View.INVISIBLE);
-        showNextTrackOnMap(geoTrack);
+        showSavedGeoTrackOnMap(geoTrack);
     }
 
     public void onLocationChanged(Location location) {
