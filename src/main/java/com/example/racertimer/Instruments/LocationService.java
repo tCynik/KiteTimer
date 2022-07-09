@@ -17,6 +17,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
+import java.util.ArrayList;
+
 /**
  * сервис, осуществляющий получение обновления данных геолокации
  * новые данные рассылаются через широковещательные Broadcast сообщения
@@ -30,6 +32,9 @@ public class LocationService extends Service {
     final static int NO_WIND_CALCULATION = 0; // без подсчета
     final static int CALCULATE_BY_DIAGRAM = 1; // по диаграмме скоростей
     final static int CALCULATE_BY_VMG_COMPARE = 2; // по сравнению ВМГ - требует первоначального направления
+
+    private boolean isAppResumed = true;
+    private ArrayList<Location> tempLocationsData;
 
     private LocationManager locationManager;
     private LocationListener locationListener;
@@ -45,7 +50,6 @@ public class LocationService extends Service {
     public LocationService() {
     }
 
-
     @Override
     public IBinder onBind(Intent intent) {
         Log.i("racer_timer", "service: i was binded to something... " );
@@ -53,16 +57,11 @@ public class LocationService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is started");
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
     public void onCreate() {
         super.onCreate();
+        Log.i("bugfix", "location Service: service was created by onCreate() ");
 
-        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is started");
+        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is created");
         /** создаем листенер и описываем его действия */
 
         // создаем экземпляр интерфейса для генерации передачи из сервиса в обьект расчета статистики WindStatistics
@@ -85,16 +84,25 @@ public class LocationService extends Service {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " service is get new location ");
-                if (location != null) { // когда поступила ненулевая геолокация, отправляем сообщение
-                    intent = new Intent(BROADCAST_ACTION);
-                    intent.putExtra("location", location);
-                    sendBroadcast(intent);
+                Log.i("bugfix", " service is get new location. resumed is = "+isAppResumed);
+                if (isAppResumed) {
+                    if (location != null) { // когда поступила ненулевая геолокация, отправляем сообщение
+                        intent = new Intent(BROADCAST_ACTION);
+                        intent.putExtra("location", location);
+                        sendBroadcast(intent);
 
-                    // передаем новые геоданные в расчетчик направления ветра
-                    // TODO: реализовать управление обработкой геоданных и получения результата в зависимости от выбранного типа расчета
-                    //windByStatistics.onLocationChanged(location);
-                    windByCompare.onLocationChanged(location);
+                        // передаем новые геоданные в расчетчик направления ветра
+                        // TODO: реализовать управление обработкой геоданных и получения результата в зависимости от выбранного типа расчета
+                        //windByStatistics.onLocationChanged(location);
+                        windByCompare.onLocationChanged(location);
+                    }
+                } else {
+                    Log.i("bugfix", " app is stopped, adding location to list ");
+
+                    addLocationToTempData(location);
                 }
+                //addLocationToTempData(location);
+
             }
 
             @Override
@@ -110,14 +118,51 @@ public class LocationService extends Service {
         }
     }
 
-    public int getWindDirection () { // если напр ветра 10000 = значит, пока результатов нет
-        return windByStatistics.getWindDirection();
+//    @Nullable
+//    @Override
+//    public ComponentName startForegroundService(Intent service) {
+//        return super.startForegroundService(service);
+//    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+        Log.i("bugfix", "location Service: service was started by onStartCommand() ");
+        Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is started");
+        return Service.START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " the service was destroyed ");
+        Log.i("bugfix", " the service was destroyed ");
+        super.onDestroy();
+    }
+
+    public void appWasResumedOrStopped(boolean isAppResumed) {
+        this.isAppResumed = isAppResumed;
+        if (isAppResumed) {
+            Log.i(PROJECT_LOG_TAG, " app is resumed ");
+            Log.i("bugfix", "location Service: app was resumed ");
+
+            sendLocationData();
+            updateWindDirection();
+            tempLocationsData = null;
+        } else {
+            tempLocationsData = new ArrayList<>();
+            Log.i("bugfix", "location Service: app was stopped, creating LocationsData ");
+
+            Log.i(PROJECT_LOG_TAG, " app is paused ");
+        }
+    }
+
+    private void addLocationToTempData(Location location) {
+        tempLocationsData.add(location);
+        Log.i("bugfix", " service got new location. data size is "+ tempLocationsData.size());
+    }
+
+    public int getWindDirection () { // если напр ветра 10000 = значит, пока результатов нет
+        return windByStatistics.getWindDirection();
     }
 
     public boolean checkPermission() { // проверяем наличие разрешения на геоданные
@@ -136,6 +181,16 @@ public class LocationService extends Service {
         // TODO: вынеси в отдельный метод отправку интента с ветром, тут и в onWindChanged вызов этого метода
         // нужно допиливать фрагмент прибора
         windChangedHerald.onWindDirectionChanged(windByStatistics.getWindDirection());
+    }
+
+    private void sendLocationData() {
+        if (tempLocationsData != null & tempLocationsData.size() != 0) {
+            intent = new Intent(BROADCAST_ACTION);
+            intent.putExtra("locationsData", tempLocationsData);
+            Log.i("bugfix", " sending the location data. tempDataSize = " + tempLocationsData.size());
+
+            sendBroadcast(intent);
+        }
     }
 
     // организуем получение экземпляра данного сервиса через биндер

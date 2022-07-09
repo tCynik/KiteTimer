@@ -123,6 +123,7 @@ public class MapManager {
         return displayedTracksNameList;
     }
 
+
     public void setScreenCenterToPaintingView(TrackPaintingView trackPaintingView) {
         float screenCenterX = tracksLayout.getWidth() / 2;
         float screenCenterY = tracksLayout.getHeight() / 2;
@@ -173,6 +174,17 @@ public class MapManager {
             }
         }
         currentLocation = location;
+    }
+
+    public void hasMissedLocations (ArrayList<Location> missedLocations) {
+        int i = 0;
+        for (Location nextLocation: missedLocations) {
+            i++;
+            Log.i("bugfix", "mapManager: loaded the missed location #"+i);
+
+            if (recordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
+            else dutyTrackLine.drawNextSegmentByLocation(nextLocation);
+        }
     }
 
     public void setTracksLayout(MapScrollView windowMap, MapHorizontalScrollView horizontalMapScroll,

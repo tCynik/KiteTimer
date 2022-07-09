@@ -46,6 +46,8 @@ import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity implements
         TimerFragment.CloserTimerInterface {
 
@@ -171,14 +173,51 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onResume() { // при восстановлении окна автоматически запрашиваем данные по ветру
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         if (location == null) {
             initBroadcastListener(); // запускаем слушатель новых геоданных
+            // TODO: is it necessary?!!
+
             bindToLocationService();
         }
+        if (locationService != null) locationService.appWasResumedOrStopped(true);
 
-        updateWindDirection();
+        //updateWindDirectionFromService();
+        //getMissedLocationsFromService();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        if (location == null) {
+//            initBroadcastListener(); // запускаем слушатель новых геоданных
+//            // TODO: is it necessary?!!
+//
+//            bindToLocationService();
+//        }
+//        if (locationService != null) locationService.appOnResumed(true);
+//
+//        //updateWindDirectionFromService();
+//        //getMissedLocationsFromService();
+    }
+
+    @Override
+    protected void onPause() {
+        //locationService.appOnResumed(false);
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.i("bugfix", " mainActivity: app is stopped ");
+
+        locationService.appWasResumedOrStopped(false);
+        super.onStop();
+    }
+
+    public void updateWindDirectionFromService() {
+        locationService.updateWindDirection();
     }
 
     public void askToSaveTrack(String trackName) {
@@ -310,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Log.i("racer_timer", "app is closing by user... ");
                         stopRace();
+                        locationService.stopService(intentLocationService);
                         finish(); // закрываем эту активити
                     }
                 })
@@ -342,9 +382,9 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    public void updateWindDirection() { // получение ветра для событий, требующих этого
-        if (locationService != null) locationService.updateWindDirection();
-    }
+//    public void updateWindDirectionFromService() { // получение ветра для событий, требующих этого
+//        if (locationService != null) locationService.updateWindDirection();
+//    }
 
     private void stopRace() { // остановка гонки
         super.onBackPressed();
@@ -406,9 +446,9 @@ public class MainActivity extends AppCompatActivity implements
 
     /** Настраиваем и запускаем сервис для приема и трансляции данных геолокации */
     private void createLocationService() {
-        if (! checkPermission()) askPermission(); // если разрешения нет, запрашиваем разрешение
+        if (! checkLocationPermission()) askLocationPermission();
 
-        if (checkPermission()) { // еще раз проверяем: если разрешение есть, запускаем сервис
+        if (checkLocationPermission()) {
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " permission good, starting service ");
             intentLocationService = new Intent(this, LocationService.class);
             intentLocationService.setPackage("com.example.racertimer.Instruments");
@@ -419,7 +459,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /** Методы для работы с разрешениями на геолокацию */
-    public boolean checkPermission() { // проверяем наличие разрешения на геоданные
+    public boolean checkLocationPermission() {
         // если разрешения нет:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -427,10 +467,10 @@ public class MainActivity extends AppCompatActivity implements
         {
             return false; // если разрешения нет, возвращаем false
         } else
-            return true; // в противном случае разрешение есть, возвращаем true
+            return true; //
     }
-    private void askPermission() { // запрос разрешения
-        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, // запрашиваем разрешение
+    private void askLocationPermission() {
+        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
     }
 
@@ -448,7 +488,6 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
                 Log.i("racer_timer", "location service disconnected " );
-
             }
         };
 
@@ -457,7 +496,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /** блок работы со слушателем геолокации  */
     private void initBroadcastListener() {
-        locationBroadcastReceiver = new BroadcastReceiver() { // создаем broadcastlistener
+        locationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) { // обработка интента
                 if (intent.hasExtra("location")) { // если в сообщении есть геолокация
@@ -471,7 +510,19 @@ public class MainActivity extends AppCompatActivity implements
                     if (windDirectionFromExtra != 10000) {
                         onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
                         windDirectionGettedFromService = true;
-                        Log.i("racer_timer", "getted wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+                        Log.i("racer_timer", "got wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+                    }
+                }
+
+                if (intent.hasExtra("locationsData")) {
+                    ArrayList<Location> missedLocations = (ArrayList<Location>) intent.getExtras().get("locationsData");
+                    if (missedLocations.size() == 0) {
+                        Log.i("racer_timer", "activity got an empty missed locations");
+                    }
+                    else {
+                        Log.i("racer_timer", "activity got missed locations with "+missedLocations.size()+ " points");
+                        mapManager.hasMissedLocations(missedLocations);
+                        tracksDataManager.hasMissedLocations(missedLocations);
                     }
                 }
             }

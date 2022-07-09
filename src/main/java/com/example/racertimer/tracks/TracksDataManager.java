@@ -45,6 +45,10 @@ public class TracksDataManager {
         isTrackRecordingProgress = true;
     }
 
+    public void hasMissedLocations(ArrayList<Location> missedLocations){
+        trackPoints.addAll(missedLocations);
+    }
+
     /**
      * Логика сохранения трека такова:
      * пользователь жмет остановку записи, ему приходит диалоговое окно:
