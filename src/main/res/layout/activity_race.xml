@@ -17,14 +17,22 @@
         android:text="start"/>
 
     <!-- главное размещение UI элементов -->
-    <FrameLayout
-
+    <fragment
         android:id="@+id/fr_sailing_tools"
+        android:name="com.example.racertimer.SailingToolsFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         app:layout_constraintDimensionRatio="H, 1"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!--android:id="@+id/fr_sailing_tools"
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintDimensionRatio="H, 1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>-->
 
     <fragment
         android:id="@+id/fr_place_map"
@@ -32,9 +40,11 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/fr_sailing_tools"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/half_bar"
-        app:layout_constraintEnd_toStartOf="@id/fr_sailing_tools">
+        app:layout_constraintVertical_bias="0.0">
 
     </fragment>
 

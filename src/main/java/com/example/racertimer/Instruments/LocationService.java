@@ -59,7 +59,7 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i("bugfix", "location Service: service was created by onCreate() ");
+       // Log.i("bugfix", "location Service: service was created by onCreate() ");
 
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is created");
         /** создаем листенер и описываем его действия */
@@ -84,7 +84,7 @@ public class LocationService extends Service {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " service is get new location ");
-                Log.i("bugfix", " service is get new location. resumed is = "+isAppResumed);
+                //Log.i("bugfix", " service is get new location. resumed is = "+isAppResumed);
                 if (isAppResumed) {
                     if (location != null) { // когда поступила ненулевая геолокация, отправляем сообщение
                         intent = new Intent(BROADCAST_ACTION);
@@ -97,7 +97,7 @@ public class LocationService extends Service {
                         windByCompare.onLocationChanged(location);
                     }
                 } else {
-                    Log.i("bugfix", " app is stopped, adding location to list ");
+                    //Log.i("bugfix", " app is stopped, adding location to list ");
 
                     addLocationToTempData(location);
                 }
@@ -127,7 +127,7 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Log.i("bugfix", "location Service: service was started by onStartCommand() ");
+        //Log.i("bugfix", "location Service: service was started by onStartCommand() ");
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is started");
         return Service.START_STICKY;
     }
@@ -135,7 +135,7 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " the service was destroyed ");
-        Log.i("bugfix", " the service was destroyed ");
+        //Log.i("bugfix", " the service was destroyed ");
         super.onDestroy();
     }
 
@@ -143,14 +143,14 @@ public class LocationService extends Service {
         this.isAppResumed = isAppResumed;
         if (isAppResumed) {
             Log.i(PROJECT_LOG_TAG, " app is resumed ");
-            Log.i("bugfix", "location Service: app was resumed ");
+            //Log.i("bugfix", "location Service: app was resumed ");
 
             sendLocationData();
             updateWindDirection();
             tempLocationsData = null;
         } else {
             tempLocationsData = new ArrayList<>();
-            Log.i("bugfix", "location Service: app was stopped, creating LocationsData ");
+            //Log.i("bugfix", "location Service: app was stopped, creating LocationsData ");
 
             Log.i(PROJECT_LOG_TAG, " app is paused ");
         }
@@ -158,7 +158,7 @@ public class LocationService extends Service {
 
     private void addLocationToTempData(Location location) {
         tempLocationsData.add(location);
-        Log.i("bugfix", " service got new location. data size is "+ tempLocationsData.size());
+        //Log.i("bugfix", " service got new location. data size is "+ tempLocationsData.size());
     }
 
     public int getWindDirection () { // если напр ветра 10000 = значит, пока результатов нет
@@ -187,7 +187,7 @@ public class LocationService extends Service {
         if (tempLocationsData != null & tempLocationsData.size() != 0) {
             intent = new Intent(BROADCAST_ACTION);
             intent.putExtra("locationsData", tempLocationsData);
-            Log.i("bugfix", " sending the location data. tempDataSize = " + tempLocationsData.size());
+            //Log.i("bugfix", " sending the location data. tempDataSize = " + tempLocationsData.size());
 
             sendBroadcast(intent);
         }

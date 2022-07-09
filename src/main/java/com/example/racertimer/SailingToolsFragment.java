@@ -20,8 +20,7 @@ import com.example.racertimer.multimedia.Voiceover;
  */
 
 public class SailingToolsFragment extends Fragment {
-    private final static String PROJECT_LOG_TAG = "racer_timer";
-    private boolean viewIsCreated = false;
+    private final static String PROJECT_LOG_TAG = "racer_timer_sailing_tools";
     Voiceover voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
     LayoutInflater windDialogLayoutInflater;
@@ -36,19 +35,20 @@ public class SailingToolsFragment extends Fragment {
 
     public SailingToolsFragment() {
         // Required empty public constructor
-
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO: определяем обьявленные элементы
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sailing_tools, null); // инфлейтим вьюшку фрагмента
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.setSailingToolsFragment(this);
 
         arrowsLayoutCL = view.findViewById(R.id.arrows_layout); // вьюшка для стрелок скорости
         centralParametersCL = view.findViewById(R.id.central_params_cl); // вьюшка для ограничения движения стрелок
@@ -69,8 +69,7 @@ public class SailingToolsFragment extends Fragment {
 
         resetAllMaximums(); // выставляем в ноль все вьюшки
         renewWindDirection(202);
-        Log.i("racer_timer_tools_fragment", " fragment view was created ");
-        viewIsCreated = true; // разрешаем изменение вьюшек
+        Log.i(PROJECT_LOG_TAG, " fragment tools view was created by onCreateView");
 
         /** установка направления ветра вручную нажатием на поле "ветер" */
 
@@ -80,7 +79,7 @@ public class SailingToolsFragment extends Fragment {
                 try {
                     MainActivity mainActivity = (MainActivity) getActivity();
                     mainActivity.manuallyWindManager();
-                    Log.i("racer_timer_tools_fragment", " windManager in fragment pressed ");
+                    Log.i(PROJECT_LOG_TAG, " windManager in fragment pressed ");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -98,37 +97,31 @@ public class SailingToolsFragment extends Fragment {
      */
 
     public void onVelocityChanged(int valueVelocity) { // новые данные по скорости
-        if (viewIsCreated) {
-            Log.i("racer_timer_tools_fragment", " velocity in the tools fragment changed. New one = "+ valueVelocity);
-            if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
-                renewVelocity(valueVelocity);
-                Log.i("racer_timer_tools_fragment_vel", " got new velocity = "+ valueVelocity+ ", old one = "+velocity);
-                if (velocity > maxVelocity) { // обновляем максимум
-                    renewMaxVelocity(velocity);
-                }
-                updateArrowPosition(velocity);// перемещаем стрелку
-//                updateMaxVelocity(velocity);
-                updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
+        Log.i(PROJECT_LOG_TAG, " velocity in the tools fragment changed. New one = "+ valueVelocity);
+        if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
+            renewVelocity(valueVelocity);
+            Log.i(PROJECT_LOG_TAG, " got new velocity = "+ valueVelocity+ ", old one = "+velocity);
+            if (velocity > maxVelocity) { // обновляем максимум
+                renewMaxVelocity(velocity);
             }
+            updateArrowPosition(velocity);// перемещаем стрелку
+//                updateMaxVelocity(velocity);
+            updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }
     public void onBearingChanged(int valueBearing) { // новые данные по курсу
-        if (viewIsCreated) {
-            Log.i("racer_timer_tools_fragment", " bearing in the tools fragment changed. New one = "+ valueBearing);
-            if (valueBearing != bearing) {// если вновь поступившие цифры отличаются от старых
-                renewBearing(valueBearing);
-                updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
-            }
+        Log.i(PROJECT_LOG_TAG, " bearing in the tools fragment changed. New one = "+ valueBearing);
+        if (valueBearing != bearing) {// если вновь поступившие цифры отличаются от старых
+            renewBearing(valueBearing);
+            updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }
     public void onWindDirectionChanged(int valueWindDirection) { // новые данные по направлению ветра
-        if (viewIsCreated) {
-            Log.i("racer_timer_tools_fragment", " wind dir in the tools fragment changed. New one = "+ valueWindDirection);
-            if (valueWindDirection != windDirection) {
-                windTV.setTextColor(Color.WHITE);
-                renewWindDirection(valueWindDirection);
-                updateVmgByNewWindOrVelocity();
-            }
+        Log.i(PROJECT_LOG_TAG, " wind dir in the tools fragment changed. New one = "+ valueWindDirection);
+        if (valueWindDirection != windDirection) {
+            windTV.setTextColor(Color.WHITE);
+            renewWindDirection(valueWindDirection);
+            updateVmgByNewWindOrVelocity();
         }
     }
 
@@ -137,20 +130,20 @@ public class SailingToolsFragment extends Fragment {
      */
 
     public void resetPressed () { // нажата кнопка сброса максимумов
-        if (viewIsCreated) resetAllMaximums();
+        resetAllMaximums();
     }
 
     public void muteChangedStatus (boolean valueMute) { // изменен статус переключателя звука пищалки
         voiceoverIsMuted = valueMute;
-        Log.i("racer_timer_tools_fragment", " voiceover mute setted = " + voiceoverIsMuted);
+        Log.i(PROJECT_LOG_TAG, " voiceover mute setted = " + voiceoverIsMuted);
         if (voiceoverIsMuted) {
             voiceover.voiceoverIsBeingMuted();
-            Log.i("racer_timer_tools_fragment", " voiceover was muted");
+            Log.i(PROJECT_LOG_TAG, " voiceover was muted");
         }
         else {
             voiceover.vmgIsMuted = valueMute;
             lastVMG = velocityMadeGood - 1;
-            Log.i("racer_timer_tools_fragment", " voiceover was unmuted, VMG = "+velocityMadeGood+", last VMG = "+lastVMG);
+            Log.i(PROJECT_LOG_TAG, " voiceover was unmuted, VMG = "+velocityMadeGood+", last VMG = "+lastVMG);
             makeBeeping();
         }
         // обновляем переменную
@@ -171,7 +164,7 @@ public class SailingToolsFragment extends Fragment {
     private void renewMaxVelocity(int value) {
         maxVelocity = value;
         maxVelocityTV.setText(String.valueOf(maxVelocity));
-        Log.i("racer_timer_tools_fragment", " new max velocity = "+value);
+        Log.i(PROJECT_LOG_TAG, " new max velocity = "+value);
     }
     private void renewVelocity(int value) {
         velocity = value;
@@ -244,7 +237,7 @@ public class SailingToolsFragment extends Fragment {
         arrowDirectionIV.setScaleY(scaleOfArrow); // выставляем масштаб
         int shift = (int) ((heightOfArrow * scaleOfArrow) - heightOfArrow); // смещение для компенсации изменения масштаба
         arrowDirectionIV.setY((shift / 2) + 6); // устанавливаем на позицию смещения + 6 для устранения разрыва между вьюшками
-        Log.i("racer_timer_tools_fragment", " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow);
+        Log.i(PROJECT_LOG_TAG, " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow);
 
         arrowDirectionIV.setVisibility(View.VISIBLE);
     }
@@ -254,7 +247,7 @@ public class SailingToolsFragment extends Fragment {
         int percent;
 
         if (velocityMadeGood != 0 & velocityMadeGood != lastVMG) { // если изменилась VMG, перезапускаем прищалку
-            Log.i("racer_timer_tools_fragment", " called makeBeeping, voiceoverMute = "+voiceoverIsMuted);
+            Log.i(PROJECT_LOG_TAG, " called makeBeeping, voiceoverMute = "+voiceoverIsMuted);
             lastVMG = velocityMadeGood;
 
             if (velocityMadeGood > 0) { // обрабатываем апвинд

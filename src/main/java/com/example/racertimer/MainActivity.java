@@ -108,21 +108,51 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_race);
-////////// вынеси определение вьюшек в отдельный метод
+        context = this;
+
+        findViews();
+        setClickListeners();
+
+        windDirection = 202;
+
+        voiceover = new Voiceover(context);
+        sailingToolsFragment.setVoiceover(voiceover);
+
+        // TODO: нужно разобраться зачем это тут. таймер стартовый отдельно, гоночный отдельно. Убрать?
+        timerRunning(); // запускаем отсчет и обработку таймера
+
+        createLocationService();
+
+        tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
+        mapManager = new MapManager(context);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (location == null) {
+            initBroadcastListener(); // запускаем слушатель новых геоданных
+            bindToLocationService();
+        }
+        if (locationService != null) locationService.appWasResumedOrStopped(true);
+    }
+
+    @Override
+    protected void onStop() {
+        //Log.i("bugfix", " mainActivity: app is stopped ");
+        locationService.appWasResumedOrStopped(false);
+        super.onStop();
+    }
+
+    private void findViews() {
         btnMenu = findViewById(R.id.button_menu);
         btnStopwach = findViewById(R.id.stopwach);
 
         menuPlace = findViewById(R.id.fr_menu_place); // находим контейнер для дальнейшего размещения вьюшек
-
-        // TODO: нужно генерировать линии best VMG программно по заданным координатам.
-
-        windDirection = 202;
-
-        context = this;
-
-        mapFragment = new MapFragment();
-
         btnStartRecordTrack = findViewById(R.id.button_start);
+    }
+
+    private void setClickListeners() {
         btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,20 +167,6 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         });
-
-        tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
-
-        /** запускаем таймер */
-        timerRunning(); // запускаем отсчет и обработку таймера
-
-        /** блок работы с геоданными */
-        createLocationService();
-
-        voiceover = new Voiceover(context);
-
-        deploySailingToolsFragment();
-
-        mapManager = new MapManager(context);
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,51 +185,6 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         });
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (location == null) {
-            initBroadcastListener(); // запускаем слушатель новых геоданных
-            // TODO: is it necessary?!!
-
-            bindToLocationService();
-        }
-        if (locationService != null) locationService.appWasResumedOrStopped(true);
-
-        //updateWindDirectionFromService();
-        //getMissedLocationsFromService();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        if (location == null) {
-//            initBroadcastListener(); // запускаем слушатель новых геоданных
-//            // TODO: is it necessary?!!
-//
-//            bindToLocationService();
-//        }
-//        if (locationService != null) locationService.appOnResumed(true);
-//
-//        //updateWindDirectionFromService();
-//        //getMissedLocationsFromService();
-    }
-
-    @Override
-    protected void onPause() {
-        //locationService.appOnResumed(false);
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.i("bugfix", " mainActivity: app is stopped ");
-
-        locationService.appWasResumedOrStopped(false);
-        super.onStop();
     }
 
     public void updateWindDirectionFromService() {
@@ -254,6 +225,10 @@ public class MainActivity extends AppCompatActivity implements
         alertDialog.show(); // отображение диалога
     }
 
+    public void setSailingToolsFragment(SailingToolsFragment sailingToolsFragment) {
+        this.sailingToolsFragment = sailingToolsFragment;
+    }
+
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
                                       Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition,
                                       Button menuTracks) {
@@ -284,22 +259,6 @@ public class MainActivity extends AppCompatActivity implements
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_place_map, timerFragment);
-        fragmentTransaction.commit();
-    }
-
-    public void deployMapFragment() { // создание фрагмента для карты
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_place_map, mapFragment);
-        fragmentTransaction.commit();
-    }
-
-    public void deploySailingToolsFragment () { // механизм выгрузки фрагмента центральных элементов
-        if (sailingToolsFragment == null) sailingToolsFragment = new SailingToolsFragment();
-        sailingToolsFragment.setVoiceover(voiceover); // передаем экземпляр озвучки
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_sailing_tools, sailingToolsFragment);
         fragmentTransaction.commit();
     }
 
@@ -496,37 +455,40 @@ public class MainActivity extends AppCompatActivity implements
 
     /** блок работы со слушателем геолокации  */
     private void initBroadcastListener() {
-        locationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) { // обработка интента
-                if (intent.hasExtra("location")) { // если в сообщении есть геолокация
-                    Location location = (Location) intent.getExtras().get("location");
-                    processorChangedLocation(location); // отдаем точку на обработку в процессор
-                    Log.i("racer_timer", "getted location broadcast from locationService, " +
-                            "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
-                }
-                if (intent.hasExtra("windDirection")) {
-                    int windDirectionFromExtra = (int) intent.getExtras().get("windDirection");
-                    if (windDirectionFromExtra != 10000) {
-                        onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
-                        windDirectionGettedFromService = true;
-                        Log.i("racer_timer", "got wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+        if (locationBroadcastReceiver == null) {
+            locationBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) { // обработка интента
+                    if (intent.hasExtra("location")) { // если в сообщении есть геолокация
+                        Location location = (Location) intent.getExtras().get("location");
+                        processorChangedLocation(location); // отдаем точку на обработку в процессор
+                        Log.i("racer_timer", "getted location broadcast from locationService, " +
+                                "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
                     }
-                }
+                    if (intent.hasExtra("windDirection")) {
+                        int windDirectionFromExtra = (int) intent.getExtras().get("windDirection");
+                        if (windDirectionFromExtra != 10000) {
+                            onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
+                            windDirectionGettedFromService = true;
+                            Log.i("racer_timer", "got wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+                        }
+                    }
 
-                if (intent.hasExtra("locationsData")) {
-                    ArrayList<Location> missedLocations = (ArrayList<Location>) intent.getExtras().get("locationsData");
-                    if (missedLocations.size() == 0) {
-                        Log.i("racer_timer", "activity got an empty missed locations");
-                    }
-                    else {
-                        Log.i("racer_timer", "activity got missed locations with "+missedLocations.size()+ " points");
-                        mapManager.hasMissedLocations(missedLocations);
-                        tracksDataManager.hasMissedLocations(missedLocations);
+                    if (intent.hasExtra("locationsData")) {
+                        ArrayList<Location> missedLocations = (ArrayList<Location>) intent.getExtras().get("locationsData");
+                        if (missedLocations.size() == 0) {
+                            Log.i("racer_timer", "activity got an empty missed locations");
+                        }
+                        else {
+                            Log.i("racer_timer", "activity got missed locations with "+missedLocations.size()+ " points");
+                            mapManager.hasMissedLocations(missedLocations);
+                            tracksDataManager.hasMissedLocations(missedLocations);
+                        }
                     }
                 }
-            }
-        };
+            };
+        }
+
         locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
@@ -581,8 +543,10 @@ public class MainActivity extends AppCompatActivity implements
             //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelocity;
-            Log.i("racer_timer", " sending velocity = "+ velocity);
-            if (sailingToolsFragment != null) sailingToolsFragment.onVelocityChanged(velocity);
+            if (sailingToolsFragment != null) {
+                Log.i("racer_timer", " sending into sailing tools velocity = "+ velocity);
+                sailingToolsFragment.onVelocityChanged(velocity);
+            }
             //mapFragment.locationIsChanged(location);
         } else sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
