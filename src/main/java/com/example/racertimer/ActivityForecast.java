@@ -168,7 +168,6 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         }
     }
 
-
     private void createHandler() {
         handler = new Handler(){
             @Override

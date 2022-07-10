@@ -37,6 +37,8 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
+import com.example.racertimer.Instruments.RacingTimer;
+import com.example.racertimer.Instruments.TimerStatusUpdater;
 import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
@@ -46,6 +48,7 @@ import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
@@ -83,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private int defaultMapScale = 1;
 
+    private TimerStatusUpdater timerStatusUpdater;
     private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
     private int timerHour = 0; // переменная в часах
     private int timerMin = 0; // переменная счетчика в минутах
@@ -125,6 +129,29 @@ public class MainActivity extends AppCompatActivity implements
 
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
         mapManager = new MapManager(context);
+
+        timerStatusUpdater = new TimerStatusUpdater() {
+            @Override
+            public void onTimerStatusUpdated(long timerStatus) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss.SS");
+                String timerStatusString = simpleDateFormat.format(timerStatus);
+                btnStopwach.setText(timerStatusString);
+            }
+        };
+
+        startTheTestTimer();
+
+    }
+
+    private void startTheTestTimer() {
+//        StartingProcedureTimer startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater);
+//        startingProcedureTimer.start();//thread.start();
+//
+//        SystemClock.sleep(3000);
+//        startingProcedureTimer.stopTheTimer();
+
+        RacingTimer racingTimer = new RacingTimer(timerStatusUpdater);
+        racingTimer.start();
     }
 
     @Override
