@@ -48,7 +48,7 @@ public class TimerFragment extends Fragment {
     private StartingProcedureTimer startingProcedureTimer;
     private CountDownTimer countDownTimer;
     private Voiceover voiceover;
-    private Button btnCancelRace, btn5Minutes, btn3Minutes, btn2Minutes, btn1Minutes;
+    private Button btnInstantStartRace, btn5Minutes, btn3Minutes, btn2Minutes, btn1Minutes;
     private TextView timerResult;
 
     private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
@@ -58,12 +58,6 @@ public class TimerFragment extends Fragment {
 
     private boolean timerPaused = true; // флаг: поставлен ли таймер на паузу
 
-    public interface CloserTimerInterface {
-        public void finishTheTimer();
-    }
-
-    CloserTimerInterface closerTimer;
-
     public TimerFragment() {
         // Required empty public constructor
     }
@@ -71,11 +65,6 @@ public class TimerFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        try {
-            closerTimer = (CloserTimerInterface) context; // получаем интерфейс закрытия таймера
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " cast activity to interface is failed in TimerFragment");
-        }
     }
 
     @Override
@@ -113,7 +102,7 @@ public class TimerFragment extends Fragment {
 
     private void findTheViews(View view) {
         timerResult = view.findViewById(R.id.timer_fragment_tv);
-        btnCancelRace = view.findViewById(R.id.instant_start_race);
+        btnInstantStartRace = view.findViewById(R.id.instant_start_race);
         btn5Minutes = view.findViewById(R.id.set_5min);
         btn3Minutes = view.findViewById(R.id.set_3min);
         btn2Minutes = view.findViewById(R.id.set_2min);
@@ -139,11 +128,12 @@ public class TimerFragment extends Fragment {
         });
 
         /** кнопка прекращение и закрытие таймера */
-        btnCancelRace.setOnClickListener(new View.OnClickListener() {
+        btnInstantStartRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (countDownTimer != null) countDownTimer.cancel();
-                closerTimer.finishTheTimer();
+                MainActivity mainActivity = (MainActivity) getActivity();
+                mainActivity.StartTheRace();
             }
         });
 
@@ -239,7 +229,8 @@ public class TimerFragment extends Fragment {
                 case 2: voiceover.playSingleTimerSound(SOUND_ASSET_TWO); break;
                 case 1: voiceover.playSingleTimerSound(SOUND_ASSET_ONE); break;
                 case 0: voiceover.playSingleTimerSound(SOUND_ASSET_START);
-                    closerTimer.finishTheTimer();
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    mainActivity.StartTheRace();
                     countDownTimer.cancel();
                     timerPaused = true;
                 default: break;

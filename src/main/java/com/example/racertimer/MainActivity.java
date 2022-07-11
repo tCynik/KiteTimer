@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,17 +52,16 @@ import com.example.racertimer.tracks.TracksMenuFragment;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements
-        TimerFragment.CloserTimerInterface {
+public class MainActivity extends AppCompatActivity {
 
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
     private Button btnStopStartTimerAndStopRace;
     private Button btnStartRecordTrack;
-    private boolean isTrackRecorded = false;
 
     private ImageButton btnMenu;
+    private TextView racingTimerTV;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
 
@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements
     public DeveloperFragment developerFragment = null;
     public FragmentContainerView menuPlace; // место, в котором возникает меню
 
+    private RacingTimer racingTimer;
     public TracksDataManager tracksDataManager;
     public MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onTimerStatusUpdated(long timerStatus) {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss.SS");
                 String timerStatusString = simpleDateFormat.format(timerStatus);
-                btnStopStartTimerAndStopRace.setText(timerStatusString);
+                racingTimerTV.setText(timerStatusString);
             }
         };
 
@@ -149,9 +150,6 @@ public class MainActivity extends AppCompatActivity implements
 //
 //        SystemClock.sleep(3000);
 //        startingProcedureTimer.stopTheTimer();
-
-        RacingTimer racingTimer = new RacingTimer(timerStatusUpdater);
-        racingTimer.start();
     }
 
     @Override
@@ -177,17 +175,19 @@ public class MainActivity extends AppCompatActivity implements
 
         menuPlace = findViewById(R.id.fr_menu_place); // находим контейнер для дальнейшего размещения вьюшек
         btnStartRecordTrack = findViewById(R.id.button_start);
+
+        racingTimerTV = findViewById(R.id.racing_timer);
     }
 
     private void setClickListeners() {
         btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isTrackRecorded) {
+                if (isRaceStarted) {
                     tracksDataManager.initSavingRecordedTrack();
                 } else {
                     tracksDataManager.beginRecordTrack();
-                    isTrackRecorded = true;
+                    isRaceStarted = true;
                     btnStartRecordTrack.setText("STOP");
                     mapManager.beginNewCurrentTrackDrawing();
                     Log.i("racer_timer_painter", "track drawing is beginning");
@@ -205,15 +205,15 @@ public class MainActivity extends AppCompatActivity implements
         btnStopStartTimerAndStopRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (timerFragment != null) { // race is FALSE, timer is TRUE
+                if (timerFragment != null) { // race = 0, timer = 1 : close the timer
                     // TODO: if timer is ticking ask user about the exit
+                    btnStopStartTimerAndStopRace.setText("NEW RACE");
                     undeployTimerFragment();
-                } else { // timer is FALSE
-                    if (isRaceStarted) { // race is TRUE
+                } else { // timer = 0,
+                    if (isRaceStarted) { // race = 1 : stop the race
                         tracksDataManager.initSavingRecordedTrack();
-                    } else { // race is FALSE
+                    } else { // race = 0, timer = 0 : start the timer
                         deployTimerFragment();
-                        btnStopStartTimerAndStopRace.setText("Cancel");
                     }
                 }
             }
@@ -233,8 +233,7 @@ public class MainActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialogInterface, int i) {
                         GeoTrack geoTrack = tracksDataManager.saveCurrentTrackByName(trackName);
                         mapManager.stopAndSaveTrack(geoTrack);
-                        isTrackRecorded = false;
-                        btnStartRecordTrack.setText("START");
+                        endRace();
                         btnStopStartTimerAndStopRace.setText("NEW RACE");
                     }
                 })
@@ -249,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialogInterface, int which) {
                         tracksDataManager.clearTheTrack();
                         mapManager.stopAndDeleteTrack();
-                        isTrackRecorded = false;
+                        endRace();
                         dialogInterface.cancel();
                         btnStartRecordTrack.setText("START");
                         btnStopStartTimerAndStopRace.setText("NEW RACE");
@@ -291,9 +290,9 @@ public class MainActivity extends AppCompatActivity implements
     //TODO: make subclass FragmentDeployer, which will able to deploy and undeploy all fragments
     public void deployTimerFragment() { // создание фрагмента для таймера
         if (timerFragment == null) timerFragment = new TimerFragment();
+        btnStopStartTimerAndStopRace.setText("Cancel");
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        //fragmentTransaction.replace(R.id.fr_place_map, timerFragment);
         fragmentTransaction.replace(R.id.timer_container, timerFragment);
         findViewById(R.id.timer_container).setVisibility(View.VISIBLE);
         fragmentTransaction.commit();
@@ -332,7 +331,6 @@ public class MainActivity extends AppCompatActivity implements
     private void undeployTimerFragment() {
         timerFragment = null;
         findViewById(R.id.timer_container).setVisibility(View.INVISIBLE);
-        btnStopStartTimerAndStopRace.setText("NEW RACE");
     }
 
     public Location getCurrentLocation () {
@@ -601,30 +599,34 @@ public class MainActivity extends AppCompatActivity implements
         sailingToolsFragment.muteChangedStatus(b);
     }
 
-    public void startRace () { // изменение статуса, идет ли гонка
-        this.isRaceStarted = true;
-    }
-
-    public void endRace () {
-        this.isRaceStarted = false;
-    }
 
     public void resetAllMaximums() {
         sailingToolsFragment.resetPressed();
         Log.i("racer_timer", "reset VMG maximums");
     }
 
-    @Override
-    public void finishTheTimer() {
-        startRace();
-        // TODO: при окончании таймера закрываем фрагмерт (или делаем контейнер прозрачным)
-        //deployMapFragment();
+    public void endRace() {
+        racingTimer.stop();
+        isRaceStarted = false;
+    }
+
+    public void StartTheRace() {
+        tracksDataManager.beginRecordTrack();
+        mapManager.beginNewCurrentTrackDrawing();
+        isRaceStarted = true;
+        btnStopStartTimerAndStopRace.setText("RACE STOP");
+        undeployTimerFragment();
+        startRacingTimer();
+    }
+
+    private void startRacingTimer() {
+        racingTimer = new RacingTimer(timerStatusUpdater);
+        racingTimer.start();
     }
 
     public String getTracksPackage() {
         return tracksFolderAddress;
     }
-
 }
 
 
