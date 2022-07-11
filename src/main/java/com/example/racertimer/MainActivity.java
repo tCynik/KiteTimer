@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements
     private final static String PROJECT_LOG_TAG = "racer_timer";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
-    private Button btnStopwach;
+    private Button btnStopStartTimerAndStopRace;
     private Button btnStartRecordTrack;
     private boolean isTrackRecorded = false;
 
@@ -135,11 +135,11 @@ public class MainActivity extends AppCompatActivity implements
             public void onTimerStatusUpdated(long timerStatus) {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss.SS");
                 String timerStatusString = simpleDateFormat.format(timerStatus);
-                btnStopwach.setText(timerStatusString);
+                btnStopStartTimerAndStopRace.setText(timerStatusString);
             }
         };
 
-        startTheTestTimer();
+        //startTheTestTimer();
 
     }
 
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void findViews() {
         btnMenu = findViewById(R.id.button_menu);
-        btnStopwach = findViewById(R.id.stopwach);
+        btnStopStartTimerAndStopRace = findViewById(R.id.stopwatch);
 
         menuPlace = findViewById(R.id.fr_menu_place); // находим контейнер для дальнейшего размещения вьюшек
         btnStartRecordTrack = findViewById(R.id.button_start);
@@ -202,13 +202,19 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        btnStopwach.setOnClickListener(new View.OnClickListener() {
+        btnStopStartTimerAndStopRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isRaceStarted) { // если гонка идет, выводим диалоговое меню об остановке
-                    // TODO: диалоговое меню "остановить гонку? да/нет"
-                } else { // если гонка не идет, вызываем таймер
-                    deployTimerFragment();
+                if (timerFragment != null) { // race is FALSE, timer is TRUE
+                    // TODO: if timer is ticking ask user about the exit
+                    undeployTimerFragment();
+                } else { // timer is FALSE
+                    if (isRaceStarted) { // race is TRUE
+                        tracksDataManager.initSavingRecordedTrack();
+                    } else { // race is FALSE
+                        deployTimerFragment();
+                        btnStopStartTimerAndStopRace.setText("Cancel");
+                    }
                 }
             }
         });
@@ -229,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements
                         mapManager.stopAndSaveTrack(geoTrack);
                         isTrackRecorded = false;
                         btnStartRecordTrack.setText("START");
+                        btnStopStartTimerAndStopRace.setText("NEW RACE");
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -245,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements
                         isTrackRecorded = false;
                         dialogInterface.cancel();
                         btnStartRecordTrack.setText("START");
+                        btnStopStartTimerAndStopRace.setText("NEW RACE");
                     }
                 });
         AlertDialog alertDialog = confirmSaveTrack.create(); // создание диалога
@@ -285,7 +293,9 @@ public class MainActivity extends AppCompatActivity implements
         if (timerFragment == null) timerFragment = new TimerFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fr_place_map, timerFragment);
+        //fragmentTransaction.replace(R.id.fr_place_map, timerFragment);
+        fragmentTransaction.replace(R.id.timer_container, timerFragment);
+        findViewById(R.id.timer_container).setVisibility(View.VISIBLE);
         fragmentTransaction.commit();
     }
 
@@ -317,6 +327,12 @@ public class MainActivity extends AppCompatActivity implements
 
     public void undeployTracksMenu(){
         menuPlace.setVisibility(View.INVISIBLE);
+    }
+
+    private void undeployTimerFragment() {
+        timerFragment = null;
+        findViewById(R.id.timer_container).setVisibility(View.INVISIBLE);
+        btnStopStartTimerAndStopRace.setText("NEW RACE");
     }
 
     public Location getCurrentLocation () {

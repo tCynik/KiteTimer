@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,72 +11,85 @@
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="80sp"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layout_constraintVertical_weight="1"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/set_5min"
-            android:layout_width="10dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:layout_margin="5dp"
             android:text="5 min"
-            android:textSize="10sp" />
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/set_3min"
-            android:layout_width="10dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:layout_margin="5dp"
             android:text="3 min"
-            android:textSize="10sp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
     <LinearLayout
         android:id="@+id/linear_2"
         android:layout_width="match_parent"
-        android:layout_height="80sp"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layout_constraintVertical_weight="1"
+        android:orientation="horizontal">
         <Button
             android:id="@+id/set_2min"
-            android:layout_width="10dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:textSize="10sp"
+            android:textSize="20sp"
             android:layout_weight="1"
+            android:layout_margin="5dp"
             android:text="2 min"/>
         <Button
             android:id="@+id/set_1min"
-            android:layout_width="10dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:textSize="10sp"
+            android:textSize="20sp"
             android:layout_weight="1"
+            android:layout_margin="5dp"
             android:text="1 min"/>
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/cancel_race"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        android:textSize="10sp"
-        android:text="Cancel race"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linear_2"
-        app:layout_constraintBottom_toTopOf="@id/timer_fragment_tv"/>
-    <TextView
-        android:id="@+id/timer_fragment_tv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="60sp"
-        android:textColor="@color/red"
-        android:text="00:00"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/timer_fragment_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_margin="10dp"
+            android:textSize="80sp"
+            android:layout_weight="2"
+            android:textColor="@color/red"
+            android:text="00:00" />
+
+        <Button
+            android:id="@+id/instant_start_race"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="Instant START"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

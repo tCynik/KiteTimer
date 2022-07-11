@@ -36,14 +36,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.racertimer.Instruments.StartingProcedureTimer;
+import com.example.racertimer.Instruments.TimerStatusUpdater;
 import com.example.racertimer.multimedia.Voiceover;
+
+import java.text.SimpleDateFormat;
 
 public class TimerFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
+    private StartingProcedureTimer startingProcedureTimer;
     private CountDownTimer countDownTimer;
     private Voiceover voiceover;
-    private Button btnCancelTimer;
+    private Button btnCancelRace, btn5Minutes, btn3Minutes, btn2Minutes, btn1Minutes;
     private TextView timerResult;
 
     private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
@@ -73,7 +78,6 @@ public class TimerFragment extends Fragment {
         }
     }
 
-    // метод аналог onCreate в активити, но без доступа к UI
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,17 +85,42 @@ public class TimerFragment extends Fragment {
         }
     }
 
-    // создание вью
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, // что передаем для отображения
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_timer, null);
 
         voiceover = new Voiceover(getActivity());
 
+        findTheViews(view);
+        setClickListeners();
         /** обработка нажатий и отображения циферблата */
-        timerResult = view.findViewById(R.id.timer_fragment_tv);
+
+
         initTimer();
+
+        TimerStatusUpdater timerStatusUpdater = new TimerStatusUpdater() {
+            @Override
+            public void onTimerStatusUpdated(long timerStatus) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
+                String timerStatusString = simpleDateFormat.format(timerStatus);
+                timerResult.setText(timerStatusString);
+            }
+        };
+        startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater);
+        return view;
+    }
+
+    private void findTheViews(View view) {
+        timerResult = view.findViewById(R.id.timer_fragment_tv);
+        btnCancelRace = view.findViewById(R.id.instant_start_race);
+        btn5Minutes = view.findViewById(R.id.set_5min);
+        btn3Minutes = view.findViewById(R.id.set_3min);
+        btn2Minutes = view.findViewById(R.id.set_2min);
+        btn1Minutes = view.findViewById(R.id.set_1min);
+    }
+
+    private void setClickListeners() {
         timerResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -110,8 +139,7 @@ public class TimerFragment extends Fragment {
         });
 
         /** кнопка прекращение и закрытие таймера */
-        Button butCancelRace = (Button) view.findViewById(R.id.cancel_race);
-        butCancelRace.setOnClickListener(new View.OnClickListener() {
+        btnCancelRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (countDownTimer != null) countDownTimer.cancel();
@@ -120,8 +148,7 @@ public class TimerFragment extends Fragment {
         });
 
         /** кнопки корректировки таймера */
-        Button but5Minutes = view.findViewById(R.id.set_5min);
-        but5Minutes.setOnClickListener(new View.OnClickListener() {
+        btn5Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 timerSec = 60 * 5;
@@ -130,8 +157,7 @@ public class TimerFragment extends Fragment {
             }
         });
 
-        Button but3Minutes = view.findViewById(R.id.set_3min);
-        but3Minutes.setOnClickListener(new View.OnClickListener() {
+        btn3Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 timerSec = 60 * 3;
@@ -140,8 +166,7 @@ public class TimerFragment extends Fragment {
             }
         });
 
-        Button but2Minutes = view.findViewById(R.id.set_2min);
-        but2Minutes.setOnClickListener(new View.OnClickListener() {
+        btn2Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.i(PROJECT_LOG_TAG, " button 2 min pressed " );
@@ -151,8 +176,7 @@ public class TimerFragment extends Fragment {
             }
         });
 
-        Button but1Minutes = view.findViewById(R.id.set_1min);
-        but1Minutes.setOnClickListener(new View.OnClickListener() {
+        btn1Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.i(PROJECT_LOG_TAG, " button 1 min pressed " );
@@ -161,7 +185,6 @@ public class TimerFragment extends Fragment {
                 timerResult.setText(timerString2Print.toString()); // выводим значение на экран
             }
         });
-        return view;
     }
 
     private void initTimer() {

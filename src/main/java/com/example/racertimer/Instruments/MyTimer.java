@@ -8,14 +8,13 @@ import java.util.Date;
 public abstract class MyTimer {
     public Thread thread;
     Date currentTime, startedTime;
-    long currentTimerSize, timerLeft;
+    long timerLeft;
     TimerStatusUpdater timerStatusUpdater;
     boolean isTimerRan = true;
 
     public MyTimer(TimerStatusUpdater timerStatusUpdater, int countMilSec, int beginningTimerLeftSec) {
         this.timerStatusUpdater = timerStatusUpdater;
         this.timerLeft = beginningTimerLeftSec * 1000;
-        startedTime = Calendar.getInstance().getTime();
         initTheThread(countMilSec);
     }
 
@@ -34,6 +33,7 @@ public abstract class MyTimer {
     }
 
     public void start() {
+        startedTime = Calendar.getInstance().getTime();
         thread.start();
     }
 
@@ -45,15 +45,7 @@ public abstract class MyTimer {
         return 0;
     }
 
-    public void setTimerLeft(long timerLeft) {
-        this.timerLeft = timerLeft;
-    }
-
-    public void stopTheTimer() {
-        isTimerRan = false;
-    }
-
-    public void setCurrentTimerSize(long currentTimerSize) {
-        this.currentTimerSize = currentTimerSize;
+    public void stop() {
+        if (isTimerRan) isTimerRan = false;
     }
 }

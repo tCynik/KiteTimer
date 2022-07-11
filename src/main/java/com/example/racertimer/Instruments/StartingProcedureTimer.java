@@ -1,12 +1,11 @@
 package com.example.racertimer.Instruments;
 
-import com.example.racertimer.MainActivity;
-
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class StartingProcedureTimer extends MyTimer {
-    private MainActivity mainActivity;
+    long currentTimePeriod;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
 
     public StartingProcedureTimer(TimerStatusUpdater timerStatusUpdater) {
@@ -15,11 +14,22 @@ public class StartingProcedureTimer extends MyTimer {
 
     @Override
     long calculateTimerLeft(Date currentTime) {
-        return startedTime.getTime() + currentTimerSize - currentTime.getTime();
+        return startedTime.getTime() + currentTimePeriod - currentTime.getTime();
     }
 
-    public void correctTimerLeft(long correcter) {
-        long correctedTime = currentTime.getTime() + correcter;
-        setTimerLeft(correctedTime);
+    public void setTimerPeriod(long currentTimerSize) {
+        startedTime = Calendar.getInstance().getTime();
+        this.currentTimePeriod = currentTimerSize;
+    }
+
+    public void correctTimerLeft(int correcter) {
+        currentTimePeriod = currentTimePeriod + correcter;
+    }
+
+    public void resume() {
+        if (!isTimerRan) {
+            startedTime = Calendar.getInstance().getTime();
+            isTimerRan = true;
+        }
     }
 }

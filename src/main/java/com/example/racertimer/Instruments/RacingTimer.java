@@ -11,4 +11,5 @@ public class RacingTimer extends MyTimer {
     long calculateTimerLeft(Date currentTime) {
         return currentTime.getTime() - startedTime.getTime();
     }
+
 }
