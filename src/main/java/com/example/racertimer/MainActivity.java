@@ -15,7 +15,6 @@ import android.location.Location;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
@@ -58,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
     private Button btnStopStartTimerAndStopRace;
-    private Button btnStartRecordTrack;
 
     private ImageButton btnMenu;
     private TextView racingTimerTV;
@@ -123,9 +121,6 @@ public class MainActivity extends AppCompatActivity {
         voiceover = new Voiceover(context);
         sailingToolsFragment.setVoiceover(voiceover);
 
-        // TODO: нужно разобраться зачем это тут. таймер стартовый отдельно, гоночный отдельно. Убрать?
-        timerRunning(); // запускаем отсчет и обработку таймера
-
         createLocationService();
 
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
@@ -174,26 +169,11 @@ public class MainActivity extends AppCompatActivity {
         btnStopStartTimerAndStopRace = findViewById(R.id.stopwatch);
 
         menuPlace = findViewById(R.id.fr_menu_place); // находим контейнер для дальнейшего размещения вьюшек
-        btnStartRecordTrack = findViewById(R.id.button_start);
 
         racingTimerTV = findViewById(R.id.racing_timer);
     }
 
     private void setClickListeners() {
-        btnStartRecordTrack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isRaceStarted) {
-                    tracksDataManager.initSavingRecordedTrack();
-                } else {
-                    tracksDataManager.beginRecordTrack();
-                    isRaceStarted = true;
-                    btnStartRecordTrack.setText("STOP");
-                    mapManager.beginNewCurrentTrackDrawing();
-                    Log.i("racer_timer_painter", "track drawing is beginning");
-                }
-            }
-        });
 
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -250,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
                         mapManager.stopAndDeleteTrack();
                         endRace();
                         dialogInterface.cancel();
-                        btnStartRecordTrack.setText("START");
                         btnStopStartTimerAndStopRace.setText("NEW RACE");
                     }
                 });
@@ -339,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
 
     /** Отработка нажатия кнопки "Назад" */
     @Override
-    public void onBackPressed() { // в случае нажатия кнопки назад диалег по переходу в главное меню
+    public void onBackPressed() { // в случае нажатия кнопки назад диалог по переходу в главное меню
         AlertDialog.Builder confurmingRaceEnd = new AlertDialog.Builder(this); // строитель диалога
         confurmingRaceEnd.setMessage("End the race?")
                 .setCancelable(false) // не отменяемый (при нажатии вне поля диалога не закрывается)
@@ -400,21 +379,6 @@ public class MainActivity extends AppCompatActivity {
         bearing = CoursesCalculator.convertAngleFrom0To360(bearing);
         Log.i("ActivityRace", "averageCourse = " + bearing);
         return bearing;
-    }
-
-    // TODO: вот эту срань с таймером переносим во фрагмент прогноза.
-    /** Счетчик таймера*/
-    private void timerRunning () {
-        new CountDownTimer(60000, 1000) {
-            @Override
-            public void onTick(long l) {
-                onTimerTicked();
-            }
-            @Override
-            public void onFinish() {
-                timerRunning();
-            }
-        }.start();
     }
 
     /** обработка изменения таймера*/

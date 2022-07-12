@@ -1,7 +1,6 @@
 package com.example.racertimer.Instruments;
 
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -30,7 +29,7 @@ public abstract class MyTimer {
                     currentTime = Calendar.getInstance().getTime();
                     timerLeft = calculateTimerLeft(currentTime);
                     onTimerTicked(timerLeft);
-                    Log.i("bugfix", "Thread: "+Thread.currentThread().getName()+", making next tick ");
+                    //Log.i("bugfix", "Thread: "+Thread.currentThread().getName()+", making next tick ");
                 }
             }
         });
