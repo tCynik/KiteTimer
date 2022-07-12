@@ -39,8 +39,6 @@ import com.example.racertimer.Instruments.StartingProcedureTimer;
 import com.example.racertimer.Instruments.TimerStatusUpdater;
 import com.example.racertimer.multimedia.Voiceover;
 
-import java.text.SimpleDateFormat;
-
 public class TimerFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
@@ -90,10 +88,8 @@ public class TimerFragment extends Fragment {
 
         timerStatusUpdater = new TimerStatusUpdater() {
             @Override
-            public void onTimerStatusUpdated(long timerStatus) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
-                String timerStatusString = simpleDateFormat.format(timerStatus);
-                timerResult.setText(timerStatusString);
+            public void onTimerStatusUpdated(String timerStatus) {
+                timerResult.setText(timerStatus);
             }
         };
         startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater);

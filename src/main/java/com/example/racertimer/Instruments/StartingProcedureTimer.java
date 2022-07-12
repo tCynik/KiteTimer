@@ -9,7 +9,7 @@ public class StartingProcedureTimer extends MyTimer {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
 
     public StartingProcedureTimer(TimerStatusUpdater timerStatusUpdater) {
-        super(timerStatusUpdater, 1000, 60); // период обновления счетчика 1 секунда
+        super(timerStatusUpdater, 1000, 60, "mm:ss"); // период обновления счетчика 1 секунда
     }
 
     @Override

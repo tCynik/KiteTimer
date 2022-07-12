@@ -48,7 +48,6 @@ import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -128,10 +127,9 @@ public class MainActivity extends AppCompatActivity {
 
         timerStatusUpdater = new TimerStatusUpdater() {
             @Override
-            public void onTimerStatusUpdated(long timerStatus) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss.SS");
-                String timerStatusString = simpleDateFormat.format(timerStatus);
-                racingTimerTV.setText(timerStatusString);
+            public void onTimerStatusUpdated(String timerStatus) {
+                Log.i("bugfix", " clock is get new sign: "+timerStatus);
+                racingTimerTV.setText(timerStatus);
             }
         };
 
