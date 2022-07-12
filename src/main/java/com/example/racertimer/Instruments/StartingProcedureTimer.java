@@ -20,6 +20,7 @@ public class StartingProcedureTimer extends MyTimer {
     public void setTimerPeriod(long currentTimerSize) {
         startedTime = Calendar.getInstance().getTime();
         this.currentTimePeriod = currentTimerSize;
+        onTimerTicked(currentTimerSize);
     }
 
     public void correctTimerLeft(int correcter) {

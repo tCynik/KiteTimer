@@ -194,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
                         tracksDataManager.initSavingRecordedTrack();
                     } else { // race = 0, timer = 0 : start the timer
                         deployTimerFragment();
+                        racingTimerTV.setText("GET READY!");
                     }
                 }
             }

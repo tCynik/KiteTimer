@@ -25,7 +25,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +45,7 @@ public class TimerFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
     private StartingProcedureTimer startingProcedureTimer;
+    private TimerStatusUpdater timerStatusUpdater;
     private CountDownTimer countDownTimer;
     private Voiceover voiceover;
     private Button btnInstantStartRace, btn5Minutes, btn3Minutes, btn2Minutes, btn1Minutes;
@@ -88,7 +88,7 @@ public class TimerFragment extends Fragment {
 
         initTimer();
 
-        TimerStatusUpdater timerStatusUpdater = new TimerStatusUpdater() {
+        timerStatusUpdater = new TimerStatusUpdater() {
             @Override
             public void onTimerStatusUpdated(long timerStatus) {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
@@ -115,23 +115,25 @@ public class TimerFragment extends Fragment {
             public void onClick(View view) {
                 if (timerPaused) { // если счетчик остановлен,
                     timerPaused = false; // снимамем счетчик с паузы
-                    runTimerCounter(60); // запускаем счетчик на 1 минуту
+                    startingProcedureTimer.start();
+                    //runTimerCounter(60); // запускаем счетчик на 1 минуту
                     //countDownTimer.start();
                     timerResult.setTextColor(Color.WHITE);
                 } else { // если таймер идет, ставим на паузу
                     timerPaused = true;
-                    if (countDownTimer != null ) countDownTimer.cancel();
+                    startingProcedureTimer.stop();
+                    //if (countDownTimer != null ) countDownTimer.cancel();
                     timerResult.setTextColor(Color.RED);
                     voiceover.playSingleTimerSound(SOUND_ASSET_PAUSE);
                 }
             }
         });
 
-        /** кнопка прекращение и закрытие таймера */
         btnInstantStartRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (countDownTimer != null) countDownTimer.cancel();
+                startingProcedureTimer.stop();
+                //if (countDownTimer != null) countDownTimer.cancel();
                 MainActivity mainActivity = (MainActivity) getActivity();
                 mainActivity.StartTheRace();
             }
@@ -141,38 +143,49 @@ public class TimerFragment extends Fragment {
         btn5Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                timerSec = 60 * 5;
-                String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
-                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
+                startingProcedureTimer.setTimerPeriod(5 * 60 * 1000);
+
+                //timerSec = 60 * 5;
+                //String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
+                //timerResult.setText(timerString2Print.toString()); // выводим значение на экран
             }
         });
 
         btn3Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                timerSec = 60 * 3;
-                String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
-                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
+                startingProcedureTimer.setTimerPeriod(3 * 60 * 1000);
+
+
+//                timerSec = 60 * 3;
+//                String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
+//                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
             }
         });
 
         btn2Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(PROJECT_LOG_TAG, " button 2 min pressed " );
-                timerSec = 60 * 2;
-                String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
-                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
+                startingProcedureTimer.setTimerPeriod(2 * 60 * 1000);
+
+
+//                Log.i(PROJECT_LOG_TAG, " button 2 min pressed " );
+//                timerSec = 60 * 2;
+//                String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
+//                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
             }
         });
 
         btn1Minutes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(PROJECT_LOG_TAG, " button 1 min pressed " );
-                timerSec = 60 * 1;
-                String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
-                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
+                startingProcedureTimer.setTimerPeriod(1 * 60 * 1000);
+
+
+//                Log.i(PROJECT_LOG_TAG, " button 1 min pressed " );
+//                timerSec = 60 * 1;
+//                String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
+//                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
             }
         });
     }
