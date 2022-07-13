@@ -544,7 +544,6 @@ public class MainActivity extends AppCompatActivity {
             latitude = location.getLatitude();
             longitude = location.getLongitude();
         }
-
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
@@ -552,17 +551,15 @@ public class MainActivity extends AppCompatActivity {
 
         if (location.hasSpeed()) {
             Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
+            if (!mapManager.isRecordingInProgress() & isRaceStarted) mapManager.beginNewCurrentTrackDrawing();
             mapManager.onLocationChanged(location);
             tracksDataManager.onLocationChanged(location);
-
-            //mapFragment.locationIsChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;
             velocity = (int) tempVelocity;
             if (sailingToolsFragment != null) {
                 Log.i("racer_timer", " sending into sailing tools velocity = "+ velocity);
                 sailingToolsFragment.onVelocityChanged(velocity);
             }
-            //mapFragment.locationIsChanged(location);
         } else sailingToolsFragment.onVelocityChanged(0);
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
@@ -572,7 +569,6 @@ public class MainActivity extends AppCompatActivity {
     public void muteChangedStatus(boolean b) { // выключение звука пищалки
         sailingToolsFragment.muteChangedStatus(b);
     }
-
 
     public void resetAllMaximums() {
         sailingToolsFragment.resetPressed();
@@ -586,7 +582,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void StartTheRace() {
         tracksDataManager.beginRecordTrack();
-        mapManager.beginNewCurrentTrackDrawing();
         isRaceStarted = true;
         undeployTimerFragment();
         btnStopStartTimerAndStopRace.setText("STOP RACE");
@@ -603,7 +598,6 @@ public class MainActivity extends AppCompatActivity {
         return tracksFolderAddress;
     }
 }
-
 
 // TODO: сделать главное меню, где назначаем варианты определения ветра:
 //       установка только вручную; установка по сравнению; установка по статистике

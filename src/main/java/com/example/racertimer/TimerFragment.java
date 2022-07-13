@@ -91,10 +91,11 @@ public class TimerFragment extends Fragment {
             @Override
             public void onTimerStatusUpdated(String timerStatus) {
                 timerResult.setText(timerStatus);
+                if (timerStatus.equals("00:00")) startRaceCloseTomer();
             }
         };
         startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater);
-        startingProcedureTimer.setTimerPeriod(5 * 60 * 1000);
+        startingProcedureTimer.setTimerPeriod(10 * 60 * 1000);
 
         return view;
     }
@@ -132,10 +133,11 @@ public class TimerFragment extends Fragment {
         btnInstantStartRace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startingProcedureTimer.stop();
-                //if (countDownTimer != null) countDownTimer.cancel();
-                MainActivity mainActivity = (MainActivity) getActivity();
-                mainActivity.StartTheRace();
+                startRaceCloseTomer();
+//                startingProcedureTimer.stop();
+//                //if (countDownTimer != null) countDownTimer.cancel();
+//                MainActivity mainActivity = (MainActivity) getActivity();
+//                mainActivity.StartTheRace();
             }
         });
 
@@ -190,6 +192,12 @@ public class TimerFragment extends Fragment {
         });
     }
 
+    private void startRaceCloseTomer() {
+        startingProcedureTimer.stop();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.StartTheRace();
+    }
+
     public boolean isTimerRan() {return startingProcedureTimer.isTimerRan();}
 
     public void stopTheTimer() {
@@ -198,7 +206,7 @@ public class TimerFragment extends Fragment {
 
     private void initTimer() {
         //runTimerCounter(60); // запускаем счетчик на 1 минуту
-        timerSec = 60 * 5; // устанавливаем таймер на 5 минут
+        timerSec = 60 * 10; // устанавливаем таймер на 5 минут
         String timerString2Print = calcTimeMinSec(timerSec); // получаем стринговое отобржение таймера
         timerResult.setText(timerString2Print.toString()); // выводим значение на экран
         Toast.makeText(getActivity(), "tap the timer to START", Toast.LENGTH_LONG).show();

@@ -35,7 +35,7 @@ public class MapManager {
     private boolean screenCenterPinnedOnPosition = true;
     private boolean scrollingIsManual = true;
 
-    private boolean recordingInProgress = false; // TODO: after testing set FALSE
+    private boolean isRecordingInProgress = false; // TODO: after testing set FALSE
     private ConstraintLayout tracksLayout;
     private MapScrollView windowMap;
     private MapHorizontalScrollView horizontalMapScroll;
@@ -47,6 +47,10 @@ public class MapManager {
     public MapManager(Context context) {
         this.context = context;
         loadedAndDisplayedTracks = new LinkedList<>();
+    }
+
+    public boolean isRecordingInProgress() {
+        return isRecordingInProgress;
     }
 
     private void makeTrackGirdCalculator (Location location) {
@@ -66,7 +70,7 @@ public class MapManager {
             Toast.makeText(context, "Track recording started!", Toast.LENGTH_LONG).show();
         } else Toast.makeText(context, "GPS offline. Switch it ON to begin.", Toast.LENGTH_LONG).show();
 
-        recordingInProgress = true;
+        isRecordingInProgress = true;
 
         if (dutyTrackLine != null) {
             dutyTrackLine.setVisibility(View.INVISIBLE);
@@ -133,12 +137,12 @@ public class MapManager {
     }
 
     public void stopAndDeleteTrack() {
-        recordingInProgress = false;
+        isRecordingInProgress = false;
         currentTrackLine.setVisibility(View.INVISIBLE);
     }
 
     public void stopAndSaveTrack(GeoTrack geoTrack) {
-        recordingInProgress = false;
+        isRecordingInProgress = false;
         currentTrackLine.setVisibility(View.INVISIBLE);
         showSavedGeoTrackOnMap(geoTrack);
     }
@@ -162,7 +166,7 @@ public class MapManager {
                 screenWindowShifter.moveWindowCenterToPosition(location);
                 scrollingIsManual = true;
             }
-            if (recordingInProgress) {
+            if (isRecordingInProgress) {
                 currentTrackLine.drawNextSegmentByLocation(location);
             } else {
                 if (speed >5) {
@@ -182,7 +186,7 @@ public class MapManager {
             i++;
             Log.i("bugfix", "mapManager: loaded the missed location #"+i);
 
-            if (recordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
+            if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
             else dutyTrackLine.drawNextSegmentByLocation(nextLocation);
         }
     }
