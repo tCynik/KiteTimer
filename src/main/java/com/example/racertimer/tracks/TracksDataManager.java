@@ -1,7 +1,6 @@
 package com.example.racertimer.tracks;
 
 import android.location.Location;
-import android.util.Log;
 
 import com.example.racertimer.MainActivity;
 
@@ -100,7 +99,7 @@ public class TracksDataManager {
     }
 
     public GeoTrack saveCurrentTrackByName(String trackNameToBeSaved) {
-        Log.i("bugfix", "Manager: saving track by name " + trackNameToBeSaved);
+        //Log.i("bugfix", "Manager: saving track by name " + trackNameToBeSaved);
         GeoTrack trackToBeSaved = new GeoTrack();
         trackToBeSaved.setTrackName(trackNameToBeSaved);
         trackToBeSaved.setPointsListToSave(trackPoints);
@@ -124,7 +123,7 @@ public class TracksDataManager {
     }
 
     public TracksDatabase loadTracksDatabase () {
-        Log.i("bugfix", "Manager: loading the tracks. number is: "+ gpsTrackLoader.getSavedTracks().homMuchSavedTracks());
+        //Log.i("bugfix", "Manager: loading the tracks. number is: "+ gpsTrackLoader.getSavedTracks().homMuchSavedTracks());
         return gpsTrackLoader.getSavedTracks();
     }
 

@@ -172,10 +172,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (timerFragment != null) { // race = 0, timer = 1 : close the timer
-                    // TODO: if timer is ticking ask user about the exit
-                    btnStopStartTimerAndStopRace.setText("NEW RACE");
-                    timerFragment.stopTheTimer();
-                    undeployTimerFragment();
+                    if (timerFragment.isTimerRan()) stopTimerAlertDialog();
+                    else {
+                        undeployTimerFragment();
+                        racingTimerTV.setText("Go chase!");
+                    }
                 } else { // timer = 0,
                     if (isRaceStarted) { // race = 1 : stop the race
                         tracksDataManager.initSavingRecordedTrack();
@@ -186,6 +187,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void stopTimerAlertDialog() {
+        AlertDialog.Builder stopTimer = new AlertDialog.Builder(this);
+        stopTimer.setMessage("Cancel the race timer?").setCancelable(true)
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        undeployTimerFragment();
+                        racingTimerTV.setText("Go chase!");
+                    }
+                }). setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = stopTimer.create();
+        alertDialog.show();
     }
 
     public void updateWindDirectionFromService() {
@@ -296,6 +316,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void undeployTimerFragment() {
+        btnStopStartTimerAndStopRace.setText("NEW RACE");
+        timerFragment.stopTheTimer();
         timerFragment = null;
         findViewById(R.id.timer_container).setVisibility(View.INVISIBLE);
     }
@@ -566,8 +588,9 @@ public class MainActivity extends AppCompatActivity {
         tracksDataManager.beginRecordTrack();
         mapManager.beginNewCurrentTrackDrawing();
         isRaceStarted = true;
-        btnStopStartTimerAndStopRace.setText("RACE STOP");
         undeployTimerFragment();
+        btnStopStartTimerAndStopRace.setText("STOP RACE");
+        // TODO: here must be tested correctness text in start-timer-button
         startRacingTimer();
     }
 

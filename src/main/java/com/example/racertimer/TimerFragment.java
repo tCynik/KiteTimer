@@ -190,6 +190,8 @@ public class TimerFragment extends Fragment {
         });
     }
 
+    public boolean isTimerRan() {return startingProcedureTimer.isTimerRan();}
+
     public void stopTheTimer() {
         startingProcedureTimer.stop();
     }

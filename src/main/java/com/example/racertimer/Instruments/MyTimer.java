@@ -1,7 +1,6 @@
 package com.example.racertimer.Instruments;
 
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,10 +31,14 @@ public abstract class MyTimer {
                     Date currentTime = Calendar.getInstance().getTime();
                     timerLeft = calculateTimerLeft(currentTime);
                     onTimerTicked(timerLeft);
-                    Log.i("bugfix", "Thread: "+Thread.currentThread().getName()+", making next tick ");
+                    //Log.i("bugfix", "Thread: "+Thread.currentThread().getName()+", making next tick ");
                 }
             }
         });
+    }
+
+    public boolean isTimerRan() {
+        return isTimerRan;
     }
 
     public void start() {
@@ -43,6 +46,10 @@ public abstract class MyTimer {
         isTimerRan = true;
         initTheThread();
         thread.start();
+    }
+
+    public void stop() {
+        if (isTimerRan) isTimerRan = false;
     }
 
     void onTimerTicked (long timerLeft) {
@@ -56,7 +63,4 @@ public abstract class MyTimer {
         return 0;
     }
 
-    public void stop() {
-        if (isTimerRan) isTimerRan = false;
-    }
 }
