@@ -13,18 +13,17 @@ public abstract class MyTimer {
     long timerLeft;
     TimerStatusUpdater timerStatusUpdater;
     boolean isTimerRan = false;
-    long periodCountMilSec;
     SimpleDateFormat simpleDateFormat;
+    long periodCountMilSec;
 
     public MyTimer(TimerStatusUpdater timerStatusUpdater, int countMilSec, int beginningTimerLeftSec, String dateFormatPattern) {
         this.timerStatusUpdater = timerStatusUpdater;
         this.timerLeft = beginningTimerLeftSec * 1000;
-        periodCountMilSec = countMilSec;
-        initTheThread(countMilSec);
+        this.periodCountMilSec = countMilSec;
         simpleDateFormat = new SimpleDateFormat(dateFormatPattern);
     }
 
-    public void initTheThread(long periodCountMilSec) {
+    public void initTheThread() {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -42,6 +41,7 @@ public abstract class MyTimer {
     public void start() {
         startedTime = Calendar.getInstance().getTime();
         isTimerRan = true;
+        initTheThread();
         thread.start();
     }
 

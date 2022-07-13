@@ -128,21 +128,9 @@ public class MainActivity extends AppCompatActivity {
         timerStatusUpdater = new TimerStatusUpdater() {
             @Override
             public void onTimerStatusUpdated(String timerStatus) {
-                Log.i("bugfix", " clock is get new sign: "+timerStatus);
                 racingTimerTV.setText(timerStatus);
             }
         };
-
-        //startTheTestTimer();
-
-    }
-
-    private void startTheTestTimer() {
-//        StartingProcedureTimer startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater);
-//        startingProcedureTimer.start();//thread.start();
-//
-//        SystemClock.sleep(3000);
-//        startingProcedureTimer.stopTheTimer();
     }
 
     @Override
@@ -186,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
                 if (timerFragment != null) { // race = 0, timer = 1 : close the timer
                     // TODO: if timer is ticking ask user about the exit
                     btnStopStartTimerAndStopRace.setText("NEW RACE");
+                    timerFragment.stopTheTimer();
                     undeployTimerFragment();
                 } else { // timer = 0,
                     if (isRaceStarted) { // race = 1 : stop the race

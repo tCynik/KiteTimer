@@ -25,6 +25,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -93,6 +94,8 @@ public class TimerFragment extends Fragment {
             }
         };
         startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater);
+        startingProcedureTimer.setTimerPeriod(5 * 60 * 1000);
+
         return view;
     }
 
@@ -111,6 +114,7 @@ public class TimerFragment extends Fragment {
             public void onClick(View view) {
                 if (timerPaused) { // если счетчик остановлен,
                     timerPaused = false; // снимамем счетчик с паузы
+                    Log.i("bugfix", " starting the timer ");
                     startingProcedureTimer.start();
                     //runTimerCounter(60); // запускаем счетчик на 1 минуту
                     //countDownTimer.start();
@@ -184,6 +188,10 @@ public class TimerFragment extends Fragment {
 //                timerResult.setText(timerString2Print.toString()); // выводим значение на экран
             }
         });
+    }
+
+    public void stopTheTimer() {
+        startingProcedureTimer.stop();
     }
 
     private void initTimer() {

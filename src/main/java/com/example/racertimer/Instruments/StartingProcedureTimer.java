@@ -20,17 +20,13 @@ public class StartingProcedureTimer extends MyTimer {
     public void setTimerPeriod(long currentTimerSize) {
         startedTime = Calendar.getInstance().getTime();
         this.currentTimePeriod = currentTimerSize;
-        onTimerTicked(currentTimerSize);
+        String timerStatusString = simpleDateFormat.format(currentTimerSize);
+        timerStatusUpdater.onTimerStatusUpdated(timerStatusString);
     }
 
-    public void correctTimerLeft(int correcter) {
-        currentTimePeriod = currentTimePeriod + correcter;
-    }
-
-    public void resume() {
-        if (!isTimerRan) {
-            startedTime = Calendar.getInstance().getTime();
-            isTimerRan = true;
-        }
+    @Override
+    public void stop() {
+        super.stop();
+        currentTimePeriod = timerLeft;
     }
 }
