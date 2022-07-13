@@ -43,7 +43,7 @@ import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
 import com.example.racertimer.map.MapUITools;
-import com.example.racertimer.multimedia.Voiceover;
+import com.example.racertimer.multimedia.BeepSounds;
 import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView arrowDirectionOnMap, arrowWindOnMap;
 
-    private Voiceover voiceover;
+    private BeepSounds voiceover;
 
     private int velocity, bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
 
@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
         windDirection = 202;
 
-        voiceover = new Voiceover(context);
+        voiceover = new BeepSounds(context);
         sailingToolsFragment.setVoiceover(voiceover);
 
         createLocationService();
@@ -619,3 +619,5 @@ public class MainActivity extends AppCompatActivity {
 //  переписать старт записи трека на остановку таймера
 
 // TODO: при вызове новой гонки таймер получается скомканный. что-то с контейнером таймера.
+
+// TODO: make no GPS signal info in map

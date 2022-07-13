@@ -138,7 +138,7 @@ public class MapManager {
 
     public void stopAndDeleteTrack() {
         isRecordingInProgress = false;
-        currentTrackLine.setVisibility(View.INVISIBLE);
+        if (currentTrackLine !=null) currentTrackLine.setVisibility(View.INVISIBLE);
     }
 
     public void stopAndSaveTrack(GeoTrack geoTrack) {

@@ -13,7 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
-import com.example.racertimer.multimedia.Voiceover;
+import com.example.racertimer.multimedia.BeepSounds;
 
 /**
  * фрагмент для отображения данных с текущими лавировочными параметрами
@@ -21,7 +21,7 @@ import com.example.racertimer.multimedia.Voiceover;
 
 public class SailingToolsFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_sailing_tools";
-    Voiceover voiceover;
+    BeepSounds voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
     LayoutInflater windDialogLayoutInflater;
     ImageView arrowVelocityIV, arrowDirectionIV;
@@ -88,7 +88,7 @@ public class SailingToolsFragment extends Fragment {
         return view;
     }
 
-    public void setVoiceover (Voiceover voiceover) {
+    public void setVoiceover (BeepSounds voiceover) {
         this.voiceover = voiceover;
     }
 
@@ -261,7 +261,7 @@ public class SailingToolsFragment extends Fragment {
                 threshold = (int) (bestDownwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
                 if (velocityMadeGood < threshold) { // если ВМГ меньше порога (больше по модулю, т.к. и то и то минус)
                     percent = calculateBeepingPercent(bestDownwind, threshold); // запускаем/меняем пищалку
-                    if (velocity > 5) voiceover.playRepeatSound(percent);
+                    //if (velocity > 5) voiceover.playRepeatSound(percent);
                 } else voiceover.stopRepeatSound();
             }
         }

@@ -1,25 +1,7 @@
 package com.example.racertimer;
 
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_EIGHT;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_FIFTY;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_FIVE;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_FORTY;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_FOUR;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_NINE;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_ONE;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_ONE_MINUTE;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_ONE_MINUTE_READY;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_PAUSE;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_SEVEN;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_SIX;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_START;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_TEN;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_THIRTY;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_THREE;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_TWENTY;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_TWO;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_TWO_MINUTE;
-import static com.example.racertimer.multimedia.Voiceover.SOUND_ASSET_TWO_MINUTE_READY;
+//import static com.example.racertimer.multimedia.ParentVoiceover.SOUND_ASSET_PAUSE;
+//import static com.example.racertimer.multimedia.ParentVoiceover.SOUND_ASSET_START;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -38,7 +20,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.Instruments.StartingProcedureTimer;
 import com.example.racertimer.Instruments.TimerStatusUpdater;
-import com.example.racertimer.multimedia.Voiceover;
+import com.example.racertimer.multimedia.SystemSounds;
 
 public class TimerFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -46,7 +28,7 @@ public class TimerFragment extends Fragment {
     private StartingProcedureTimer startingProcedureTimer;
     private TimerStatusUpdater timerStatusUpdater;
     private CountDownTimer countDownTimer;
-    private Voiceover voiceover;
+    private SystemSounds voiceover;
     private Button btnInstantStartRace, btn5Minutes, btn3Minutes, btn2Minutes, btn1Minutes;
     private TextView timerResult;
 
@@ -78,7 +60,7 @@ public class TimerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_timer, null);
 
-        voiceover = new Voiceover(getActivity());
+        voiceover = new SystemSounds(getActivity());
 
         findTheViews(view);
         setClickListeners();
@@ -94,7 +76,7 @@ public class TimerFragment extends Fragment {
                 if (timerStatus.equals("00:00")) startRaceCloseTomer();
             }
         };
-        startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater);
+        startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater, (MainActivity) getActivity());
         startingProcedureTimer.setTimerPeriod(10 * 60 * 1000);
 
         return view;
@@ -125,7 +107,7 @@ public class TimerFragment extends Fragment {
                     startingProcedureTimer.stop();
                     //if (countDownTimer != null ) countDownTimer.cancel();
                     timerResult.setTextColor(Color.RED);
-                    voiceover.playSingleTimerSound(SOUND_ASSET_PAUSE);
+                    //////////////////voiceover.playSingleTimerSound(SOUND_ASSET_PAUSE);
                 }
             }
         });
@@ -237,25 +219,25 @@ public class TimerFragment extends Fragment {
 //        if (! timerPaused){
             timerSec -- ;
             switch (timerSec) {
-                case 130: voiceover.playSingleTimerSound(SOUND_ASSET_TWO_MINUTE_READY); break;
-                case 120: voiceover.playSingleTimerSound(SOUND_ASSET_TWO_MINUTE); break;
-                case 70: voiceover.playSingleTimerSound(SOUND_ASSET_ONE_MINUTE_READY); break;
-                case 60: voiceover.playSingleTimerSound(SOUND_ASSET_ONE_MINUTE); break;
-                case 50: voiceover.playSingleTimerSound(SOUND_ASSET_FIFTY); break;
-                case 40: voiceover.playSingleTimerSound(SOUND_ASSET_FORTY); break;
-                case 30: voiceover.playSingleTimerSound(SOUND_ASSET_THIRTY); break;
-                case 20: voiceover.playSingleTimerSound(SOUND_ASSET_TWENTY); break;
-                case 10: voiceover.playSingleTimerSound(SOUND_ASSET_TEN); break;
-                case 9: voiceover.playSingleTimerSound(SOUND_ASSET_NINE); break;
-                case 8: voiceover.playSingleTimerSound(SOUND_ASSET_EIGHT); break;
-                case 7: voiceover.playSingleTimerSound(SOUND_ASSET_SEVEN); break;
-                case 6: voiceover.playSingleTimerSound(SOUND_ASSET_SIX); break;
-                case 5: voiceover.playSingleTimerSound(SOUND_ASSET_FIVE); break;
-                case 4: voiceover.playSingleTimerSound(SOUND_ASSET_FOUR); break;
-                case 3: voiceover.playSingleTimerSound(SOUND_ASSET_THREE); break;
-                case 2: voiceover.playSingleTimerSound(SOUND_ASSET_TWO); break;
-                case 1: voiceover.playSingleTimerSound(SOUND_ASSET_ONE); break;
-                case 0: voiceover.playSingleTimerSound(SOUND_ASSET_START);
+//                case 130: voiceover.playSingleTimerSound(SOUND_ASSET_TWO_MINUTE_READY); break;
+//                case 120: voiceover.playSingleTimerSound(SOUND_ASSET_TWO_MINUTE); break;
+//                case 70: voiceover.playSingleTimerSound(SOUND_ASSET_ONE_MINUTE_READY); break;
+//                case 60: voiceover.playSingleTimerSound(SOUND_ASSET_ONE_MINUTE); break;
+//                case 50: voiceover.playSingleTimerSound(SOUND_ASSET_FIFTY); break;
+//                case 40: voiceover.playSingleTimerSound(SOUND_ASSET_FORTY); break;
+//                case 30: voiceover.playSingleTimerSound(SOUND_ASSET_THIRTY); break;
+//                case 20: voiceover.playSingleTimerSound(SOUND_ASSET_TWENTY); break;
+//                case 10: voiceover.playSingleTimerSound(SOUND_ASSET_TEN); break;
+//                case 9: voiceover.playSingleTimerSound(SOUND_ASSET_NINE); break;
+//                case 8: voiceover.playSingleTimerSound(SOUND_ASSET_EIGHT); break;
+//                case 7: voiceover.playSingleTimerSound(SOUND_ASSET_SEVEN); break;
+//                case 6: voiceover.playSingleTimerSound(SOUND_ASSET_SIX); break;
+//                case 5: voiceover.playSingleTimerSound(SOUND_ASSET_FIVE); break;
+//                case 4: voiceover.playSingleTimerSound(SOUND_ASSET_FOUR); break;
+//                case 3: voiceover.playSingleTimerSound(SOUND_ASSET_THREE); break;
+//                case 2: voiceover.playSingleTimerSound(SOUND_ASSET_TWO); break;
+//                case 1: voiceover.playSingleTimerSound(SOUND_ASSET_ONE); break;
+                case 0: //voiceover.playSingleTimerSound(SOUND_ASSET_START);
                     MainActivity mainActivity = (MainActivity) getActivity();
                     mainActivity.StartTheRace();
                     countDownTimer.cancel();
