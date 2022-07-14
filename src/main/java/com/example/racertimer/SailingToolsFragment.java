@@ -33,6 +33,8 @@ public class SailingToolsFragment extends Fragment {
 
     private boolean voiceoverIsMuted = false; // переменная отключен ли звук пищалки
 
+    private boolean isRaceStarted  = false;
+
     public SailingToolsFragment() {
         // Required empty public constructor
     }
@@ -246,7 +248,7 @@ public class SailingToolsFragment extends Fragment {
         int threshold;
         int percent;
 
-        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG) { // если изменилась VMG, перезапускаем прищалку
+        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG & isRaceStarted) { // если изменилась VMG, перезапускаем прищалку
             Log.i(PROJECT_LOG_TAG, " called makeBeeping, voiceoverMute = "+voiceoverIsMuted);
             lastVMG = velocityMadeGood;
 
@@ -265,6 +267,15 @@ public class SailingToolsFragment extends Fragment {
                 } else voiceover.stopRepeatSound();
             }
         }
+    }
+
+    public void startTheRace() {
+        isRaceStarted = true;
+    }
+
+    public void stopTheRace () {
+        isRaceStarted = false;
+        voiceover.stopRepeatSound();
     }
 
     private int calculateBeepingPercent(int VMGmax, int threshold) {

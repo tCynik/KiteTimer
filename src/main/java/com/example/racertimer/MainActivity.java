@@ -76,8 +76,6 @@ public class MainActivity extends AppCompatActivity {
     public MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 
-    private ImageView arrowDirectionOnMap, arrowWindOnMap;
-
     private BeepSounds voiceover;
 
     private int velocity, bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
@@ -85,10 +83,6 @@ public class MainActivity extends AppCompatActivity {
     private int defaultMapScale = 1;
 
     private TimerStatusUpdater timerStatusUpdater;
-    private String timerString = "00:00.00"; // переменная для вывода текущего секундомера чч:мм:сс.сот
-    private int timerHour = 0; // переменная в часах
-    private int timerMin = 0; // переменная счетчика в минутах
-    private int timerSec = 0; // текущее значение таймера в сотых долей секунды
 
     private double latitude = 0;
     private double longitude = 0; // координаты для получения прогноза
@@ -109,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_race);
+        setContentView(R.layout.activity_main);
         context = this;
 
         findViews();
@@ -511,6 +505,7 @@ public class MainActivity extends AppCompatActivity {
             this.location = location;
             latitude = location.getLatitude();
             longitude = location.getLongitude();
+            if (timerFragment != null) racingTimerTV.setText("Go chase!");
         }
         latitude = location.getLatitude();
         longitude = location.getLongitude();
@@ -546,14 +541,15 @@ public class MainActivity extends AppCompatActivity {
     public void endRace() {
         racingTimer.stop();
         isRaceStarted = false;
+        sailingToolsFragment.stopTheRace();
     }
 
     public void StartTheRace() {
         tracksDataManager.beginRecordTrack();
+        sailingToolsFragment.startTheRace();
         isRaceStarted = true;
         undeployTimerFragment();
         btnStopStartTimerAndStopRace.setText("STOP RACE");
-        // TODO: here must be tested correctness text in start-timer-button
         startRacingTimer();
     }
 
