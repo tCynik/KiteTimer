@@ -127,7 +127,6 @@ public class MapManager {
         return displayedTracksNameList;
     }
 
-
     public void setScreenCenterToPaintingView(TrackPaintingView trackPaintingView) {
         float screenCenterX = tracksLayout.getWidth() / 2;
         float screenCenterY = tracksLayout.getHeight() / 2;
@@ -185,7 +184,6 @@ public class MapManager {
         for (Location nextLocation: missedLocations) {
             i++;
             Log.i("bugfix", "mapManager: loaded the missed location #"+i);
-
             if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
             else dutyTrackLine.drawNextSegmentByLocation(nextLocation);
         }
@@ -258,9 +256,3 @@ public class MapManager {
         }
     }
 }
-//Log.i("bugfix", "fixPosition is working2. pinned = "+ screenCenterPinnedOnPosition );
-
-//TODO: разобраться с алгоритмом начала запука трека (совместно с таймером)
-
-//TODO: BUGREPORT1 после соханения трека он удаляется
-//TODO: BUGREPORT2 при загрузке трека установить центр экрана на трек (если включена центровка?)

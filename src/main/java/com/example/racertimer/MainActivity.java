@@ -234,16 +234,20 @@ public class MainActivity extends AppCompatActivity {
                 .setNeutralButton("delete track", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which) {
-                        tracksDataManager.clearTheTrack();
-                        mapManager.stopAndDeleteTrack();
-                        endRace();
+                        clearCurrentTrack();
                         dialogInterface.cancel();
-                        btnStopStartTimerAndStopRace.setText("NEW RACE");
                     }
                 });
         AlertDialog alertDialog = confirmSaveTrack.create(); // создание диалога
         alertDialog.setTitle("Save the track?"); // заголовок
         alertDialog.show(); // отображение диалога
+    }
+
+    public void clearCurrentTrack() {
+        tracksDataManager.clearTheTrack();
+        mapManager.stopAndDeleteTrack();
+        endRace();
+        btnStopStartTimerAndStopRace.setText("NEW RACE");
     }
 
     public void setSailingToolsFragment(SailingToolsFragment sailingToolsFragment) {
@@ -331,8 +335,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() { // в случае нажатия кнопки назад диалог по переходу в главное меню
         AlertDialog.Builder confurmingRaceEnd = new AlertDialog.Builder(this); // строитель диалога
         confurmingRaceEnd.setMessage("End the race?")
-                .setCancelable(false) // не отменяемый (при нажатии вне поля диалога не закрывается)
-                // назначаем кнопки взаимодействия
+                .setCancelable(false)
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -389,33 +392,6 @@ public class MainActivity extends AppCompatActivity {
         bearing = CoursesCalculator.convertAngleFrom0To360(bearing);
         Log.i("ActivityRace", "averageCourse = " + bearing);
         return bearing;
-    }
-
-    /** обработка изменения таймера*/
-    private void onTimerTicked () {
-        timerSec++;
-        if (timerSec > 59) {
-            timerSec -= 60;
-            timerMin ++;
-        }
-        if (timerMin == 60) {
-            timerMin = 0;
-            timerHour ++;
-        }
-        timerString = calcTimer(timerHour, timerMin, timerSec);
-//        timerRace.setText(timerString.toString());
-    }
-
-    /** Калькулятор гоночного таймера */
-    private String calcTimer (int timerHour, int timerMin, int timerSec) {
-//        timerString = timerSec / 10+ "." + (int) timerSec % 10; // тут таймер с сотыми секунды, но там время неверное
-//        if (timerSec < 100 ) timerString = "" + 0 + timerString;
-//        timerString = timerMin + ":" + timerString;
-        if (timerSec < 10) timerString = timerMin + ":0" + timerSec;
-        else timerString = timerMin + ":" + timerSec;
-        if (timerMin < 10 ) timerString = "0" + timerString;
-        if (timerHour !=0 ) timerString = timerHour + ":" + timerString;
-        return timerString;
     }
 
     /** Настраиваем и запускаем сервис для приема и трансляции данных геолокации */
@@ -508,14 +484,6 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
-    public void setArrowDirectionOnMap(ImageView imageView) {
-        arrowDirectionOnMap = imageView;
-    }
-
-    public void setArrowWindOnMap (ImageView imageView) {
-        arrowWindOnMap = imageView;
-    }
-
     public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
@@ -606,18 +574,5 @@ public class MainActivity extends AppCompatActivity {
 //       если началась гонка, включаем запуск сравнения, если нет данных по ручному ветру -
 // исходим из того, что у нас правый бейдевинд
 //       либо запускаем если выбран чек поле "запуск сравнения"
-
-// TODO: при первом открытии по умолчанию загружаем фрагмент карты
-//   обработка запуска гонки (по окончании таймера)
-//  обработка остановки гонки (из таймера)
-//  cancelRace - кнопка вверху
-//  нужна кнопка моментального старта гонки
-
-
-// TODO: перед праздниками остановился на реализации отображения записываемого трека на карте
-//  логировать и тестировать вызов старта записи (сделал временную кнопку) и процесс создания и рисования трека - координаты, отображение точки, и т.д.
-//  переписать старт записи трека на остановку таймера
-
-// TODO: при вызове новой гонки таймер получается скомканный. что-то с контейнером таймера.
 
 // TODO: make no GPS signal info in map

@@ -1,7 +1,5 @@
 package com.example.racertimer.Instruments;
 
-import android.util.Log;
-
 import java.util.Date;
 
 public class RacingTimer extends MyTimer {

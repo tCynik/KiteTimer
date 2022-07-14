@@ -48,24 +48,17 @@ public class TracksDataManager {
         trackPoints.addAll(missedLocations);
     }
 
-    /**
-     * Логика сохранения трека такова:
-     * пользователь жмет остановку записи, ему приходит диалоговое окно:
-     * Остановить запись? Варианты ответа: отмена, удалить трек, сохранить трек с именем таким-то.
-     * отмена - убираем окно, ничего не меняется.
-     * Удалить трек - переспрашиваем, вызываем обнуление трека
-     * сохранить трек - записываем трек с указанным именем.
-     */
-
     public void clearTheTrack () {
         trackPoints.clear();
         isTrackRecordingProgress = false;
     }
 
     public void initSavingRecordedTrack() {
-        String trackNameToBeSaved = generateTrackName();
-        trackNameToBeSaved = trackNameUniquer(trackNameToBeSaved);
-        askUserToSave(trackNameToBeSaved);
+        if (trackPoints.size() != 0) {
+            String trackNameToBeSaved = generateTrackName();
+            trackNameToBeSaved = trackNameUniquer(trackNameToBeSaved);
+            askUserToSave(trackNameToBeSaved);
+        } else mainActivity.clearCurrentTrack();
     }
 
     private String generateTrackName () {
@@ -118,8 +111,6 @@ public class TracksDataManager {
 
     private void askUserToSave (String trackNameToBeChecked) {
         mainActivity.askToSaveTrack(trackNameToBeChecked);
-        // TODO: make request to user by dialogMenu to save the track with the current name.
-        //  if user pressed Y save the file. If user cancelled - clear the arraylist
     }
 
     public TracksDatabase loadTracksDatabase () {

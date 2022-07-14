@@ -48,23 +48,27 @@ public class StartingProcedureTimer extends MyTimer {
         this.currentTimePeriod = currentTimerSize;
         String timerStatusString = simpleDateFormat.format(currentTimerSize);
         timerStatusUpdater.onTimerStatusUpdated(timerStatusString);
-        voiceover.playSound(SOUND_ASSET_TWO_MINUTE_READY);
+        voiceoverTimerStatus(currentTimerSize);
     }
 
     @Override
     public void stop() {
         super.stop();
         currentTimePeriod = timerLeft;
+    }
+
+    public void pause() {
         voiceover.playSound(SOUND_ASSET_PAUSE);
+        stop();
     }
 
     @Override
     void onTimerTicked(long timerLeft) {
         super.onTimerTicked(timerLeft);
-        voiceoverTimeStatus(timerLeft);
+        voiceoverTimerStatus(timerLeft);
     }
 
-    private void voiceoverTimeStatus(long timerLeft) {
+    private void voiceoverTimerStatus(long timerLeft) {
         int timerLeftSeconds = (int) timerLeft / 1000;
         switch (timerLeftSeconds) {
             case 130: voiceover.playSound(SOUND_ASSET_TWO_MINUTE_READY);
@@ -73,7 +77,7 @@ public class StartingProcedureTimer extends MyTimer {
                 break;
             case 70: voiceover.playSound(SOUND_ASSET_ONE_MINUTE_READY);
                 break;
-            case 61: voiceover.playSound(SOUND_ASSET_ONE_MINUTE);
+            case 60: voiceover.playSound(SOUND_ASSET_ONE_MINUTE);
                 break;
             case 50: voiceover.playSound(SOUND_ASSET_FIFTY);
                 break;
