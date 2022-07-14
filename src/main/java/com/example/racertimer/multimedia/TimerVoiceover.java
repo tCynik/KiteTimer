@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.example.racertimer.R;
 
-public class TimerVoiceover extends ParentVoiceover {
+public class TimerVoiceover extends VoiceoverMain {
     private static final int PRIORITY_TIMER = 3; // озвучка таймера
 
     public static int SOUND_ASSET_ONE   =             1;
@@ -33,7 +33,7 @@ public class TimerVoiceover extends ParentVoiceover {
     public TimerVoiceover(Context context) {
         super(context);
 
-        soundPool.load(context, R.raw.eng_one, PRIORITY_TIMER); // 1
+        soundPool.load(context, R.raw.eng_one, PRIORITY_TIMER); // 1 - порядковый номер подгурзки ассета
         soundPool.load(context, R.raw.eng_two, PRIORITY_TIMER); // 2
         soundPool.load(context, R.raw.eng_three, PRIORITY_TIMER); // 3
         soundPool.load(context, R.raw.eng_four, PRIORITY_TIMER); // 4
@@ -43,17 +43,16 @@ public class TimerVoiceover extends ParentVoiceover {
         soundPool.load(context, R.raw.eng_eight, PRIORITY_TIMER); // 8
         soundPool.load(context, R.raw.eng_nine, PRIORITY_TIMER); // 9
         soundPool.load(context, R.raw.eng_ten, PRIORITY_TIMER); // 10
-        soundPool.load(context, R.raw.eng_ten, PRIORITY_TIMER); // 10 - это 15, пока нет озвучки
-        soundPool.load(context, R.raw.eng_twenty, PRIORITY_TIMER); // 11
-        soundPool.load(context, R.raw.eng_threety, PRIORITY_TIMER); // 12
-        soundPool.load(context, R.raw.eng_fourty, PRIORITY_TIMER); // 13
-        soundPool.load(context, R.raw.eng_fivety, PRIORITY_TIMER); // 14
-        soundPool.load(context, R.raw.eng_one_minute, PRIORITY_TIMER); // 15
-        soundPool.load(context, R.raw.eng_one_minute_ready, PRIORITY_TIMER); // 16
-        soundPool.load(context, R.raw.eng_two_minutes, PRIORITY_TIMER); // 17
-        soundPool.load(context, R.raw.eng_two_minutes_ready, PRIORITY_TIMER); // 18
-        soundPool.load(context, R.raw.start_cow_bell, PRIORITY_TIMER); // 19
-        soundPool.load(context, R.raw.eng_pause, PRIORITY_TIMER); // 20
-
+        soundPool.load(context, R.raw.eng_ten, PRIORITY_TIMER); // 11 - это место под 15 сек, пока нет озвучки
+        soundPool.load(context, R.raw.eng_twenty, PRIORITY_TIMER); // 12
+        soundPool.load(context, R.raw.eng_threety, PRIORITY_TIMER); // 13
+        soundPool.load(context, R.raw.eng_fourty, PRIORITY_TIMER); // 14
+        soundPool.load(context, R.raw.eng_fivety, PRIORITY_TIMER); // 15
+        soundPool.load(context, R.raw.eng_one_minute, PRIORITY_TIMER); // 16
+        soundPool.load(context, R.raw.eng_one_minute_ready, PRIORITY_TIMER); // 17
+        soundPool.load(context, R.raw.eng_two_minutes, PRIORITY_TIMER); // 18
+        soundPool.load(context, R.raw.eng_two_minutes_ready, PRIORITY_TIMER); // 19
+        soundPool.load(context, R.raw.start_cow_bell, PRIORITY_TIMER); // 20
+        soundPool.load(context, R.raw.eng_pause, PRIORITY_TIMER); // 21
     }
 }

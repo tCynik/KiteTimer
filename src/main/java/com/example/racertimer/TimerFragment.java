@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.Instruments.StartingProcedureTimer;
 import com.example.racertimer.Instruments.TimerStatusUpdater;
-import com.example.racertimer.multimedia.SystemSounds;
 
 public class TimerFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -28,7 +27,6 @@ public class TimerFragment extends Fragment {
     private StartingProcedureTimer startingProcedureTimer;
     private TimerStatusUpdater timerStatusUpdater;
     private CountDownTimer countDownTimer;
-    private SystemSounds voiceover;
     private Button btnInstantStartRace, btn5Minutes, btn3Minutes, btn2Minutes, btn1Minutes;
     private TextView timerResult;
 
@@ -59,8 +57,6 @@ public class TimerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_timer, null);
-
-        voiceover = new SystemSounds(getActivity());
 
         findTheViews(view);
         setClickListeners();

@@ -48,14 +48,14 @@ public class StartingProcedureTimer extends MyTimer {
         this.currentTimePeriod = currentTimerSize;
         String timerStatusString = simpleDateFormat.format(currentTimerSize);
         timerStatusUpdater.onTimerStatusUpdated(timerStatusString);
-        voiceover.playSingleTimerSound(SOUND_ASSET_TWO_MINUTE_READY);
+        voiceover.playSound(SOUND_ASSET_TWO_MINUTE_READY);
     }
 
     @Override
     public void stop() {
         super.stop();
         currentTimePeriod = timerLeft;
-        voiceover.playSingleTimerSound(SOUND_ASSET_PAUSE);
+        voiceover.playSound(SOUND_ASSET_PAUSE);
     }
 
     @Override
@@ -67,44 +67,44 @@ public class StartingProcedureTimer extends MyTimer {
     private void voiceoverTimeStatus(long timerLeft) {
         int timerLeftSeconds = (int) timerLeft / 1000;
         switch (timerLeftSeconds) {
-            case 130: voiceover.playSingleTimerSound(SOUND_ASSET_TWO_MINUTE_READY);
+            case 130: voiceover.playSound(SOUND_ASSET_TWO_MINUTE_READY);
                 break;
-            case 120: voiceover.playSingleTimerSound(SOUND_ASSET_TWO_MINUTE);
+            case 120: voiceover.playSound(SOUND_ASSET_TWO_MINUTE);
                 break;
-            case 70: voiceover.playSingleTimerSound(SOUND_ASSET_ONE_MINUTE_READY);
+            case 70: voiceover.playSound(SOUND_ASSET_ONE_MINUTE_READY);
                 break;
-            case 61: voiceover.playSingleTimerSound(SOUND_ASSET_ONE_MINUTE);
+            case 61: voiceover.playSound(SOUND_ASSET_ONE_MINUTE);
                 break;
-            case 50: voiceover.playSingleTimerSound(SOUND_ASSET_FIFTY);
+            case 50: voiceover.playSound(SOUND_ASSET_FIFTY);
                 break;
-            case 40: voiceover.playSingleTimerSound(SOUND_ASSET_FORTY);
+            case 40: voiceover.playSound(SOUND_ASSET_FORTY);
                 break;
-            case 30: voiceover.playSingleTimerSound(SOUND_ASSET_THIRTY);
+            case 30: voiceover.playSound(SOUND_ASSET_THIRTY);
                 break;
-            case 20: voiceover.playSingleTimerSound(SOUND_ASSET_TWENTY);
+            case 20: voiceover.playSound(SOUND_ASSET_TWENTY);
                 break;
-            case 10: voiceover.playSingleTimerSound(SOUND_ASSET_TEN);
+            case 10: voiceover.playSound(SOUND_ASSET_TEN);
                 break;
-            case 9: voiceover.playSingleTimerSound(SOUND_ASSET_NINE);
+            case 9: voiceover.playSound(SOUND_ASSET_NINE);
                 break;
-            case 8: voiceover.playSingleTimerSound(SOUND_ASSET_EIGHT);
+            case 8: voiceover.playSound(SOUND_ASSET_EIGHT);
                 break;
-            case 7: voiceover.playSingleTimerSound(SOUND_ASSET_SEVEN);
+            case 7: voiceover.playSound(SOUND_ASSET_SEVEN);
                 break;
-            case 6: voiceover.playSingleTimerSound(SOUND_ASSET_SIX);
+            case 6: voiceover.playSound(SOUND_ASSET_SIX);
                 break;
-            case 5: voiceover.playSingleTimerSound(SOUND_ASSET_FIVE);
+            case 5: voiceover.playSound(SOUND_ASSET_FIVE);
                 break;
-            case 4: voiceover.playSingleTimerSound(SOUND_ASSET_FOUR);
+            case 4: voiceover.playSound(SOUND_ASSET_FOUR);
                 break;
-            case 3: voiceover.playSingleTimerSound(SOUND_ASSET_THREE);
+            case 3: voiceover.playSound(SOUND_ASSET_THREE);
                 break;
-            case 2: voiceover.playSingleTimerSound(SOUND_ASSET_TWO);
+            case 2: voiceover.playSound(SOUND_ASSET_TWO);
                 break;
-            case 1: voiceover.playSingleTimerSound(SOUND_ASSET_ONE);
+            case 1: voiceover.playSound(SOUND_ASSET_ONE);
                 break;
             case 0:
-                voiceover.playSingleTimerSound(SOUND_ASSET_START);
+                voiceover.playSound(SOUND_ASSET_START);
                 break;
             default:
                 break;

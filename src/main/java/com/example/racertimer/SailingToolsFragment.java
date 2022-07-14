@@ -261,7 +261,7 @@ public class SailingToolsFragment extends Fragment {
                 threshold = (int) (bestDownwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
                 if (velocityMadeGood < threshold) { // если ВМГ меньше порога (больше по модулю, т.к. и то и то минус)
                     percent = calculateBeepingPercent(bestDownwind, threshold); // запускаем/меняем пищалку
-                    //if (velocity > 5) voiceover.playRepeatSound(percent);
+                    if (velocity > 5) voiceover.playRepeatSound(percent);
                 } else voiceover.stopRepeatSound();
             }
         }

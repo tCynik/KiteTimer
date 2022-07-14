@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.example.racertimer.R;
 
-public class BeepSounds extends ParentVoiceover {
+public class BeepSounds extends VoiceoverMain {
     private static final int PRIORITY_BEEP = 2; // звуки индикации положения VMG
 
     public static int SOUND_ASSET_BEEP =       1;
