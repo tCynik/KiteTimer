@@ -22,6 +22,8 @@ public class RacingTimer extends MyTimer {
     public void stop() {
         super.stop();
         String timerStatusString = simpleDateFormat.format(timerLeft);
-        timerStatusUpdater.onTimerStatusUpdated("last: "+timerStatusString);
+        if (timerStatusUpdater.isGpsConnected())
+            timerStatusUpdater.onTimerStatusUpdated("last: "+timerStatusString);
+        else timerStatusUpdater.onTimerStatusUpdated("No GPS!");
     }
 }

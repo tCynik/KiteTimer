@@ -59,8 +59,7 @@
                 android:layout_height="match_parent"
                 android:textSize="25sp"
                 android:gravity="end"
-                android:layout_marginEnd="10dp"
-                android:text="NO GPS"/>
+                android:layout_marginEnd="10dp"/>
 
         </LinearLayout>
 

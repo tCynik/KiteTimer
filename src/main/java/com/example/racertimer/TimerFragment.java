@@ -20,7 +20,7 @@ public class TimerFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";
 
     private StartingProcedureTimer startingProcedureTimer;
-    private TimerStatusUpdater timerStatusUpdater;
+    private TimerStatusUpdater startingTimerStatusUpdater;
     private Button btnInstantStartRace, btn5Minutes, btn3Minutes, btn2Minutes, btn1Minutes;
     private TextView timerResult;
 
@@ -53,14 +53,19 @@ public class TimerFragment extends Fragment {
 
         Toast.makeText(getActivity(), "tap the timer to START", Toast.LENGTH_LONG).show();
 
-        timerStatusUpdater = new TimerStatusUpdater() {
+        startingTimerStatusUpdater = new TimerStatusUpdater() {
             @Override
             public void onTimerStatusUpdated(String timerStatus) {
                 timerResult.setText(timerStatus);
                 if (timerStatus.equals("00:00")) startRaceCloseTomer();
             }
+
+            @Override
+            public boolean isGpsConnected() {
+                return false;
+            }
         };
-        startingProcedureTimer = new StartingProcedureTimer(timerStatusUpdater, (MainActivity) getActivity());
+        startingProcedureTimer = new StartingProcedureTimer(startingTimerStatusUpdater, (MainActivity) getActivity());
         startingProcedureTimer.setTimerPeriod(10 * 60 * 1000);
 
         return view;

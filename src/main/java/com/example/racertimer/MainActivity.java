@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private TracksMenuFragment tracksMenuFragment;
     private TimerFragment timerFragment = null;
     private MapFragment mapFragment = null;
+    private InfoBarUpdater infoBarUpdater;
     public MapUITools mapUITools;
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
@@ -82,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int defaultMapScale = 1;
 
-    private TimerStatusUpdater timerStatusUpdater;
+    private TimerStatusUpdater racingTimerStatusUpdater;
+    private InfoBarController infoBarController;
 
     private double latitude = 0;
     private double longitude = 0; // координаты для получения прогноза
@@ -119,12 +121,22 @@ public class MainActivity extends AppCompatActivity {
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
         mapManager = new MapManager(context);
 
-        timerStatusUpdater = new TimerStatusUpdater() {
+        racingTimerStatusUpdater = new TimerStatusUpdater() {
             @Override
             public void onTimerStatusUpdated(String timerStatus) {
-                racingTimerTV.setText(timerStatus);
+                Log.i("bugfix", "update info bar status: " + timerStatus);
+                infoBarController.updateTheBar(timerStatus);
+            }
+
+            @Override
+            public boolean isGpsConnected() {
+
+                if (longitude == 0) return false;
+                else return true;
             }
         };
+
+        infoBarController = new InfoBarController(racingTimerTV);
     }
 
     @Override
@@ -497,6 +509,7 @@ public class MainActivity extends AppCompatActivity {
     private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ". Activity race get new location ");
         double tempVelocity;
+        Log.i("bugfix", "location accuracy = " + location.getAccuracy());
 
         // TODO: прогноз открывается после получения локации? Нужно реализовать такой принцип, что
         //  если нет кординат, прогноз открывается для ранее использованной точки, а при
@@ -504,8 +517,14 @@ public class MainActivity extends AppCompatActivity {
         if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
             this.location = location;
             latitude = location.getLatitude();
+            Log.i("bugfix", "latitude = " + latitude);
+
             longitude = location.getLongitude();
-            if (timerFragment != null) racingTimerTV.setText("Go chase!");
+            infoBarController.onGpsConnected();
+            if (timerFragment != null) updateTheString("Go chase!");
+                //infoBarController.updateTheBar("1Go chase!");
+                //racingTimerStatusUpdater.onTimerStatusUpdated("Go chase!");
+            //if (timerFragment != null) racingTimerTV.setText("Go chase!");
         }
         latitude = location.getLatitude();
         longitude = location.getLongitude();
@@ -527,6 +546,11 @@ public class MainActivity extends AppCompatActivity {
         bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
         if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
         if (mapUITools != null) mapUITools.onBearingChanged(bearing);
+    }
+
+    void updateTheString (String nextString) {
+        Log.i("bugfix", "main Activity: ubdating the bar to string: " + nextString);
+        infoBarController.updateTheBar(nextString);
     }
 
     public void muteChangedStatus(boolean b) { // выключение звука пищалки
@@ -554,13 +578,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startRacingTimer() {
-        racingTimer = new RacingTimer(timerStatusUpdater);
+        racingTimer = new RacingTimer(racingTimerStatusUpdater);
         racingTimer.start();
     }
 
     public String getTracksPackage() {
         return tracksFolderAddress;
     }
+}
+
+interface InfoBarUpdater {
+    void updateInfoBarStatus (String infoBarStatus);
 }
 
 // TODO: сделать главное меню, где назначаем варианты определения ветра:
