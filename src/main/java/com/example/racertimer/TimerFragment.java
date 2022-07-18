@@ -59,11 +59,6 @@ public class TimerFragment extends Fragment {
                 timerResult.setText(timerStatus);
                 if (timerStatus.equals("00:00")) startRaceCloseTomer();
             }
-
-            @Override
-            public boolean isGpsConnected() {
-                return false;
-            }
         };
         startingProcedureTimer = new StartingProcedureTimer(startingTimerStatusUpdater, (MainActivity) getActivity());
         startingProcedureTimer.setTimerPeriod(10 * 60 * 1000);

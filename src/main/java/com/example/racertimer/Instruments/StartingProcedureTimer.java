@@ -102,13 +102,17 @@ public class StartingProcedureTimer extends MyTimer {
             case 4: voiceover.playSound(SOUND_ASSET_FOUR);
                 break;
             case 3: voiceover.playSound(SOUND_ASSET_THREE);
+                timerStatusUpdater.onTimerStatusUpdated("timer three");
                 break;
             case 2: voiceover.playSound(SOUND_ASSET_TWO);
+                timerStatusUpdater.onTimerStatusUpdated("timer two");
                 break;
             case 1: voiceover.playSound(SOUND_ASSET_ONE);
+                timerStatusUpdater.onTimerStatusUpdated("timer one");
                 break;
             case 0:
                 voiceover.playSound(SOUND_ASSET_START);
+                timerStatusUpdater.onTimerStatusUpdated("start");
                 break;
             default:
                 break;

@@ -127,16 +127,22 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("bugfix", "update info bar status: " + timerStatus);
                 infoBarController.updateTheBar(timerStatus);
             }
+        };
+
+        TextViewController infoBarTVInterface = new TextViewController() {
+            @Override
+            public void updateTextView(String nexText) {
+                if (timerFragment != null) racingTimerTV.setText(nexText);
+            }
 
             @Override
-            public boolean isGpsConnected() {
-
-                if (longitude == 0) return false;
-                else return true;
+            public String getTextFromView() {
+                return (String) racingTimerTV.getText();
             }
         };
 
-        infoBarController = new InfoBarController(racingTimerTV);
+        infoBarController = new InfoBarController(infoBarTVInterface);
+        infoBarController.greetings();
     }
 
     @Override
@@ -181,14 +187,14 @@ public class MainActivity extends AppCompatActivity {
                     if (timerFragment.isTimerRan()) stopTimerAlertDialog();
                     else {
                         undeployTimerFragment();
-                        racingTimerTV.setText("Go chase!");
+                        infoBarController.updateTheBar("ready to go");
                     }
                 } else { // timer = 0,
                     if (isRaceStarted) { // race = 1 : stop the race
                         tracksDataManager.initSavingRecordedTrack();
                     } else { // race = 0, timer = 0 : start the timer
                         deployTimerFragment();
-                        racingTimerTV.setText("GET READY!");
+                        infoBarController.updateTheBar("timer");
                     }
                 }
             }
@@ -520,11 +526,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i("bugfix", "latitude = " + latitude);
 
             longitude = location.getLongitude();
-            infoBarController.onGpsConnected();
-            if (timerFragment != null) updateTheString("Go chase!");
-                //infoBarController.updateTheBar("1Go chase!");
-                //racingTimerStatusUpdater.onTimerStatusUpdated("Go chase!");
-            //if (timerFragment != null) racingTimerTV.setText("Go chase!");
+            infoBarController.updateTheBar("gps");
         }
         latitude = location.getLatitude();
         longitude = location.getLongitude();

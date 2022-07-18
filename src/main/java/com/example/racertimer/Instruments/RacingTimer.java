@@ -14,16 +14,18 @@ public class RacingTimer extends MyTimer {
 
     @Override
     void onTimerTicked(long timerLeft) {
-        if (timerLeft < 2000) timerStatusUpdater.onTimerStatusUpdated("GO! GO! GO!!!");
-        else super.onTimerTicked(timerLeft);
+//        if (timerLeft < 2000) timerStatusUpdater.onTimerStatusUpdated("GO! GO! GO!!!");
+//        else
+            super.onTimerTicked(timerLeft);
     }
 
     @Override
     public void stop() {
         super.stop();
-        String timerStatusString = simpleDateFormat.format(timerLeft);
-        if (timerStatusUpdater.isGpsConnected())
-            timerStatusUpdater.onTimerStatusUpdated("last: "+timerStatusString);
-        else timerStatusUpdater.onTimerStatusUpdated("No GPS!");
+//        String timerStatusString = simpleDateFormat.format(timerLeft);
+        timerStatusUpdater.onTimerStatusUpdated("stop race");
+//        if (timerStatusUpdater.isGpsConnected())
+//            timerStatusUpdater.onTimerStatusUpdated("last: "+timerStatusString);
+//        else timerStatusUpdater.onTimerStatusUpdated("No GPS!");
     }
 }
