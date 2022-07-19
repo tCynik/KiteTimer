@@ -1,5 +1,5 @@
 package com.example.racertimer.Instruments;
 
-public interface TimerStatusUpdater {
+public interface InfoBarStatusUpdater {
     void onTimerStatusUpdated(String timerStatus);
 }

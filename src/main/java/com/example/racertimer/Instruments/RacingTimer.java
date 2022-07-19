@@ -1,10 +1,12 @@
 package com.example.racertimer.Instruments;
 
+import com.example.racertimer.MainActivity;
+
 import java.util.Date;
 
 public class RacingTimer extends MyTimer {
-    public RacingTimer(TimerStatusUpdater timerStatusUpdater) {
-        super(timerStatusUpdater, 10, 0, "mm:ss.SS");
+    public RacingTimer(MainActivity mainActivity, InfoBarStatusUpdater infoBarStatusUpdater) {
+        super(mainActivity, infoBarStatusUpdater, 10, 0, "mm:ss.SS");
     }
 
     @Override
@@ -14,18 +16,12 @@ public class RacingTimer extends MyTimer {
 
     @Override
     void onTimerTicked(long timerLeft) {
-//        if (timerLeft < 2000) timerStatusUpdater.onTimerStatusUpdated("GO! GO! GO!!!");
-//        else
             super.onTimerTicked(timerLeft);
     }
 
     @Override
     public void stop() {
         super.stop();
-//        String timerStatusString = simpleDateFormat.format(timerLeft);
-        timerStatusUpdater.onTimerStatusUpdated("stop race");
-//        if (timerStatusUpdater.isGpsConnected())
-//            timerStatusUpdater.onTimerStatusUpdated("last: "+timerStatusString);
-//        else timerStatusUpdater.onTimerStatusUpdated("No GPS!");
+        infoBarStatusUpdater.onTimerStatusUpdated("stop race");
     }
 }

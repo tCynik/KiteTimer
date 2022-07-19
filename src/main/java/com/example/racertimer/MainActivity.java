@@ -38,7 +38,7 @@ import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
-import com.example.racertimer.Instruments.TimerStatusUpdater;
+import com.example.racertimer.Instruments.InfoBarStatusUpdater;
 import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
@@ -83,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int defaultMapScale = 1;
 
-    private TimerStatusUpdater racingTimerStatusUpdater;
-    private InfoBarController infoBarController;
+    private InfoBarStatusUpdater infoBarStatusUpdater;
+    private InfoBarPresenter infoBarPresenter;
 
     private double latitude = 0;
     private double longitude = 0; // координаты для получения прогноза
@@ -121,18 +121,17 @@ public class MainActivity extends AppCompatActivity {
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
         mapManager = new MapManager(context);
 
-        racingTimerStatusUpdater = new TimerStatusUpdater() {
+        infoBarStatusUpdater = new InfoBarStatusUpdater() {
             @Override
             public void onTimerStatusUpdated(String timerStatus) {
-                Log.i("bugfix", "update info bar status: " + timerStatus);
-                infoBarController.updateTheBar(timerStatus);
+                infoBarPresenter.updateTheBar(timerStatus);
             }
         };
 
         TextViewController infoBarTVInterface = new TextViewController() {
             @Override
             public void updateTextView(String nexText) {
-                if (timerFragment != null) racingTimerTV.setText(nexText);
+                racingTimerTV.setText(nexText);
             }
 
             @Override
@@ -141,8 +140,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        infoBarController = new InfoBarController(infoBarTVInterface);
-        infoBarController.greetings();
+        infoBarPresenter = new InfoBarPresenter(infoBarTVInterface);
+        infoBarPresenter.greetings();
     }
 
     @Override
@@ -187,14 +186,14 @@ public class MainActivity extends AppCompatActivity {
                     if (timerFragment.isTimerRan()) stopTimerAlertDialog();
                     else {
                         undeployTimerFragment();
-                        infoBarController.updateTheBar("ready to go");
+                        infoBarPresenter.updateTheBar("ready to go");
                     }
                 } else { // timer = 0,
                     if (isRaceStarted) { // race = 1 : stop the race
                         tracksDataManager.initSavingRecordedTrack();
                     } else { // race = 0, timer = 0 : start the timer
                         deployTimerFragment();
-                        infoBarController.updateTheBar("timer");
+                        infoBarPresenter.updateTheBar("timer");
                     }
                 }
             }
@@ -325,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.replace(R.id.fr_menu_place, tracksMenuFragment);
         fragmentTransaction.commit();
         menuPlace.setVisibility(View.VISIBLE);
+        infoBarPresenter.updateTheBar("timer");
     }
 
     public void undeployTracksMenu(){
@@ -335,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
         btnStopStartTimerAndStopRace.setText("NEW RACE");
         timerFragment.stopTheTimer();
         timerFragment = null;
+        //infoBarPresenter.updateTheBar("cancel race");
         findViewById(R.id.timer_container).setVisibility(View.INVISIBLE);
     }
 
@@ -526,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i("bugfix", "latitude = " + latitude);
 
             longitude = location.getLongitude();
-            infoBarController.updateTheBar("gps");
+            infoBarPresenter.updateTheBar("gps");
         }
         latitude = location.getLatitude();
         longitude = location.getLongitude();
@@ -550,11 +551,6 @@ public class MainActivity extends AppCompatActivity {
         if (mapUITools != null) mapUITools.onBearingChanged(bearing);
     }
 
-    void updateTheString (String nextString) {
-        Log.i("bugfix", "main Activity: ubdating the bar to string: " + nextString);
-        infoBarController.updateTheBar(nextString);
-    }
-
     public void muteChangedStatus(boolean b) { // выключение звука пищалки
         sailingToolsFragment.muteChangedStatus(b);
     }
@@ -575,13 +571,19 @@ public class MainActivity extends AppCompatActivity {
         sailingToolsFragment.startTheRace();
         isRaceStarted = true;
         undeployTimerFragment();
+        infoBarPresenter.unlockTheBar();
+        infoBarPresenter.updateTheBar("start");
         btnStopStartTimerAndStopRace.setText("STOP RACE");
         startRacingTimer();
     }
 
     private void startRacingTimer() {
-        racingTimer = new RacingTimer(racingTimerStatusUpdater);
+        racingTimer = new RacingTimer(this, infoBarStatusUpdater);
         racingTimer.start();
+    }
+
+    public void onStartingTimerPeriodChanged (String nextStatus) {
+        infoBarPresenter.updateTheBar(nextStatus);
     }
 
     public String getTracksPackage() {

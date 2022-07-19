@@ -33,8 +33,8 @@ public class StartingProcedureTimer extends MyTimer {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss");
     TimerVoiceover voiceover;
 
-    public StartingProcedureTimer(TimerStatusUpdater timerStatusUpdater, MainActivity mainActivity) {
-        super(timerStatusUpdater, 1000, 60, "mm:ss"); // период обновления счетчика 1 секунда
+    public StartingProcedureTimer(MainActivity mainActivity, InfoBarStatusUpdater infoBarStatusUpdater) {
+        super(mainActivity, infoBarStatusUpdater, 1000, 60, "mm:ss"); // период обновления счетчика 1 секунда
         voiceover = new TimerVoiceover(mainActivity);
     }
 
@@ -47,7 +47,7 @@ public class StartingProcedureTimer extends MyTimer {
         startedTime = Calendar.getInstance().getTime();
         this.currentTimePeriod = currentTimerSize;
         String timerStatusString = simpleDateFormat.format(currentTimerSize);
-        timerStatusUpdater.onTimerStatusUpdated(timerStatusString);
+        infoBarStatusUpdater.onTimerStatusUpdated(timerStatusString);
         voiceoverTimerStatus(currentTimerSize);
     }
 
@@ -102,17 +102,16 @@ public class StartingProcedureTimer extends MyTimer {
             case 4: voiceover.playSound(SOUND_ASSET_FOUR);
                 break;
             case 3: voiceover.playSound(SOUND_ASSET_THREE);
-                timerStatusUpdater.onTimerStatusUpdated("timer three");
+                mainActivity.onStartingTimerPeriodChanged("timer three");
                 break;
             case 2: voiceover.playSound(SOUND_ASSET_TWO);
-                timerStatusUpdater.onTimerStatusUpdated("timer two");
+                mainActivity.onStartingTimerPeriodChanged("timer two");
                 break;
             case 1: voiceover.playSound(SOUND_ASSET_ONE);
-                timerStatusUpdater.onTimerStatusUpdated("timer one");
+                mainActivity.onStartingTimerPeriodChanged("timer one");
                 break;
             case 0:
                 voiceover.playSound(SOUND_ASSET_START);
-                timerStatusUpdater.onTimerStatusUpdated("start");
                 break;
             default:
                 break;
