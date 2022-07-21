@@ -148,8 +148,6 @@ public class SailingToolsFragment extends Fragment {
             Log.i(PROJECT_LOG_TAG, " voiceover was unmuted, VMG = "+velocityMadeGood+", last VMG = "+lastVMG);
             makeBeeping();
         }
-        // обновляем переменную
-        // пищим/не пищим
     }
 
     /**

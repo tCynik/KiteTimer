@@ -516,7 +516,6 @@ public class MainActivity extends AppCompatActivity {
     private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ". Activity race get new location ");
         double tempVelocity;
-        Log.i("bugfix", "location accuracy = " + location.getAccuracy());
 
         // TODO: прогноз открывается после получения локации? Нужно реализовать такой принцип, что
         //  если нет кординат, прогноз открывается для ранее использованной точки, а при
@@ -524,14 +523,16 @@ public class MainActivity extends AppCompatActivity {
         if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
             this.location = location;
             latitude = location.getLatitude();
-            Log.i("bugfix", "latitude = " + latitude);
 
             longitude = location.getLongitude();
             infoBarPresenter.updateTheBar("gps");
+            //TODO: for now the latitude/longitude are unuseful. think about to replace it on single boolean
         }
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
-        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
+//        else {
+//            latitude = location.getLatitude();
+//            longitude = location.getLongitude();
+//        }
+//        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 
 
         if (location.hasSpeed()) {
