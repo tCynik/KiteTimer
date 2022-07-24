@@ -1,7 +1,9 @@
-package com.example.racertimer.Instruments;
+package com.example.racertimer.windDirection;
 
 import android.location.Location;
 import android.util.Log;
+
+import com.example.racertimer.Instruments.CoursesCalculator;
 
 import java.util.Arrays;
 
@@ -12,9 +14,10 @@ import java.util.Arrays;
  * пересчет направления ветра работает все время пока идем галсами апвинд. При переходе в даунвинд расчет прекращается
  * для корректной работы требуется исходное значение ветра
  */
-public class WindByCompare {
+public class WindByCompareManager {
     private final static String PROJECT_LOG_TAG = "racer_timer_windCompare";
 
+    public WindChangeCalculator windChangeCalculator;
     private int windDirection; // направление ветра
     private int lastNumberOfTack = 0; // последний номер галса: 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
     private WindChangedHerald windChangedHerald; // экземпляр интерфейса для отправки измененного направления
@@ -29,11 +32,12 @@ public class WindByCompare {
     private static final int TACK_LEFT_DOWNWIND = 4;
 
 
-    public WindByCompare (int windDirection, WindChangedHerald windChangedHerald) {
+    public WindByCompareManager(int windDirection, WindChangedHerald windChangedHerald) {
         this.windChangedHerald = windChangedHerald;
         this.windDirection = windDirection;
         maxTackVMG = new int[2]; // обьявляем массив для хранения максимальных данных
         tackVMGsBearings = new int[2];
+        windChangeCalculator = new WindChangeCalculator();
     }
 
     public void setWindDirection (int windDirection) {
@@ -62,9 +66,8 @@ public class WindByCompare {
         if (numberOfTack == TACK_LEFT_UPWIND || numberOfTack == TACK_RIGHT_UPWIND) { // если речь о бейдевинде, анализируем ВМГ на предмет максимума
             int velocity = (int) (location.getSpeed() * 3.6); // в км/ч
             int velocityMadeGood = CoursesCalculator.VMGByWindBearingVelocity(windDirection, bearing, velocity);
-
-            // максималка для данного галса при скорости выше 12 кмч
-            if ( velocityMadeGood > maxTackVMG[(numberOfTack - 2)] & velocity > 12) {
+            // определяем максималку для данного галса при скорости выше 12 кмч
+            if (velocityMadeGood > maxTackVMG[(numberOfTack - 2)] & velocity > 12) {
                 Log.i("racer_timer_wind_compare", " max VMG on course "+numberOfTack+" changed. Old = "+maxTackVMG[numberOfTack - 2]+", new = "+ velocityMadeGood);
                 maxTackVMG[numberOfTack - 2] = velocityMadeGood; // обновляем максимум. номера галсов 2 и 3, переводим в 0 и 1
                 tackVMGsBearings[numberOfTack - 2] = bearing;
@@ -78,13 +81,15 @@ public class WindByCompare {
      * если курс меняется на бейдевинд, увеличиваем счетчик
      */
     private void onTackChanged() { // если у нас изменился номер курса
-        Log.d("debug", "the tack was changed, now counter is" + upwindTackChangedCounter);
+        Log.i("racer_timer_wind_compare", "the tack was changed, now counter is" + upwindTackChangedCounter);
         if (upwindTackChangedCounter > 2) calculateWindDirection();
         renewCounterByChangedTack();
     }
 
     private void calculateWindDirection () {
         int updatedWindDirection;
+
+
         // определяем разницу между углами. если правый бейдевинд больше левого, угол положительный
         int angleDiffs = CoursesCalculator.diffAngles(tackVMGsBearings[0], tackVMGsBearings[1]);
 
@@ -117,6 +122,7 @@ public class WindByCompare {
 
     private void renewCounterByChangedTack() {
         if (lastNumberOfTack == TACK_LEFT_DOWNWIND || lastNumberOfTack == TACK_RIGHT_DOWNWIND) { // если курс изменился на бакштаг
+            Log.i("racer_timer_wind_compare", "the tack is downwind, setting counter to 0" );
             upwindTackChangedCounter = 0; // обнуляем счетчик галсов против ветра
             Arrays.fill(maxTackVMG, 0); // очищаем массив скоростей
         } else upwindTackChangedCounter++; // если не на бакштаг, считаем количество измененных курсов
@@ -135,4 +141,40 @@ public class WindByCompare {
 //       - меню с вариантами выбора методов расчета ветра
 //       - запуск расчета ветра вручную либо во время гонки (после окончания таймера)
 
+class WindChangeCalculator {
+    int maxVmgRight = 0;
+    int maxVmgLeft = 0;
+    int leftBearing = 0;
+    int rightBearing = 0;
 
+    public void setUpwindStatistics(int maxVmgRight, int maxVmgLeft, int rightBearing, int leftBearing) {
+        this.maxVmgRight = maxVmgRight;
+        this.maxVmgLeft = maxVmgLeft;
+        this.rightBearing = rightBearing;
+        this.leftBearing = leftBearing;
+    }
+
+    public int calculateCurrentWindDir () {
+        int updatedWindDirection;
+        // определяем разницу между углами. если правый бейдевинд больше левого, угол положительный
+        int angleDiffs = CoursesCalculator.diffAngles(rightBearing, leftBearing);
+        if (maxVmgRight > maxVmgLeft) { // если ВМГ в правом бакштаге больше чем в левом
+            // в таком случае напр ветра нужно сместить против часовой (уменьшить)
+            int rateVMGs = maxVmgLeft * 100 / maxVmgRight; // соотношение ВМГ меньшего к большему
+            int windDirCorrection = (int) angleDiffs * rateVMGs / 100; // насколько корректируем напр ветра
+            Log.i("racer_timer_wind_compare", " max VMG right = "+maxVmgRight+", max VMG left = "+maxVmgLeft );
+            updatedWindDirection = rightBearing + windDirCorrection; // уменьшаем направление ветра
+            Log.i("racer_timer_wind_compare", " wind correction1: rate = "+rateVMGs+", windDirCirrection = "+windDirCorrection+", wind dir = "+updatedWindDirection);
+        } else { // если ВМГ в левом бакштаге больше чем в правом
+            // напр ветра нужно сместить по часовой (увеличить)
+            int rateVMGs = maxVmgRight * 100 / maxVmgLeft; // соотношение ВМГ большего к меньшему
+            int windDirCorrection = (int) angleDiffs * rateVMGs / 100; // насколько корректируем напр ветра
+            Log.i("racer_timer_wind_compare", " max VMG right = "+maxVmgRight+", max VMG left = "+maxVmgLeft);
+            updatedWindDirection = leftBearing + windDirCorrection; // увеличиваем направление ветра
+            Log.i("racer_timer_wind_compare", " wind correction2: rate = "+rateVMGs+", windDirCirrection = "+windDirCorrection+", wind dir = "+updatedWindDirection);
+        }
+        return updatedWindDirection;
+    }
+
+
+}

@@ -112,6 +112,9 @@ public class MainActivity extends AppCompatActivity {
         setClickListeners();
 
         windDirection = 202;
+        // TODO: при первом запуске приходится вручную обновлять установленный ветер. Нужно чтобы
+        //  это происходило автоматически. + установка ветра при первом включении как в прошлый
+        //  раз или если есть сеть - по прогнозу
 
         voiceover = new BeepSounds(context);
         sailingToolsFragment.setVoiceover(voiceover);

@@ -1,8 +1,10 @@
-package com.example.racertimer.Instruments;
+package com.example.racertimer.windDirection;
 
 import android.location.Location;
 import android.os.CountDownTimer;
 import android.util.Log;
+
+import com.example.racertimer.Instruments.CoursesCalculator;
 
 import java.util.Arrays;
 import java.util.Timer;
