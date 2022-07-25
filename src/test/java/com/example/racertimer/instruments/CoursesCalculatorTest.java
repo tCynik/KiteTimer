@@ -170,5 +170,38 @@ public class CoursesCalculatorTest {
         assertEquals(result, CoursesCalculator.diffAngles(angleFirst, angleSecond));
     }
 
+    /** направление ветра по двум бейдеиндам */
+    @Test
+    public void windBetweenTwoUpwindsCross360 () {
+        int bearing1 = 350;
+        int bearing2 = 30;
+        int result = 10;
+        assertEquals(result, CoursesCalculator.windBetweenTwoUpwinds(bearing1, bearing2));
+    }
+
+    @Test
+    public void windBetweenTwoUpwindsCross360Contrary () {
+        int bearing2 = 350;
+        int bearing1 = 30;
+        int result = 10;
+        assertEquals(result, CoursesCalculator.windBetweenTwoUpwinds(bearing1, bearing2));
+    }
+
+    @Test
+    public void windBetweenTwoUpwindsDirect () {
+        int bearing1 = 60;
+        int bearing2 = 100;
+        int result = 80;
+        assertEquals(result, CoursesCalculator.windBetweenTwoUpwinds(bearing1, bearing2));
+    }
+
+    @Test
+    public void windBetweenTwoUpwindsContrary () {
+        int bearing2 = 60;
+        int bearing1 = 100;
+        int result = 80;
+        assertEquals(result, CoursesCalculator.windBetweenTwoUpwinds(bearing1, bearing2));
+    }
+
 
 }

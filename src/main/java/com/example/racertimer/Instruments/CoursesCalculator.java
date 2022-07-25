@@ -102,7 +102,7 @@ public class CoursesCalculator {
         return resultCourse;
     }
 
-    /** вычисление наименьшего угла между двумы лучами с учотом возможного перехода через 0
+    /** вычисление наименьшего угла между двумя лучами с учетом возможного перехода через 0
      * Считаем по часовой стрелке от 1 ко 2. положительная разница - по часовой, отрицательная - против часовой */
     public static int diffAngles (int angleFirst, int angleSecond) {
         int directDiff = angleSecond - angleFirst; // прямая разница
@@ -112,6 +112,29 @@ public class CoursesCalculator {
             directDiff = angleSecond + (360 - angleFirst); // получаем положительное значение
         }
         return directDiff;
+    }
+
+    /** вычисление напрвления ветра между двумя бейдевиндами */
+    public static int windBetweenTwoUpwinds(int bearing1, int bearing2) {
+        int windDirection;
+        int biggerBearing, smallerBearing;
+
+        if (bearing1 > bearing2) {
+            biggerBearing = bearing1;
+            smallerBearing = bearing2;
+        }
+        else {
+            biggerBearing = bearing2;
+            smallerBearing = bearing1;
+        }
+
+        int directDiff = biggerBearing - smallerBearing;
+        if (directDiff > 180) { // обработка перехода через 0
+            directDiff = 360 - directDiff;
+            windDirection = smallerBearing - directDiff/2;
+        } else windDirection = smallerBearing + directDiff/2;
+
+        return windDirection;
     }
 
 }
