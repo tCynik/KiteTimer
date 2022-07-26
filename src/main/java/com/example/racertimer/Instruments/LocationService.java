@@ -17,7 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import com.example.racertimer.windDirection.WindByCompareManager;
+import com.example.racertimer.windDirection.WindCalcByCompareManager;
 import com.example.racertimer.windDirection.WindByStatistics;
 import com.example.racertimer.windDirection.WindChangedHerald;
 
@@ -49,7 +49,7 @@ public class LocationService extends Service {
     private Intent intent; // интент для отправки сообщений из данного сервиса
 
     private WindByStatistics windByStatistics;
-    private WindByCompareManager windByCompareManager;
+    private WindCalcByCompareManager windCalcByCompareManager;
     public MyBinder binder = new MyBinder();
 
     public LocationService() {
@@ -92,7 +92,7 @@ public class LocationService extends Service {
                 windByStatistics = new WindByStatistics(5, windChangedHerald);
                 break;
             case CALCULATE_BY_VMG_COMPARE:
-                windByCompareManager = new WindByCompareManager(202, windChangedHerald);
+                windCalcByCompareManager = new WindCalcByCompareManager(202, windChangedHerald);
                 break;
         }
     }
@@ -130,7 +130,7 @@ public class LocationService extends Service {
                 windByStatistics.onLocationChanged(location);
                 break;
             case CALCULATE_BY_VMG_COMPARE:
-                windByCompareManager.onLocationChanged(location);
+                windCalcByCompareManager.onLocationChanged(location);
                 break;
         }
     }

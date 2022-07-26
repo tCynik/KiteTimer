@@ -2,25 +2,30 @@ package com.example.racertimer.windDirection;
 
 import android.location.Location;
 
-public class CompareRoughCalculator {
+import com.example.racertimer.Instruments.CoursesCalculator;
+
+public class CompareRoughCalculator extends WindByCompareCalculator{
     private Location lastLocation;
     private Location locationA, locationB; // расчеты ведутся для двух отрезков:
     // отрезок А-В, и отрезок В-"текущая точка"
-    private int bearingFirstSegment, bearingSecondSegment = 1000;
+    private int bearingSegmentAB, bearingSegmentBC = 1000;
 
-    boolean firstSegmentFinished = false;
+    boolean segmentAB_IsFinished = false;
 
+    public CompareRoughCalculator(CalculatedWindUpdater calculatedWindUpdater) {
+        super(calculatedWindUpdater);
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
-        if (locationA == null) locationA = location;
-        else
-            if (locationB == null & firstSegmentFinished == true) {
-                locationB = location;
-                bearingFirstSegment = (int) locationA.bearingTo(locationB);
+        if (locationA == null) locationA = location; // first got location
+        else {
+            if (segmentAB_IsFinished) {
+                bearingSegmentBC = (int) locationB.bearingTo(location);
+                int windDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingSegmentAB, bearingSegmentBC);
+                onWindCalculated(windDirection);
             }
-            else {
-                bearingSecondSegment = (int) locationB.bearingTo(location);
-            }
-        if (bearingSecondSegment != 1000) calculateWindDirection();
+        }
     }
 
     private void calculateWindDirection() {
@@ -28,7 +33,11 @@ public class CompareRoughCalculator {
     }
 
     public void onTackChanged(Location location) {
-        firstSegmentFinished = true;
+        if (! segmentAB_IsFinished) {
+            segmentAB_IsFinished = true;
+            locationB = location;
+            bearingSegmentAB = (int) locationA.bearingTo(locationB);
+        }
     }
 
 }

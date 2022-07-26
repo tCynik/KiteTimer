@@ -116,7 +116,7 @@ public class CoursesCalculator {
 
     /** вычисление напрвления ветра между двумя бейдевиндами */
     public static int windBetweenTwoUpwinds(int bearing1, int bearing2) {
-        int windDirection;
+        int windDirection = 1000;
         int biggerBearing, smallerBearing;
 
         if (bearing1 > bearing2) {

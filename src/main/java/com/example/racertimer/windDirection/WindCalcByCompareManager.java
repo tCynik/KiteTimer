@@ -14,23 +14,24 @@ import java.util.Arrays;
  * пересчет направления ветра работает все время пока идем галсами апвинд. При переходе в даунвинд расчет прекращается
  * для корректной работы требуется исходное значение ветра
  */
-public class WindByCompareManager {
+public class WindCalcByCompareManager {
     private final static String PROJECT_LOG_TAG = "racer_timer_windCompare";
 
     private final int EMPTY = 0;
     private final int WIND_DEFAULT = 1; // дефолтное или выставлено вручную или продгруженное вчерашнее
-    private final int WIND_FIRST = 2;   // рассчитанно грубо или загруженное сегодняшнее
+    private final int WIND_ROUGH = 2;   // рассчитанно грубо или загруженное сегодняшнее
     private final int WIND_DYNAMIC = 3;  // текущее, высчитано динамически
 
     private int windStatus = EMPTY;
     private int managerWorkStatus = EMPTY;
 
     private CompareRoughCalculator compareRoughCalculator;
-    private DynamicCalculator dynamicCalculator;
+    private CompareDynamicCalculator compareDynamicCalculator;
     public WindChangeCalculator windChangeCalculator;
     private int windDirection; // направление ветра
     private int lastNumberOfTack = 0; // последний номер галса: 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
     private WindChangedHerald windChangedHerald; // экземпляр интерфейса для отправки измененного направления
+    private CalculatedWindUpdater roughWindUpdater, dynamicWindUpdater;
 
     private int[] maxTackVMG, tackVMGsBearings;
     private int bearingLastMaxVMG; // курс, при котором зафиксирован максимальный ВМГ
@@ -42,13 +43,26 @@ public class WindByCompareManager {
     private static final int TACK_LEFT_DOWNWIND = 4;
 
 
-    public WindByCompareManager(int windDirection, WindChangedHerald windChangedHerald) {
+    public WindCalcByCompareManager(int windDirection, WindChangedHerald windChangedHerald) {
         this.windChangedHerald = windChangedHerald;
         // TODO: убрать выставление ветра в конструкторе
         this.windDirection = windDirection;
         maxTackVMG = new int[2]; // обьявляем массив для хранения максимальных данных
         tackVMGsBearings = new int[2];
         windChangeCalculator = new WindChangeCalculator();
+        //TODO: вынести в отдельные методы создание интефейса и создание калькуляторов
+        roughWindUpdater = new CalculatedWindUpdater() {
+            @Override
+            public void windIsCalculated(int calculatedWind) {
+                updateWindDirectionCalculatedRough(calculatedWind);
+            }
+        };
+        dynamicWindUpdater = new CalculatedWindUpdater() {
+            @Override
+            public void windIsCalculated(int calculatedWind) {
+                updateWindDirectionCalculatedDynamic(calculatedWind);
+            }
+        };
     }
 
     public void setWindDirection (int windDirection) {
@@ -58,9 +72,21 @@ public class WindByCompareManager {
         windStatus = WIND_DEFAULT;
     }
 
+    private void updateWindDirectionCalculatedRough(int windDirection) {
+        this.windDirection = windDirection;
+        windChangedHerald.onWindDirectionChanged(windDirection); // отправляем сообщение с новым значением
+        windStatus = WIND_ROUGH;
+    }
+
+    private void updateWindDirectionCalculatedDynamic(int windDirection) {
+        this.windDirection = windDirection;
+        windChangedHerald.onWindDirectionChanged(windDirection); // отправляем сообщение с новым значением
+        windStatus = WIND_DYNAMIC;
+    }
+
     public void startCalculating() {
         if (windStatus == WIND_DEFAULT) makeRoughCalculating();
-        else makeDynamicCalculayting();
+        else makeDynamicCalculating(windDirection);
     }
 
     public void endCalculating() {
@@ -68,12 +94,24 @@ public class WindByCompareManager {
     }
 
     private void makeRoughCalculating() {
-        compareRoughCalculator = new CompareRoughCalculator();
-        managerWorkStatus = WIND_FIRST;
+        CalculatedWindUpdater roughWindUpdater = new CalculatedWindUpdater() {
+            @Override
+            public void windIsCalculated(int calculatedWind) {
+                updateWindDirectionCalculatedRough(calculatedWind);
+            }
+        };
+        compareRoughCalculator = new CompareRoughCalculator(roughWindUpdater);
+        managerWorkStatus = WIND_ROUGH;
     }
 
-    private void makeDynamicCalculayting() {
-        dynamicCalculator = new DynamicCalculator();
+    private void makeDynamicCalculating(int windDirection) {
+        CalculatedWindUpdater dynamicWindUpdater = new CalculatedWindUpdater() {
+            @Override
+            public void windIsCalculated(int calculatedWind) {
+                updateWindDirectionCalculatedDynamic(calculatedWind);
+            }
+        };
+        compareDynamicCalculator = new CompareDynamicCalculator(dynamicWindUpdater, windDirection);
         managerWorkStatus = WIND_DYNAMIC;
     }
 
@@ -83,26 +121,28 @@ public class WindByCompareManager {
      * смотрим, меняется ли галс. Если галс в бейдевинд, для каждого направления находим максимум ВМГ и курс при этом максимуме
      */
     public void onLocationChanged (Location location) { // прием новых данных по геолокации
-        int tack = CoursesCalculator.numberOfTack(windDirection, (int) location.getBearing());
-        checkTackChanging(tack);
+        int numberOfTack = CoursesCalculator.numberOfTack(windDirection, (int) location.getBearing());
+        if (checkTackChanging(numberOfTack)) onTackChanged(numberOfTack, location);
 
         switch (managerWorkStatus) {
-            case WIND_FIRST:
+            case WIND_ROUGH:
                 compareRoughCalculator.onLocationChanged(location);
                 break;
             case WIND_DYNAMIC:
-                dynamicCalculator.onLocationChanged(location, tack);
+                compareDynamicCalculator.onLocationChanged(location, numberOfTack);
                 break;
             default: break;
         }
     }
 
-    private void checkTackChanging(int numberOfTack) {
+    private boolean checkTackChanging(int numberOfTack) {
+        boolean tackIsChanged = false;
         if (numberOfTack != lastNumberOfTack) { // если новый галс не равен прежнему
             Log.i("racer_timer_wind_compare", " tack was changed from "+lastNumberOfTack+" to "+numberOfTack);
             lastNumberOfTack = numberOfTack; // переприсваиваем номер галса
-            onTackChanged(numberOfTack);
+            tackIsChanged = true;
         }
+        return tackIsChanged;
     }
 
     /** обработчик при изменений курса
@@ -112,13 +152,13 @@ public class WindByCompareManager {
      */
     private void onTackChanged(int tack, Location location) { // если у нас изменился номер курса
         switch (managerWorkStatus) {
-            case WIND_FIRST:
+            case WIND_ROUGH:
                 if (upwindTackChangedCounter < 2) compareRoughCalculator.onTackChanged(location);
                 else switchToDynamicCalc();
                 calculateWindDirection();
                 break;
             case WIND_DYNAMIC:
-                dynamicCalculator.onTackChanged(location);
+                compareDynamicCalculator.onTackChanged(tack);
                 break;
             default: break;
         }
