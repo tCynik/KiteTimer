@@ -11,8 +11,8 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import com.example.racertimer.MainActivity;
 import com.example.racertimer.R;
+import com.example.racertimer.windDirection.WindChangedHerald;
 
 /** класс ручного ввода направления ветра через диалоговое окно */
 public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
@@ -25,10 +25,12 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
     private SeekBar seekbarWind; // бар настройки ветра
     private Button buttonIncrease, buttonDecrease;
 
+    private WindChangedHerald windChangedHerald;
 
-    public ManuallyWind (Context context, int windDirection) {
+    public ManuallyWind (Context context, int windDirection, WindChangedHerald windChangedHerald) {
         this.context = context;
         this.windDirection = windDirection;
+        this.windChangedHerald = windChangedHerald;
         windDialogLayoutInflater = LayoutInflater.from(context);
         windDialogView = windDialogLayoutInflater.inflate(R.layout.manually_input_wind, null);
         inputText = windDialogView.findViewById(R.id.edit_wind);
@@ -82,8 +84,9 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
                         }
 
                         if (windDirection != 10000) { // если есть новые данные, передаем в активити
-                            MainActivity mainActivity = (MainActivity) context;
-                            mainActivity.onWindDirectionChanged(windDirection);
+                            windChangedHerald.onWindDirectionChanged(windDirection);
+//                            MainActivity mainActivity = (MainActivity) context;
+//                            mainActivity.onWindDirectionChanged(windDirection);
                         }
                     }
                 })

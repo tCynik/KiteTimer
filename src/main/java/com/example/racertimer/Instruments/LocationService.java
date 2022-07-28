@@ -44,6 +44,8 @@ public class LocationService extends Service {
     private LocationManager locationManager;
     private LocationListener locationListener;
 
+    private int windDirection = 10000;
+
     WindChangedHerald windChangedHerald; // интерфейс для передачи данных в класс хранения и расчета статистических данных
 
     private Intent intent; // интент для отправки сообщений из данного сервиса
@@ -92,7 +94,8 @@ public class LocationService extends Service {
                 windByStatistics = new WindByStatistics(5, windChangedHerald);
                 break;
             case CALCULATE_BY_VMG_COMPARE:
-                windCalcByCompareManager = new WindCalcByCompareManager(202, windChangedHerald);
+                windCalcByCompareManager = new WindCalcByCompareManager(windChangedHerald, windDirection);
+                windCalcByCompareManager.setWindDirection(202);
                 break;
         }
     }
@@ -189,6 +192,10 @@ public class LocationService extends Service {
         return windByStatistics.getWindDirection();
     }
 
+    public void setWindDirection () {
+        // TODO: реализовать передачу сюда напрвления ветра, загруженного из памяти,
+        //  взятого из интернета, либо установленного вручную.
+    }
 
     public void updateWindDirection () {
         Log.i("racer_timer", "manually sending actual wind direction " );

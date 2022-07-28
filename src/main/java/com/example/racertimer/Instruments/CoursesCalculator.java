@@ -1,16 +1,12 @@
 package com.example.racertimer.Instruments;
 
+import com.example.racertimer.windDirection.TackDirection;
+
 /** класс для выполнения различных вычислений с курсами и углами
     целиком покрывается тестами
  */
 
 public class CoursesCalculator {
-    // 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
-    private static final int TACK_RIGHT_DOWNWIND = 1;
-    private static final int TACK_RIGHT_UPWIND = 2;
-    private static final int TACK_LEFT_UPWIND = 3;
-    private static final int TACK_LEFT_DOWNWIND = 4;
-
 
     /** приведение заданного угла к интервалу от 0 до 359 (360 = 0) */
     public static int convertAngleFrom0To360(int angle) {
@@ -47,12 +43,12 @@ public class CoursesCalculator {
     }
 
     /** расчет номера галса по четвертям */
-    public static int numberOfTack (int windDir, int bearing) { // определение номера галса
+    public static TackDirection numberOfTack (int windDir, int bearing) { // определение номера галса
         int windCourseAngle = calcWindCourseAngle(windDir, bearing);
-        if (windCourseAngle > 90) return TACK_LEFT_DOWNWIND; // если больше 90 - левый бакштаг
-        else if (windCourseAngle > 0) return TACK_LEFT_UPWIND; // если от 0 до 90 - левый бейдевинд
-            else if (windCourseAngle < -90) return TACK_RIGHT_DOWNWIND; // если меньше -90 - правый бакштаг
-                else return TACK_RIGHT_UPWIND; // в ином случае (не болььше 0 и не меньше -90 - правый бейдевинд
+        if (windCourseAngle > 90) return TackDirection.DOWNWIND_LEFT; // если больше 90 - левый бакштаг
+        else if (windCourseAngle > 0) return TackDirection.UPWIND_LEFT; // если от 0 до 90 - левый бейдевинд
+            else if (windCourseAngle < -90) return TackDirection.DOWNWIND_RIGHT; // если меньше -90 - правый бакштаг
+                else return TackDirection.UPWIND_RIGHT; // в ином случае (не болььше 0 и не меньше -90 - правый бейдевинд
     }
 
     /** расчет ВМГ по ветру, курсу, и скорости */

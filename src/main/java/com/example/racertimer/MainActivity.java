@@ -47,6 +47,7 @@ import com.example.racertimer.multimedia.BeepSounds;
 import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
+import com.example.racertimer.windDirection.WindChangedHerald;
 
 import java.util.ArrayList;
 
@@ -100,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection serviceConnection;
     private Binder binder;
 
+    private WindChangedHerald windChangedHerald;
+
     private Context context;
 
     @Override
@@ -121,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
         createLocationService();
 
+        windChangedHerald = initWindChangeHerald();
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
         mapManager = new MapManager(context);
 
@@ -201,6 +205,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private WindChangedHerald initWindChangeHerald() {
+        return new WindChangedHerald() {
+            @Override
+            public void onWindDirectionChanged(int updatedWindDirection) {
+                windDirection = updatedWindDirection;
+                sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
+                if (mapUITools != null) {
+                    Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+updatedWindDirection);
+                    mapUITools.setWindArrowDirection(updatedWindDirection);
+                }
+                // TODO: move windDirection into location service
+            }
+        };
     }
 
     private void stopTimerAlertDialog() {
@@ -511,7 +530,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void manuallyWindManager () { // установка направления ветра вручную
         Log.i("racer_timer_activity_race", " starting manually setting wind  ");
-        ManuallyWind manuallyWind = new ManuallyWind(this, windDirection);
+        ManuallyWind manuallyWind = new ManuallyWind(this, windDirection, windChangedHerald);
         manuallyWind.showView();
     }
 
@@ -598,6 +617,8 @@ public class MainActivity extends AppCompatActivity {
 interface InfoBarUpdater {
     void updateInfoBarStatus (String infoBarStatus);
 }
+// TODO: make the track player to simulate riding recorded tracks on map, tools, and wind calculater.
+//  Implement one with the UI testing
 
 // TODO: сделать главное меню, где назначаем варианты определения ветра:
 //       установка только вручную; установка по сравнению; установка по статистике
