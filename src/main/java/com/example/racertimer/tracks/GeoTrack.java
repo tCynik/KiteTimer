@@ -16,7 +16,7 @@ public class GeoTrack implements Serializable {
     }
 
     public String getTrackName() {
-        return trackName;
+        return trackName + "";
     }
 
     public String getDatetime() {
