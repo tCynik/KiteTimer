@@ -45,6 +45,7 @@ public class LocationService extends Service {
     private LocationListener locationListener;
 
     private int windDirection = 10000;
+    // TODO: need to make channel to transfer the wind direction into location service
 
     WindChangedHerald windChangedHerald; // интерфейс для передачи данных в класс хранения и расчета статистических данных
 
@@ -192,9 +193,9 @@ public class LocationService extends Service {
         return windByStatistics.getWindDirection();
     }
 
-    public void setWindDirection () {
-        // TODO: реализовать передачу сюда напрвления ветра, загруженного из памяти,
-        //  взятого из интернета, либо установленного вручную.
+    public void setWindDirection (int windDirection) {
+        this.windDirection = windDirection;
+        windCalcByCompareManager.setWindDirection(windDirection);
     }
 
     public void updateWindDirection () {

@@ -530,6 +530,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void manuallyWindManager () { // установка направления ветра вручную
         Log.i("racer_timer_activity_race", " starting manually setting wind  ");
+        windChangedHerald = new WindChangedHerald() {
+            @Override
+            public void onWindDirectionChanged(int windDirection) {
+                locationService.setWindDirection(windDirection);
+                sailingToolsFragment.onWindDirectionChanged(windDirection);
+                if (mapUITools != null)
+                    mapUITools.setWindArrowDirection(windDirection);
+            }
+        };
         ManuallyWind manuallyWind = new ManuallyWind(this, windDirection, windChangedHerald);
         manuallyWind.showView();
     }

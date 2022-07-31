@@ -17,7 +17,7 @@ public class WindCalcByCompareManager {
 
     private TackMoving currentTack, upwindRightTack, upwindLeftTack;
 
-    private int windDirection = 1000; // направление ветра, 1000 = нет данных
+    private int windDirection; // направление ветра, 10000 = нет данных
     private TackDirection lastTackDirection; // последний номер галса: 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
     private WindChangedHerald windChangedHerald; // экземпляр интерфейса для отправки измененного направления
     private CalculatedWindUpdater roughWindUpdater, dynamicWindUpdater;
@@ -98,7 +98,9 @@ public class WindCalcByCompareManager {
     }
 
     private boolean isDeadZoneEnded(Location location) {
-        return currentTack.isInActiveZone(location, DEAD_RADIUS);
+        if (currentTack == null) return false;
+        else
+            return currentTack.isInActiveZone(location, DEAD_RADIUS);
     }
 
     private void keepGoingUpwindAnalyse(Location location) {
