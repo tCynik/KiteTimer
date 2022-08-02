@@ -55,14 +55,5 @@ public abstract class TackMoving {
             super(location);
         }
     }
-
-    public static class Unknown extends TackMoving {
-        public Unknown(Location location) {
-            super(location);
-        }
-    }
-
-
-
 }
 

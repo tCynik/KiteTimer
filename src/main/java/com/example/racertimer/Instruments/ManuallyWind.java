@@ -84,7 +84,7 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
                         }
 
                         if (windDirection != 10000) { // если есть новые данные, передаем в активити
-                            windChangedHerald.onWindDirectionChanged(windDirection);
+                            windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.MANUAL);
 //                            MainActivity mainActivity = (MainActivity) context;
 //                            mainActivity.onWindDirectionChanged(windDirection);
                         }

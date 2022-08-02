@@ -17,7 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import com.example.racertimer.windDirection.WindCalcByCompareManager;
+import com.example.racertimer.windDirection.WindByCompareCalculator;
 import com.example.racertimer.windDirection.WindByStatistics;
 import com.example.racertimer.windDirection.WindChangedHerald;
 
@@ -52,7 +52,7 @@ public class LocationService extends Service {
     private Intent intent; // интент для отправки сообщений из данного сервиса
 
     private WindByStatistics windByStatistics;
-    private WindCalcByCompareManager windCalcByCompareManager;
+    private WindByCompareCalculator windByCompare;
     public MyBinder binder = new MyBinder();
 
     public LocationService() {
@@ -78,7 +78,7 @@ public class LocationService extends Service {
     private void makeWindChangeHerald() {
         windChangedHerald = new WindChangedHerald() {
             @Override
-            public void onWindDirectionChanged(int windDirection) { // если обновляется инфа по направлению ветра
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) { // если обновляется инфа по направлению ветра
                 intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
                 intent.putExtra("windDirection", windDirection);
                 sendBroadcast(intent); // отправляем передачу
@@ -95,10 +95,15 @@ public class LocationService extends Service {
                 windByStatistics = new WindByStatistics(5, windChangedHerald);
                 break;
             case CALCULATE_BY_VMG_COMPARE:
-                windCalcByCompareManager = new WindCalcByCompareManager(windChangedHerald, windDirection);
-                windCalcByCompareManager.setWindDirection(202);
+                windByCompare = new WindByCompareCalculator(windChangedHerald, windDirection);
+                //windCalcByCompareManager.setWindDirection(202);
                 break;
         }
+    }
+
+    public void setCalculatorStatus(boolean isItOn) {
+        if (windByCompare != null)
+            windByCompare.setCalculatorStatus(isItOn);
     }
 
     private void createLocationListener() {
@@ -134,7 +139,7 @@ public class LocationService extends Service {
                 windByStatistics.onLocationChanged(location);
                 break;
             case CALCULATE_BY_VMG_COMPARE:
-                windCalcByCompareManager.onLocationChanged(location);
+                windByCompare.onLocationChanged(location);
                 break;
         }
     }
@@ -147,7 +152,7 @@ public class LocationService extends Service {
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " request location updating ");
         }
     }
-    public boolean checkLocationPermission() {
+    private boolean checkLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) // если разрешения нет, то запускаем запрос разрешения, код ответа 100
@@ -195,12 +200,12 @@ public class LocationService extends Service {
 
     public void setWindDirection (int windDirection) {
         this.windDirection = windDirection;
-        windCalcByCompareManager.setWindDirection(windDirection);
+        windByCompare.setWindDirection(windDirection);
     }
 
     public void updateWindDirection () {
-        Log.i("racer_timer", "manually sending actual wind direction " );
-        windChangedHerald.onWindDirectionChanged(windByStatistics.getWindDirection());
+        Log.i("racer_timer", "force sending actual wind direction " );
+        windChangedHerald.onWindDirectionChanged(windByStatistics.getWindDirection(), WindProvider.CALCULATED);
     }
 
     private void sendLocationData() {

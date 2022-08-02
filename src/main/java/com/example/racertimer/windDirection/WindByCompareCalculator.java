@@ -4,16 +4,18 @@ import android.location.Location;
 import android.util.Log;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
+import com.example.racertimer.Instruments.WindProvider;
 
 /** в этом классе рассчитываем истинное направление ветра исходя из расчета разности ВМГ
  * для корректной работы требуется исходное значение ветра
  */
-public class WindCalcByCompareManager {
+public class WindByCompareCalculator {
     private final static String PROJECT_LOG_TAG = "racer_timer_windCompare";
 
     private final int DEAD_RADIUS = 50; // radius to start processing the segment
 
     private boolean forceCalculating = false;
+    private boolean isCalculatorOn = false;
 
     private TackMoving currentTack, upwindRightTack, upwindLeftTack;
 
@@ -22,7 +24,7 @@ public class WindCalcByCompareManager {
     private WindChangedHerald windChangedHerald; // экземпляр интерфейса для отправки измененного направления
     private CalculatedWindUpdater roughWindUpdater, dynamicWindUpdater;
 
-    public WindCalcByCompareManager(WindChangedHerald windChangedHerald, int windDirection) {
+    public WindByCompareCalculator(WindChangedHerald windChangedHerald, int windDirection) {
         this.windChangedHerald = windChangedHerald;
         this.windDirection = windDirection;
     }
@@ -33,10 +35,11 @@ public class WindCalcByCompareManager {
 
     public void forceCalculatingWithNoInformation () {
         forceCalculating = true;
-        startCalculating();
+        setCalculatorStatus(true);
     }
 
-    public void startCalculating() {
+    public void setCalculatorStatus(boolean isItOn) {
+        isCalculatorOn = isItOn;
         // TODO: определиться с логикой запуска/останова обработки
     }
 
@@ -53,15 +56,18 @@ public class WindCalcByCompareManager {
      * Каждый пересчет угла для любог бейдевинда - пересчет и обновление данных по ветру.
      */
     public void onLocationChanged (Location location) { // прием новых данных по геолокации
-        TackDirection tackDirection = CoursesCalculator.numberOfTack(windDirection, (int) location.getBearing());
-        if (isUpwind(tackDirection))
-            if (currentTack == null) // первый галс из серии бейдевиндов
-                currentTack = firstTackCreateInstances(tackDirection, location);
-        if (isDeadZoneEnded(location)){
-            if (isTackChanged(tackDirection))
-                registerTackChanged(tackDirection, location);
-            else if (isUpwind(tackDirection))
-                keepGoingUpwindAnalyse(location);
+        if (isCalculatorOn) {
+            Log.i(PROJECT_LOG_TAG, " got new location velocity = "+ location.getSpeed());
+            TackDirection tackDirection = CoursesCalculator.numberOfTack(windDirection, (int) location.getBearing());
+            if (isUpwind(tackDirection))
+                if (currentTack == null) // первый галс из серии бейдевиндов
+                    currentTack = firstTackCreateInstances(tackDirection, location);
+            if (isDeadZoneEnded(location)){
+                if (isTackChanged(tackDirection))
+                    registerTackChanged(tackDirection, location);
+                else if (isUpwind(tackDirection))
+                    keepGoingUpwindAnalyse(location);
+            }
         }
     }
 
@@ -91,7 +97,7 @@ public class WindCalcByCompareManager {
 
     private boolean isTackChanged(TackDirection tackDirection){
         if (tackDirection != lastTackDirection) { // если новый галс не равен прежнему
-            Log.i("racer_timer_wind_compare", " tack was changed from "+ lastTackDirection +" to "+tackDirection);
+            Log.i("PROJECT_LOG_TAG", " tack was changed from "+ lastTackDirection +" to "+tackDirection);
             return true;
         }
         else return false;
@@ -137,10 +143,10 @@ public class WindCalcByCompareManager {
     private void recalculateDirection (TackMoving tackRight, TackMoving tactLeft) {
         int bearingLeft = tactLeft.getBearing();
         int bearingRight = tackRight.getBearing();
-        Log.i("racer_timer_wind_compare", " recalculating. LeftBearing = "+ bearingLeft +", right one = "+bearingRight);
+        Log.i(PROJECT_LOG_TAG, " recalculating. LeftBearing = "+ bearingLeft +", right one = "+bearingRight);
 
         windDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingLeft, bearingRight);
-        windChangedHerald.onWindDirectionChanged(windDirection); // отправляем сообщение с новым значением
+        windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
 
         forceCalculating = false;
     }

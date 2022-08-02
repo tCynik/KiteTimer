@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
+import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.multimedia.BeepSounds;
 
 /**
@@ -35,6 +36,8 @@ public class SailingToolsFragment extends Fragment {
 
     private boolean isRaceStarted  = false;
 
+    private MainActivity mainActivity;
+
     public SailingToolsFragment() {
         // Required empty public constructor
     }
@@ -48,9 +51,6 @@ public class SailingToolsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sailing_tools, null); // инфлейтим вьюшку фрагмента
-
-        MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.setSailingToolsFragment(this);
 
         arrowsLayoutCL = view.findViewById(R.id.arrows_layout); // вьюшка для стрелок скорости
         centralParametersCL = view.findViewById(R.id.central_params_cl); // вьюшка для ограничения движения стрелок
@@ -70,7 +70,6 @@ public class SailingToolsFragment extends Fragment {
         View windDialogView = windDialogLayoutInflater.inflate(R.layout.manually_input_wind, null);
 
         resetAllMaximums(); // выставляем в ноль все вьюшки
-        renewWindDirection(202);
         Log.i(PROJECT_LOG_TAG, " fragment tools view was created by onCreateView");
 
         /** установка направления ветра вручную нажатием на поле "ветер" */
@@ -87,7 +86,20 @@ public class SailingToolsFragment extends Fragment {
                 }
             }
         });
+
+//        MainActivity mainActivity = (MainActivity) getActivity();
+//        mainActivity.setSailingToolsFragment(this);
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mainActivity == null) {
+            mainActivity = (MainActivity) getActivity();
+            mainActivity.setSailingToolsFragment(this);
+        }
     }
 
     public void setVoiceover (BeepSounds voiceover) {
@@ -118,12 +130,30 @@ public class SailingToolsFragment extends Fragment {
             updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }
-    public void onWindDirectionChanged(int valueWindDirection) { // новые данные по направлению ветра
-        Log.i(PROJECT_LOG_TAG, " wind dir in the tools fragment changed. New one = "+ valueWindDirection);
+    public void onWindDirectionChanged(int valueWindDirection, WindProvider provider) { // новые данные по направлению ветра
+        Log.i(PROJECT_LOG_TAG, " wind dir in the tools fragment changed. New one = "+ valueWindDirection+
+                " provider = " + provider);
         if (valueWindDirection != windDirection) {
-            windTV.setTextColor(Color.WHITE);
             renewWindDirection(valueWindDirection);
             updateVmgByNewWindOrVelocity();
+
+            switch (provider) {
+                case DEFAULT:
+                    windTV.setTextColor(Color.RED);
+                    break;
+                case HISTORY:
+                    windTV.setTextColor(Color.GREEN);
+                    break;
+                case FORECAST:
+                    windTV.setTextColor(Color.GREEN);
+                    break;
+                case CALCULATED:
+                    windTV.setTextColor(Color.WHITE);
+                    break;
+                case MANUAL:
+                    windTV.setTextColor(Color.BLUE);
+                    break;
+            }
         }
     }
 

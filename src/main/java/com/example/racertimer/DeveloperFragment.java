@@ -55,7 +55,7 @@ public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChan
         btnUpdateWind.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.updateWindDirectionFromService();
+                mainActivity.forceUpdateWindDirectionFromService();
             }
         });
 

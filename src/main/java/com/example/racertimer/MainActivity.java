@@ -39,6 +39,7 @@ import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
 import com.example.racertimer.Instruments.InfoBarStatusUpdater;
+import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
@@ -53,7 +54,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final static String PROJECT_LOG_TAG = "racer_timer";
+    private final static String PROJECT_LOG_TAG = "racer_timer_main";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
     private Button btnStopStartTimerAndStopRace;
@@ -105,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Context context;
 
+    private WindProvider windProvider = WindProvider.DEFAULT;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,13 +117,13 @@ public class MainActivity extends AppCompatActivity {
         findViews();
         setClickListeners();
 
-        windDirection = 202;
+        //windDirection = 202;
         // TODO: при первом запуске приходится вручную обновлять установленный ветер. Нужно чтобы
         //  это происходило автоматически. + установка ветра при первом включении как в прошлый
         //  раз или если есть сеть - по прогнозу
 
         voiceover = new BeepSounds(context);
-        sailingToolsFragment.setVoiceover(voiceover);
+//        sailingToolsFragment.setVoiceover(voiceover);
 
         createLocationService();
 
@@ -159,6 +162,13 @@ public class MainActivity extends AppCompatActivity {
             bindToLocationService();
         }
         if (locationService != null) locationService.appWasResumedOrStopped(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        if (windProvider == WindProvider.DEFAULT)
+//            setStartedWindDirection(202);
     }
 
     @Override
@@ -210,9 +220,9 @@ public class MainActivity extends AppCompatActivity {
     private WindChangedHerald initWindChangeHerald() {
         return new WindChangedHerald() {
             @Override
-            public void onWindDirectionChanged(int updatedWindDirection) {
+            public void onWindDirectionChanged(int updatedWindDirection, WindProvider provider) {
                 windDirection = updatedWindDirection;
-                sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
+                sailingToolsFragment.onWindDirectionChanged(updatedWindDirection, provider);
                 if (mapUITools != null) {
                     Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+updatedWindDirection);
                     mapUITools.setWindArrowDirection(updatedWindDirection);
@@ -241,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void updateWindDirectionFromService() {
+    public void forceUpdateWindDirectionFromService() {
         locationService.updateWindDirection();
     }
 
@@ -285,16 +295,23 @@ public class MainActivity extends AppCompatActivity {
 
     public void setSailingToolsFragment(SailingToolsFragment sailingToolsFragment) {
         this.sailingToolsFragment = sailingToolsFragment;
+        sailingToolsFragment.setVoiceover(voiceover);
+//        if (windProvider == WindProvider.DEFAULT)
+//            setStartedWindDirection(180);
     }
 
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
                                       Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition,
                                       Button menuTracks) {
         mapUITools = new MapUITools(defaultMapScale);
+
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);
 
         mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
+
+        if (windProvider == WindProvider.DEFAULT)
+            setStartedWindDirection(202);
 
         Button buttonMenuTracks = menuTracks;
         buttonMenuTracks.setOnClickListener(new View.OnClickListener() {
@@ -494,7 +511,8 @@ public class MainActivity extends AppCompatActivity {
                     if (intent.hasExtra("windDirection")) {
                         int windDirectionFromExtra = (int) intent.getExtras().get("windDirection");
                         if (windDirectionFromExtra != 10000) {
-                            onWindDirectionChanged((int) intent.getExtras().get("windDirection"));
+                            int windDirection = (int) intent.getExtras().get("windDirection");
+                            onWindDirectionChanged(windDirection, WindProvider.CALCULATED);
                             windDirectionGettedFromService = true;
                             Log.i("racer_timer", "got wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
                         }
@@ -519,9 +537,16 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
-    public void onWindDirectionChanged (int updatedWindDirection) { // смена направления ветра
+    private void setStartedWindDirection(int windDirection) {
+        onWindDirectionChanged(windDirection, WindProvider.DEFAULT);
+    }
+
+    public void onWindDirectionChanged (int updatedWindDirection, WindProvider provider) { // смена направления ветра
+        Log.i(PROJECT_LOG_TAG, "wind direction changed by provider: "+provider);
         windDirection = updatedWindDirection;
-        sailingToolsFragment.onWindDirectionChanged(updatedWindDirection);
+        sailingToolsFragment.onWindDirectionChanged(updatedWindDirection, provider);
+        // TODO: переделать на передачу ветра и провайдера с помощью интерфейса
+
         if (mapUITools != null) {
             Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
             mapUITools.setWindArrowDirection(updatedWindDirection);
@@ -532,11 +557,9 @@ public class MainActivity extends AppCompatActivity {
         Log.i("racer_timer_activity_race", " starting manually setting wind  ");
         windChangedHerald = new WindChangedHerald() {
             @Override
-            public void onWindDirectionChanged(int windDirection) {
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+                MainActivity.this.onWindDirectionChanged(windDirection, provider);
                 locationService.setWindDirection(windDirection);
-                sailingToolsFragment.onWindDirectionChanged(windDirection);
-                if (mapUITools != null)
-                    mapUITools.setWindArrowDirection(windDirection);
             }
         };
         ManuallyWind manuallyWind = new ManuallyWind(this, windDirection, windChangedHerald);
@@ -596,15 +619,17 @@ public class MainActivity extends AppCompatActivity {
         racingTimer.stop();
         isRaceStarted = false;
         sailingToolsFragment.stopTheRace();
+        locationService.setCalculatorStatus(false);
     }
 
-    public void StartTheRace() {
+    public void startTheRace() {
         tracksDataManager.beginRecordTrack();
         sailingToolsFragment.startTheRace();
         isRaceStarted = true;
         undeployTimerFragment();
         infoBarPresenter.unlockTheBar();
         infoBarPresenter.updateTheBar("start");
+        locationService.setCalculatorStatus(true);
         btnStopStartTimerAndStopRace.setText("STOP RACE");
         startRacingTimer();
     }
@@ -626,6 +651,8 @@ public class MainActivity extends AppCompatActivity {
 interface InfoBarUpdater {
     void updateInfoBarStatus (String infoBarStatus);
 }
+
+
 // TODO: make the track player to simulate riding recorded tracks on map, tools, and wind calculater.
 //  Implement one with the UI testing
 
@@ -638,3 +665,4 @@ interface InfoBarUpdater {
 //       либо запускаем если выбран чек поле "запуск сравнения"
 
 // TODO: make no GPS signal info in map
+

@@ -1,13 +1,28 @@
 package com.example.racertimer.tracks;
 
+import android.location.Location;
+
 import java.util.ArrayList;
 
 public class TestTrack {
     private ArrayList<TestPoint> track;
+    int counter = 0;
+
+    private void addPoint(TestPoint currPoint) {
+        TestPoint point = currPoint;
+        if (counter > 0) {
+            TestPoint prevPoint = track.get(counter - 1);
+            int bearing = (int) prevPoint.bearingTo(point);
+            point.setBearing(bearing);
+            int speed = prevPoint.distTo(point);
+            point.setSpeed(speed);
+        }
+        track.add(point);
+    }
 }
 
 class TestPoint {
-    private int latitude, longitude, bearing;
+    private int latitude, longitude, bearing, speed;
 
     /** в этой системе координат:
      * @param latitude - координата Y, увеличение вверх
@@ -56,5 +71,22 @@ class TestPoint {
         int deltaLongitude = secondPoint.getLongitude() - longitude;
         int dist = (int) Math.pow((Math.pow(deltaLatitude, 2) + Math.pow(deltaLongitude, 2)), 0.5);
         return dist;
+    }
+
+    public Location castToLocation () { // casting to Location for test proposes
+        Location location = new Location("gps");
+        location.setLatitude(50 + latitude / 1000);
+        location.setLongitude(90 + longitude/ 1000);
+        location.setBearing(bearing);
+        location.setSpeed(speed);
+        return location;
+    }
+
+    public void setBearing(int bearing) {
+        this.bearing = bearing;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 }

@@ -5,6 +5,7 @@ import android.os.CountDownTimer;
 import android.util.Log;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
+import com.example.racertimer.Instruments.WindProvider;
 
 import java.util.Arrays;
 import java.util.Timer;
@@ -127,7 +128,7 @@ public class WindByStatistics {
                 // отправляем бродкаст с новыми данными
                 if (lastWindDirection != windDirection) { // если зафиксировано изменение направления ветра с прошлой итерации
                     Log.i(PROJECT_LOG_TAG, "sending wind direction broadcast");
-                    windChangedHerald.onWindDirectionChanged(windDirection);// отправляем broadcast с новым направлением
+                    windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED);// отправляем broadcast с новым направлением
                 }
             }
             lastWindDirection = windDirection; // обновляем данные по направлению ветра для фиксации изменений

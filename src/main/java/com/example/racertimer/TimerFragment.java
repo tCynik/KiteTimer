@@ -131,7 +131,7 @@ public class TimerFragment extends Fragment {
     private void startRaceCloseTomer() {
         startingProcedureTimer.stop();
         MainActivity mainActivity = (MainActivity) getActivity();
-        mainActivity.StartTheRace();
+        mainActivity.startTheRace();
     }
 
     public boolean isTimerRan() {return startingProcedureTimer.isTimerRan();}
