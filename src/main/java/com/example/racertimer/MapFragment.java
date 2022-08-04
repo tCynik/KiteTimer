@@ -1,7 +1,7 @@
 package com.example.racertimer;
 
-import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
@@ -35,18 +34,9 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.i("bugfix", " onCreateView " );
 
         View view = inflater.inflate(R.layout.fragment_map, null);
 
@@ -68,9 +58,12 @@ public class MapFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mainActivity = (MainActivity) getActivity();
-        exportViewsIntoSailingTools();
-        exportTracksLayoutIntoTrackPainter();
+        if (mainActivity == null) {
+            Log.i("bugfix", " mapFragment asking renew wind first launch " );
+            mainActivity = (MainActivity) getActivity();
+            exportViewsIntoSailingTools();
+            exportTracksLayoutIntoTrackPainter();
+        }
     }
 
     private void exportViewsIntoSailingTools() {

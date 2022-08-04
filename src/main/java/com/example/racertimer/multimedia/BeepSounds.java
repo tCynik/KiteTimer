@@ -15,7 +15,6 @@ public class BeepSounds extends VoiceoverMain {
         super(context);
         soundPool.load(context, R.raw.beep, PRIORITY_BEEP); // 22
         soundPool.load(context, R.raw.patch_beep, (PRIORITY_BEEP +1)); // 23
-
     }
 
     public void playRepeatSound (int percentVMG) { // проигрывание циклических звуков - пищалка ВМГ

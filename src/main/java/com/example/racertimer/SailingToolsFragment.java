@@ -100,10 +100,13 @@ public class SailingToolsFragment extends Fragment {
             mainActivity = (MainActivity) getActivity();
             mainActivity.setSailingToolsFragment(this);
         }
+        voiceover = new BeepSounds(mainActivity);
+        mainActivity.onSailingToolsReady();
+        //mainActivity.setModuleStatus("sailing_tools");
     }
 
     public void setVoiceover (BeepSounds voiceover) {
-        this.voiceover = voiceover;
+        //this.voiceover = voiceover;
     }
 
     /**
@@ -133,6 +136,7 @@ public class SailingToolsFragment extends Fragment {
     public void onWindDirectionChanged(int valueWindDirection, WindProvider provider) { // новые данные по направлению ветра
         Log.i(PROJECT_LOG_TAG, " wind dir in the tools fragment changed. New one = "+ valueWindDirection+
                 " provider = " + provider);
+        Log.i("bugfix", " Sailing tools: provider = " +provider);
         if (valueWindDirection != windDirection) {
             renewWindDirection(valueWindDirection);
             updateVmgByNewWindOrVelocity();

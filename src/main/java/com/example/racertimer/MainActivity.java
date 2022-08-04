@@ -1,7 +1,6 @@
 package com.example.racertimer;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -35,10 +34,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
+import com.example.racertimer.Instruments.InfoBarStatusUpdater;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
-import com.example.racertimer.Instruments.InfoBarStatusUpdater;
 import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
@@ -49,6 +48,7 @@ import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
 import com.example.racertimer.windDirection.WindChangedHerald;
+import com.example.racertimer.windDirection.WindData;
 
 import java.util.ArrayList;
 
@@ -57,17 +57,14 @@ public class MainActivity extends AppCompatActivity {
     private final static String PROJECT_LOG_TAG = "racer_timer_main";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
+    final int DEFAULT_WIND_DIRECTION = 202; // usual wind direction on the main developer's spot "Shumiha"
+
     private Button btnStopStartTimerAndStopRace;
 
     private ImageButton btnMenu;
     private TextView racingTimerTV;
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
-    private boolean windDirectionGettedFromService = false; // флаг того, что уже были получены данные по направлению ветра
 
-    private TracksMenuFragment tracksMenuFragment;
     private TimerFragment timerFragment = null;
-    private MapFragment mapFragment = null;
-    private InfoBarUpdater infoBarUpdater;
     public MapUITools mapUITools;
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
@@ -81,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
     private BeepSounds voiceover;
 
-    private int velocity, bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
+    private int bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
 
     private int defaultMapScale = 1;
 
@@ -96,40 +93,35 @@ public class MainActivity extends AppCompatActivity {
 
     private Intent intentLocationService; // интент для создания сервиса геолокации
     private BroadcastReceiver locationBroadcastReceiver;
-    private IntentFilter locationIntentFilter;
 
     private LocationService locationService;
-    private ServiceConnection serviceConnection;
     private Binder binder;
 
     private WindChangedHerald windChangedHerald;
+    private WindProvider windProvider;
 
-    private Context context;
-
-    private WindProvider windProvider = WindProvider.DEFAULT;
+    private WindData windData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        context = this;
 
         findViews();
         setClickListeners();
 
-        //windDirection = 202;
         // TODO: при первом запуске приходится вручную обновлять установленный ветер. Нужно чтобы
         //  это происходило автоматически. + установка ветра при первом включении как в прошлый
         //  раз или если есть сеть - по прогнозу
 
-        voiceover = new BeepSounds(context);
+        voiceover = new BeepSounds(this);
 //        sailingToolsFragment.setVoiceover(voiceover);
 
         createLocationService();
 
         windChangedHerald = initWindChangeHerald();
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
-        mapManager = new MapManager(context);
+        mapManager = new MapManager(this);
 
         infoBarStatusUpdater = new InfoBarStatusUpdater() {
             @Override
@@ -154,6 +146,13 @@ public class MainActivity extends AppCompatActivity {
         infoBarPresenter.greetings();
     }
 
+//            if (savedInstanceState == null) {
+//        windProvider = WindProvider.DEFAULT;
+//        Log.i("bugfix", " main onCreate, provider = " +windProvider );
+//        // TODO: крч это говно так не работает. В любом случае после сворачивания приложения
+//        //  перезапускает провайдера по дефолту. Нужно разбираться с перезапуском.
+//    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -162,14 +161,29 @@ public class MainActivity extends AppCompatActivity {
             bindToLocationService();
         }
         if (locationService != null) locationService.appWasResumedOrStopped(true);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        if (windProvider == WindProvider.DEFAULT)
-//            setStartedWindDirection(202);
+
     }
+
+//    public void setModuleStatus(String moduleNameReady) {
+//        String[] moduleNames = {"sailing_tools"};
+//        boolean[] moduleStatus = new boolean[moduleNames.length];
+//        for (int i = 0; i<moduleNames.length; i++) {
+//            if (moduleNameReady.equals(moduleNames[i])) moduleStatus[i] = true;
+//        }
+//
+//        boolean allModulesReady = true;
+//        for (boolean currentStatus: moduleStatus) {
+//            if (currentStatus == false) allModulesReady = false;
+//        }
+//
+//        if (allModulesReady) loadWindData();
+//    }
 
     @Override
     protected void onStop() {
@@ -181,14 +195,11 @@ public class MainActivity extends AppCompatActivity {
     private void findViews() {
         btnMenu = findViewById(R.id.button_menu);
         btnStopStartTimerAndStopRace = findViewById(R.id.stopwatch);
-
         menuPlace = findViewById(R.id.fr_menu_place); // находим контейнер для дальнейшего размещения вьюшек
-
         racingTimerTV = findViewById(R.id.racing_timer);
     }
 
     private void setClickListeners() {
-
         btnMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -230,6 +241,26 @@ public class MainActivity extends AppCompatActivity {
                 // TODO: move windDirection into location service
             }
         };
+    }
+
+    public void onSailingToolsReady () {
+        loadWindData();
+    }
+
+    private void loadWindData() {
+        WindChangedHerald windChangedHerald = new WindChangedHerald() {
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+                if (windDirection == 10000) {
+                    windDirection = DEFAULT_WIND_DIRECTION;
+                    provider = WindProvider.DEFAULT;
+                }
+                proceedWindChanging(windDirection, provider);
+            }
+        };
+
+        if (windData == null) windData = new WindData(this);
+        windData.returnWindData(windChangedHerald);
     }
 
     private void stopTimerAlertDialog() {
@@ -296,25 +327,21 @@ public class MainActivity extends AppCompatActivity {
     public void setSailingToolsFragment(SailingToolsFragment sailingToolsFragment) {
         this.sailingToolsFragment = sailingToolsFragment;
         sailingToolsFragment.setVoiceover(voiceover);
-//        if (windProvider == WindProvider.DEFAULT)
-//            setStartedWindDirection(180);
     }
 
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
                                       Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition,
                                       Button menuTracks) {
         mapUITools = new MapUITools(defaultMapScale);
-
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);
-
         mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
 
-        if (windProvider == WindProvider.DEFAULT)
-            setStartedWindDirection(202);
+        if (windProvider == WindProvider.DEFAULT) {
+            Log.i("bugfix", " Main: provider = "+windProvider );
+        }
 
-        Button buttonMenuTracks = menuTracks;
-        buttonMenuTracks.setOnClickListener(new View.OnClickListener() {
+        menuTracks.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 deployTracksMenuFragment();
@@ -358,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void deployTracksMenuFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        tracksMenuFragment = new TracksMenuFragment();
+        TracksMenuFragment tracksMenuFragment = new TracksMenuFragment();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fr_menu_place, tracksMenuFragment);
         fragmentTransaction.commit();
@@ -462,13 +489,11 @@ public class MainActivity extends AppCompatActivity {
 
     /** Методы для работы с разрешениями на геолокацию */
     public boolean checkLocationPermission() {
-        // если разрешения нет:
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) // если разрешения нет, то запускаем запрос разрешения, код ответа 100
-        {
             return false; // если разрешения нет, возвращаем false
-        } else
+        else
             return true; //
     }
     private void askLocationPermission() {
@@ -479,17 +504,19 @@ public class MainActivity extends AppCompatActivity {
     /** биндимся к сервису для управления им */
     private void bindToLocationService() {
         Log.i("racer_timer", "Making service connection... " );
-        serviceConnection = new ServiceConnection() {
+        // приводим биндер к кастомному биндеру с методом связи
+        // получаем экземпляр нашего сервиса через биндер
+        ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                Log.i("racer_timer", "Location service binded " );
+                Log.i("racer_timer", "Location service binded ");
                 binder = (LocationService.MyBinder) iBinder; // приводим биндер к кастомному биндеру с методом связи
                 locationService = ((LocationService.MyBinder) binder).getService(); // получаем экземпляр нашего сервиса через биндер
             }
 
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
-                Log.i("racer_timer", "location service disconnected " );
+                Log.i("racer_timer", "location service disconnected ");
             }
         };
 
@@ -513,7 +540,6 @@ public class MainActivity extends AppCompatActivity {
                         if (windDirectionFromExtra != 10000) {
                             int windDirection = (int) intent.getExtras().get("windDirection");
                             onWindDirectionChanged(windDirection, WindProvider.CALCULATED);
-                            windDirectionGettedFromService = true;
                             Log.i("racer_timer", "got wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
                         }
                     }
@@ -533,16 +559,25 @@ public class MainActivity extends AppCompatActivity {
             };
         }
 
-        locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
+        IntentFilter locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
     private void setStartedWindDirection(int windDirection) {
-        onWindDirectionChanged(windDirection, WindProvider.DEFAULT);
+        loadWindData();
     }
 
-    public void onWindDirectionChanged (int updatedWindDirection, WindProvider provider) { // смена направления ветра
+    private void onWindDirectionChanged (int updatedWindDirection, WindProvider provider) { // смена направления ветра
+        if (windData == null) windData = new WindData(this);
+        Log.i("bugfix", " main: saving windData: wind = " +windDirection+", provider = " +provider);
+        windData.saveWindData(windDirection, provider);
+        proceedWindChanging(updatedWindDirection, windProvider);
+    }
+
+    private void proceedWindChanging(int updatedWindDirection, WindProvider provider) {
         Log.i(PROJECT_LOG_TAG, "wind direction changed by provider: "+provider);
+        Log.i("bugfix", " main: set provider = " +provider);
+        windProvider = provider;
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection, provider);
         // TODO: переделать на передачу ветра и провайдера с помощью интерфейса
@@ -595,7 +630,7 @@ public class MainActivity extends AppCompatActivity {
             mapManager.onLocationChanged(location);
             tracksDataManager.onLocationChanged(location);
             tempVelocity = (double) location.getSpeed()*3.6;
-            velocity = (int) tempVelocity;
+            int velocity = (int) tempVelocity;
             if (sailingToolsFragment != null) {
                 Log.i("racer_timer", " sending into sailing tools velocity = "+ velocity);
                 sailingToolsFragment.onVelocityChanged(velocity);
