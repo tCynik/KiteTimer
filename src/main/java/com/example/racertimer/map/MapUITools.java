@@ -62,6 +62,7 @@ public class MapUITools {
 
     public void setWindArrowDirection(int windDirection) {
         Log.i(PROJECT_LOG_TAG, "wind on map was changed to "+CoursesCalculator.invertCourse(windDirection) );
+        Log.i("bugfix", " mapUiTools: set windDirection = " +windDirection);
         windArrow.setRotation(CoursesCalculator.invertCourse(windDirection));
     }
 

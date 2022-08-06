@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private final static String PROJECT_LOG_TAG = "racer_timer_main";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
-    final int DEFAULT_WIND_DIRECTION = 202; // usual wind direction on the main developer's spot "Shumiha"
+    final int DEFAULT_WIND_DIRECTION = 135; // usual wind direction on the main developer's spot "Shumiha"
 
     private Button btnStopStartTimerAndStopRace;
 
@@ -90,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
     private Location location = null; // текущее положение
 
     private boolean isRaceStarted = false; // флаг того то, происходит сейчас гонка
+    private StatusUIManager statusUIManager;
+    public StatusUiUpdater statusUiUpdater;
 
     private Intent intentLocationService; // интент для создания сервиса геолокации
     private BroadcastReceiver locationBroadcastReceiver;
@@ -122,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
         windChangedHerald = initWindChangeHerald();
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
         mapManager = new MapManager(this);
+
+        runStatusUIManager();
 
         infoBarStatusUpdater = new InfoBarStatusUpdater() {
             @Override
@@ -170,20 +174,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    public void setModuleStatus(String moduleNameReady) {
-//        String[] moduleNames = {"sailing_tools"};
-//        boolean[] moduleStatus = new boolean[moduleNames.length];
-//        for (int i = 0; i<moduleNames.length; i++) {
-//            if (moduleNameReady.equals(moduleNames[i])) moduleStatus[i] = true;
-//        }
-//
-//        boolean allModulesReady = true;
-//        for (boolean currentStatus: moduleStatus) {
-//            if (currentStatus == false) allModulesReady = false;
-//        }
-//
-//        if (allModulesReady) loadWindData();
-//    }
+    private void runStatusUIManager() {
+        statusUiUpdater = new StatusUiUpdater() {
+            @Override
+            public void onStatusChecked(boolean status) {
+                if (status) loadWindData();
+            }
+
+            @Override
+            public void updateUIModuleStatus(String moduleName) {
+                statusUIManager.setModuleStatus(moduleName);
+            }
+        };
+        statusUIManager = new StatusUIManager(new String[]{"sailing_tools", "map"}, statusUiUpdater);
+    }
 
     @Override
     protected void onStop() {
@@ -243,9 +247,9 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    public void onSailingToolsReady () {
-        loadWindData();
-    }
+//    public void onSailingToolsReady () {
+//        loadWindData();
+//    }
 
     private void loadWindData() {
         WindChangedHerald windChangedHerald = new WindChangedHerald() {
@@ -260,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         if (windData == null) windData = new WindData(this);
+        Log.i("bugfix", " main: asking callback with loaded WindData ");
         windData.returnWindData(windChangedHerald);
     }
 
@@ -335,7 +340,8 @@ public class MainActivity extends AppCompatActivity {
         mapUITools = new MapUITools(defaultMapScale);
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);
-        mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
+        statusUiUpdater.updateUIModuleStatus("map");
+        //mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
 
         if (windProvider == WindProvider.DEFAULT) {
             Log.i("bugfix", " Main: provider = "+windProvider );
@@ -571,7 +577,7 @@ public class MainActivity extends AppCompatActivity {
         if (windData == null) windData = new WindData(this);
         Log.i("bugfix", " main: saving windData: wind = " +windDirection+", provider = " +provider);
         windData.saveWindData(windDirection, provider);
-        proceedWindChanging(updatedWindDirection, windProvider);
+        proceedWindChanging(updatedWindDirection, provider);
     }
 
     private void proceedWindChanging(int updatedWindDirection, WindProvider provider) {
@@ -581,11 +587,12 @@ public class MainActivity extends AppCompatActivity {
         windDirection = updatedWindDirection;
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection, provider);
         // TODO: переделать на передачу ветра и провайдера с помощью интерфейса
+        mapUITools.setWindArrowDirection(updatedWindDirection);
 
-        if (mapUITools != null) {
-            Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
-            mapUITools.setWindArrowDirection(updatedWindDirection);
-        }
+//        if (mapUITools != null) {
+//            Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
+//            mapUITools.setWindArrowDirection(updatedWindDirection);
+//        }
     }
 
     public void manuallyWindManager () { // установка направления ветра вручную
@@ -685,6 +692,43 @@ public class MainActivity extends AppCompatActivity {
 
 interface InfoBarUpdater {
     void updateInfoBarStatus (String infoBarStatus);
+}
+
+interface StatusUiUpdater {
+    void onStatusChecked(boolean status);
+    void updateUIModuleStatus(String moduleName);
+}
+
+class StatusUIManager {
+    private final static String PROJECT_LOG_TAG = "StatusUI";
+    private String[] moduleNames = {"sailing_tools", "map"};
+    private boolean[] moduleStatus;
+    private StatusUiUpdater statusUiUpdater;
+
+    public StatusUIManager(String[] moduleNames, StatusUiUpdater statusUiUpdater) {
+        this.moduleNames = moduleNames;
+        moduleStatus = new boolean[moduleNames.length];
+        this.statusUiUpdater = statusUiUpdater;
+    }
+
+    void setModuleStatus(String moduleNameReady) {
+        Log.i(PROJECT_LOG_TAG, " changing status - " + moduleNameReady+ " is ready ");
+        for (int i = 0; i<moduleNames.length; i++) {
+            if (moduleNameReady.equals(moduleNames[i])) {
+                moduleStatus[i] = true;
+            }
+        }
+        statusUiUpdater.onStatusChecked(checkAllModulesReady());
+    }
+
+    private boolean checkAllModulesReady() {
+        boolean allModulesReady = true;
+        for (boolean currentStatus: moduleStatus) {
+            if (currentStatus == false) allModulesReady = false;
+        }
+        Log.i(PROJECT_LOG_TAG, " current ready status = " + allModulesReady);
+        return allModulesReady;
+    }
 }
 
 

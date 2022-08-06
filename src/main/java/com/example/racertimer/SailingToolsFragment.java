@@ -101,8 +101,7 @@ public class SailingToolsFragment extends Fragment {
             mainActivity.setSailingToolsFragment(this);
         }
         voiceover = new BeepSounds(mainActivity);
-        mainActivity.onSailingToolsReady();
-        //mainActivity.setModuleStatus("sailing_tools");
+        mainActivity.statusUiUpdater.updateUIModuleStatus("sailing_tools");
     }
 
     public void setVoiceover (BeepSounds voiceover) {

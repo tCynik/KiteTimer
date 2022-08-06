@@ -45,7 +45,7 @@ public class WindData {
         WindProvider windProvider = WindProvider.DEFAULT;
         SavedWindState savedWindState = loadWindData();
         if (savedWindState != null) {
-            windDirection = savedWindState.getWindDirection();
+            windDirection = 270;//savedWindState.getWindDirection();
             windProvider = savedWindState.getWindProvider();
         }
         Log.i("bugfix", " windData: Data loaded. wind = " + windDirection+ ", provider = " +windProvider);
