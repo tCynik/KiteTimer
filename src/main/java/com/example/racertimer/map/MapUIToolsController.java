@@ -1,14 +1,17 @@
 package com.example.racertimer.map;
 
+import android.location.Location;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.example.racertimer.ContentUpdater;
 import com.example.racertimer.Instruments.CoursesCalculator;
+import com.example.racertimer.Instruments.WindProvider;
 
-public class MapUITools {
+public class MapUIToolsController {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_tools";
 
     private ImageView directionArrow, windArrow;
@@ -16,6 +19,7 @@ public class MapUITools {
 
     private MapManager mapManager;
 
+    private ContentUpdater contentUpdater;
     private float mapScale;
     private float minScale = 0.5f;
     private float maxScale = 10f;
@@ -23,8 +27,20 @@ public class MapUITools {
 
     private boolean screenCenterPinnedOnPosition = true;
 
-    public MapUITools(float defaultMapScale) {
+    public MapUIToolsController(float defaultMapScale) {
         this.mapScale = defaultMapScale;
+        contentUpdater = new ContentUpdater() {
+            @Override
+            public void onLocationChanged(Location location) {
+                int bearing = (int) location.getBearing();
+                onBearingChanged(bearing);
+            }
+
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+                setWindArrowDirection(windDirection);
+            }
+        };
     }
 
     public void setUIViews (ImageView directionArrow, ImageView windArrow,
@@ -53,6 +69,10 @@ public class MapUITools {
                 mapManager.onFixButtonPressed();
             }
         });
+    }
+
+    public ContentUpdater getContentUpdater() {
+        return contentUpdater;
     }
 
     public void onBearingChanged (int bearing) {

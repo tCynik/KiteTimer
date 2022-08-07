@@ -19,6 +19,7 @@ public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
 
     private MainActivity mainActivity;
+    private StatusUiUpdater statusUiUpdater;
 
     private ConstraintLayout tracksLayout;
     private MapScrollView windowMap;
@@ -61,6 +62,7 @@ public class MapFragment extends Fragment {
         if (mainActivity == null) {
             Log.i("bugfix", " mapFragment asking renew wind first launch " );
             mainActivity = (MainActivity) getActivity();
+            mainActivity.setMapFragment(this);
             exportViewsIntoSailingTools();
             exportTracksLayoutIntoTrackPainter();
         }

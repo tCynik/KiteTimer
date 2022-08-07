@@ -1,6 +1,7 @@
 package com.example.racertimer;
 
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +23,8 @@ import com.example.racertimer.multimedia.BeepSounds;
 
 public class SailingToolsFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_sailing_tools";
+    private final String MODULE_NAME = "sailing_tools";
+
     BeepSounds voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
     LayoutInflater windDialogLayoutInflater;
@@ -37,6 +40,9 @@ public class SailingToolsFragment extends Fragment {
     private boolean isRaceStarted  = false;
 
     private MainActivity mainActivity;
+
+    private StatusUiUpdater statusUiUpdater;
+    private ContentUpdater contentUpdater;
 
     public SailingToolsFragment() {
         // Required empty public constructor
@@ -89,8 +95,33 @@ public class SailingToolsFragment extends Fragment {
 
 //        MainActivity mainActivity = (MainActivity) getActivity();
 //        mainActivity.setSailingToolsFragment(this);
-
+        initContentUpdater();
         return view;
+    }
+
+    public void setStatusUiUpdater(StatusUiUpdater statusUiUpdater) {
+        this.statusUiUpdater = statusUiUpdater;
+    }
+
+    public ContentUpdater getContentUpdater() {
+        return contentUpdater;
+    }
+
+    private void initContentUpdater() {
+        contentUpdater = new ContentUpdater() {
+            @Override
+            public void onLocationChanged(Location location) {
+                int bearing = (int) location.getBearing();
+                onBearingChanged(bearing);
+                int velocity = (int) location.getSpeed();
+                onVelocityChanged(velocity);
+            }
+
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+                onWindDirectionChanged(windDirection, provider);
+            }
+        };
     }
 
     @Override
@@ -101,7 +132,13 @@ public class SailingToolsFragment extends Fragment {
             mainActivity.setSailingToolsFragment(this);
         }
         voiceover = new BeepSounds(mainActivity);
-        mainActivity.statusUiUpdater.updateUIModuleStatus("sailing_tools");
+        statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        statusUiUpdater.updateUIModuleStatus(MODULE_NAME, false);
     }
 
     public void setVoiceover (BeepSounds voiceover) {

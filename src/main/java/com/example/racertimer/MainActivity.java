@@ -42,7 +42,7 @@ import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
-import com.example.racertimer.map.MapUITools;
+import com.example.racertimer.map.MapUIToolsController;
 import com.example.racertimer.multimedia.BeepSounds;
 import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
@@ -65,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView racingTimerTV;
 
     private TimerFragment timerFragment = null;
-    public MapUITools mapUITools;
+    private MapFragment mapFragment;
+    public MapUIToolsController mapUITools;
     public SailingToolsFragment sailingToolsFragment = null;
     public MenuFragment menuFragment = null;
     public DeveloperFragment developerFragment = null;
@@ -90,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     private Location location = null; // текущее положение
 
     private boolean isRaceStarted = false; // флаг того то, происходит сейчас гонка
-    private StatusUIManager statusUIManager;
     public StatusUiUpdater statusUiUpdater;
 
     private Intent intentLocationService; // интент для создания сервиса геолокации
@@ -103,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
     private WindProvider windProvider;
 
     private WindData windData;
+
+    private StatusUIModulesDispatcher statusUIModulesDispatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,8 +127,6 @@ public class MainActivity extends AppCompatActivity {
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
         mapManager = new MapManager(this);
 
-        runStatusUIManager();
-
         infoBarStatusUpdater = new InfoBarStatusUpdater() {
             @Override
             public void onTimerStatusUpdated(String timerStatus) {
@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
         infoBarPresenter = new InfoBarPresenter(infoBarTVInterface);
         infoBarPresenter.greetings();
+        runStatusUIDispatcher();
     }
 
 //            if (savedInstanceState == null) {
@@ -173,20 +174,20 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
     }
+    public void setMapFragment (MapFragment mapFragment) {
+        this.mapFragment = mapFragment;
+    }
 
-    private void runStatusUIManager() {
-        statusUiUpdater = new StatusUiUpdater() {
-            @Override
-            public void onStatusChecked(boolean status) {
-                if (status) loadWindData();
-            }
+    private void runStatusUIDispatcher() {
+        String[] moduleNames = new String[] {"sailing_tools", "map"};
+        ContentUpdater updaterMap = mapUITools.getContentUpdater();
+        ContentUpdater updaterTools = sailingToolsFragment.getContentUpdater();
+        ContentUpdater[] contentUpdaters = new ContentUpdater[]{updaterTools, updaterMap};
 
-            @Override
-            public void updateUIModuleStatus(String moduleName) {
-                statusUIManager.setModuleStatus(moduleName);
-            }
-        };
-        statusUIManager = new StatusUIManager(new String[]{"sailing_tools", "map"}, statusUiUpdater);
+        statusUIModulesDispatcher = new StatusUIModulesDispatcher(moduleNames, contentUpdaters);
+        StatusUiUpdater statusUiUpdater = statusUIModulesDispatcher.getStatusUiUpdater();
+        mapFragment.setStatusUiUpdater(statusUiUpdater);
+        sailingToolsFragment.setStatusUiUpdater(statusUiUpdater);
     }
 
     @Override
@@ -337,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
                                       Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition,
                                       Button menuTracks) {
-        mapUITools = new MapUITools(defaultMapScale);
+        mapUITools = new MapUIToolsController(defaultMapScale);
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);
         statusUiUpdater.updateUIModuleStatus("map");
@@ -585,6 +586,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("bugfix", " main: set provider = " +provider);
         windProvider = provider;
         windDirection = updatedWindDirection;
+        statusUIModulesDispatcher.getWindChangedHerald().onWindDirectionChanged(updatedWindDirection, provider);
         sailingToolsFragment.onWindDirectionChanged(updatedWindDirection, provider);
         // TODO: переделать на передачу ветра и провайдера с помощью интерфейса
         mapUITools.setWindArrowDirection(updatedWindDirection);
@@ -632,6 +634,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (location.hasSpeed()) {
+            statusUIModulesDispatcher.getLocationChanger().onLocationChanged(location);
             Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
             if (!mapManager.isRecordingInProgress() & isRaceStarted) mapManager.beginNewCurrentTrackDrawing();
             mapManager.onLocationChanged(location);
@@ -696,39 +699,7 @@ interface InfoBarUpdater {
 
 interface StatusUiUpdater {
     void onStatusChecked(boolean status);
-    void updateUIModuleStatus(String moduleName);
-}
-
-class StatusUIManager {
-    private final static String PROJECT_LOG_TAG = "StatusUI";
-    private String[] moduleNames = {"sailing_tools", "map"};
-    private boolean[] moduleStatus;
-    private StatusUiUpdater statusUiUpdater;
-
-    public StatusUIManager(String[] moduleNames, StatusUiUpdater statusUiUpdater) {
-        this.moduleNames = moduleNames;
-        moduleStatus = new boolean[moduleNames.length];
-        this.statusUiUpdater = statusUiUpdater;
-    }
-
-    void setModuleStatus(String moduleNameReady) {
-        Log.i(PROJECT_LOG_TAG, " changing status - " + moduleNameReady+ " is ready ");
-        for (int i = 0; i<moduleNames.length; i++) {
-            if (moduleNameReady.equals(moduleNames[i])) {
-                moduleStatus[i] = true;
-            }
-        }
-        statusUiUpdater.onStatusChecked(checkAllModulesReady());
-    }
-
-    private boolean checkAllModulesReady() {
-        boolean allModulesReady = true;
-        for (boolean currentStatus: moduleStatus) {
-            if (currentStatus == false) allModulesReady = false;
-        }
-        Log.i(PROJECT_LOG_TAG, " current ready status = " + allModulesReady);
-        return allModulesReady;
-    }
+    void updateUIModuleStatus(String moduleName, boolean isItReady);
 }
 
 
