@@ -17,7 +17,8 @@ import com.example.racertimer.map.MapScrollView;
 
 public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
-    private final String MODULE_NAME = "map";
+    private final String MODULE_TOOLS_NAME = "map_tools";
+    private final String MODULE_MAP_NAME = "map";
 
     private MainActivity mainActivity;
     private StatusUiUpdater statusUiUpdater;
@@ -75,13 +76,15 @@ public class MapFragment extends Fragment {
         super.onResume();
         if (mainActivity == null) {
         }
-        statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
+        statusUiUpdater.updateUIModuleStatus(MODULE_TOOLS_NAME, true);
+        statusUiUpdater.updateUIModuleStatus(MODULE_MAP_NAME, true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
+        statusUiUpdater.updateUIModuleStatus(MODULE_TOOLS_NAME, true);
+        statusUiUpdater.updateUIModuleStatus(MODULE_MAP_NAME, true);
     }
 
     public void setStatusUiUpdater(StatusUiUpdater statusUiUpdater) {

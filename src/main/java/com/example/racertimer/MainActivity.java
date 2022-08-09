@@ -176,16 +176,18 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
     }
+
     public void setMapFragment (MapFragment mapFragment) {
         this.mapFragment = mapFragment;
     }
 
     private void runStatusUIDispatcher() {
-        String[] moduleNames = new String[] {"sailing_tools", "map"};
+        String[] moduleNames = new String[] {"sailing_tools", "map_tools", "map"};
         // TODO: need to add here mapManager to transfer new geolocation info into one
-        ContentUpdater updaterMap = mapUITools.getContentUpdater();
+        ContentUpdater updaterMapTools = mapUITools.getContentUpdater();
         ContentUpdater updaterTools = sailingToolsFragment.getContentUpdater();
-        ContentUpdater[] contentUpdaters = new ContentUpdater[]{updaterTools, updaterMap};
+        ContentUpdater updaterMap = mapManager.getContentUpdater();
+        ContentUpdater[] contentUpdaters = new ContentUpdater[]{updaterTools, updaterMapTools, updaterMap};
 
         statusUIModulesDispatcher = new StatusUIModulesDispatcher(moduleNames, contentUpdaters);
         StatusUiUpdater updaterStatusUi = statusUIModulesDispatcher.getStatusUiUpdater();
@@ -578,8 +580,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void onWindDirectionChanged (int updatedWindDirection, WindProvider provider) { // смена направления ветра
         if (windData == null) windData = new WindData(this);
-        Log.i("bugfix", " main: saving windData: wind = " +windDirection+", provider = " +provider);
-        windData.saveWindData(windDirection, provider);
+        Log.i("bugfix", " main: saving windData: wind = " +updatedWindDirection+", provider = " +provider);
+        windData.saveWindData(updatedWindDirection, provider);
         proceedWindChanging(updatedWindDirection, provider);
     }
 

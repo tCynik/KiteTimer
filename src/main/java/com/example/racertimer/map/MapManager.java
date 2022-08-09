@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.example.racertimer.ContentUpdater;
+import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.tracks.GeoTrack;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ public class MapManager {
 
     private Context context;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
+
+    private ContentUpdater contentUpdater;
 
     private CurrentTrackLine currentTrackLine;
     private LoadedTrackLine loadedTrackLine;
@@ -47,10 +51,28 @@ public class MapManager {
     public MapManager(Context context) {
         this.context = context;
         loadedAndDisplayedTracks = new LinkedList<>();
+        initContentUpdater();
     }
 
     public boolean isRecordingInProgress() {
         return isRecordingInProgress;
+    }
+
+    private void initContentUpdater() {
+        contentUpdater = new ContentUpdater() {
+            @Override
+            public void onLocationChanged(Location location) {
+                MapManager.this.onLocationChanged(location);
+            }
+
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+            }
+        };
+    }
+
+    public ContentUpdater getContentUpdater() {
+        return contentUpdater;
     }
 
     private void makeTrackGirdCalculator (Location location) {

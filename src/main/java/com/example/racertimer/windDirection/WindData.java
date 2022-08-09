@@ -27,7 +27,7 @@ public class WindData {
 
     private void outputWindStatus (SavedWindState savedWindState) {
         try {
-            FileOutputStream fileOutputStream = context.openFileOutput("saved.lst_wind_dir.bin", Context.MODE_PRIVATE);
+            FileOutputStream fileOutputStream = context.openFileOutput("saved.last_wind_dir.bin", Context.MODE_PRIVATE);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(savedWindState);
             objectOutputStream.close();
@@ -35,8 +35,10 @@ public class WindData {
             Log.i("bugfix", " windData: Data saved successful ");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Log.i("bugfix", " windData: ERROR: file not found ");
         } catch (IOException e) {
             e.printStackTrace();
+            Log.i("bugfix", " windData: ERROR: IO exception ");
         }
     }
 
