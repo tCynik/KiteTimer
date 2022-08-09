@@ -29,18 +29,7 @@ public class MapUIToolsController {
 
     public MapUIToolsController(float defaultMapScale) {
         this.mapScale = defaultMapScale;
-        contentUpdater = new ContentUpdater() {
-            @Override
-            public void onLocationChanged(Location location) {
-                int bearing = (int) location.getBearing();
-                onBearingChanged(bearing);
-            }
-
-            @Override
-            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
-                setWindArrowDirection(windDirection);
-            }
-        };
+        initContentUpdater();
     }
 
     public void setUIViews (ImageView directionArrow, ImageView windArrow,
@@ -69,6 +58,23 @@ public class MapUIToolsController {
                 mapManager.onFixButtonPressed();
             }
         });
+    }
+
+    private void initContentUpdater() {
+        contentUpdater = new ContentUpdater() {
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.i("bugfix", "mapUITools get new location from content updater ");
+                int bearing = (int) location.getBearing();
+                onBearingChanged(bearing);
+            }
+
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+                Log.i("debug", "mapUITools get new wind from content updater ");
+                setWindArrowDirection(windDirection);
+            }
+        };
     }
 
     public ContentUpdater getContentUpdater() {

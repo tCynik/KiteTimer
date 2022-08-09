@@ -148,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
 
         infoBarPresenter = new InfoBarPresenter(infoBarTVInterface);
         infoBarPresenter.greetings();
+
+        mapUITools = new MapUIToolsController(defaultMapScale);
         runStatusUIDispatcher();
     }
 
@@ -180,14 +182,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void runStatusUIDispatcher() {
         String[] moduleNames = new String[] {"sailing_tools", "map"};
+        // TODO: need to add here mapManager to transfer new geolocation info into one
         ContentUpdater updaterMap = mapUITools.getContentUpdater();
         ContentUpdater updaterTools = sailingToolsFragment.getContentUpdater();
         ContentUpdater[] contentUpdaters = new ContentUpdater[]{updaterTools, updaterMap};
 
         statusUIModulesDispatcher = new StatusUIModulesDispatcher(moduleNames, contentUpdaters);
-        StatusUiUpdater statusUiUpdater = statusUIModulesDispatcher.getStatusUiUpdater();
-        mapFragment.setStatusUiUpdater(statusUiUpdater);
-        sailingToolsFragment.setStatusUiUpdater(statusUiUpdater);
+        StatusUiUpdater updaterStatusUi = statusUIModulesDispatcher.getStatusUiUpdater();
+        mapFragment.setStatusUiUpdater(updaterStatusUi);
+        sailingToolsFragment.setStatusUiUpdater(updaterStatusUi);
     }
 
     @Override
@@ -338,10 +341,9 @@ public class MainActivity extends AppCompatActivity {
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
                                       Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition,
                                       Button menuTracks) {
-        mapUITools = new MapUIToolsController(defaultMapScale);
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);
-        statusUiUpdater.updateUIModuleStatus("map");
+
         //mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
 
         if (windProvider == WindProvider.DEFAULT) {

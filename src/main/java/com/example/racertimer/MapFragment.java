@@ -17,6 +17,7 @@ import com.example.racertimer.map.MapScrollView;
 
 public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";
+    private final String MODULE_NAME = "map";
 
     private MainActivity mainActivity;
     private StatusUiUpdater statusUiUpdater;
@@ -53,19 +54,38 @@ public class MapFragment extends Fragment {
         btnMenuTracks = view.findViewById(R.id.btn_tracks_menu);
 
         btnFixPosition = view.findViewById(R.id.btn_fix_position);
+
+        mainActivity = (MainActivity) getActivity();
+        mainActivity.setMapFragment(this);
+
         return view;
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        exportViewsIntoSailingTools();
+        exportTracksLayoutIntoTrackPainter();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (mainActivity == null) {
-            Log.i("bugfix", " mapFragment asking renew wind first launch " );
-            mainActivity = (MainActivity) getActivity();
-            mainActivity.setMapFragment(this);
-            exportViewsIntoSailingTools();
-            exportTracksLayoutIntoTrackPainter();
         }
+        statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
+    }
+
+    public void setStatusUiUpdater(StatusUiUpdater statusUiUpdater) {
+        this.statusUiUpdater = statusUiUpdater;
     }
 
     private void exportViewsIntoSailingTools() {

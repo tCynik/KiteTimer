@@ -22,9 +22,12 @@ public class StatusUIModulesDispatcher {
     private WindProvider lastProvider = null;
 
     public StatusUIModulesDispatcher (String[] moduleNames, ContentUpdater[] contentUpdaters) {
+
+        Log.i("bugfix", " dispatcher: running status dispatcher ");
         this.moduleNames = moduleNames;
         moduleStatus = new boolean[moduleNames.length];
         this.contentUpdaters = contentUpdaters;
+        initStatusUpdater();
         initInterfaces();
     }
 
@@ -37,6 +40,8 @@ public class StatusUIModulesDispatcher {
     }
 
     public StatusUiUpdater getStatusUiUpdater() {
+        if (statusUiUpdater == null)
+            Log.i(PROJECT_LOG_TAG, " debug. status updater is null! ");
         return statusUiUpdater;
     }
 
@@ -57,11 +62,12 @@ public class StatusUIModulesDispatcher {
                 sendWindToAllModules(windDirection, provider);
             }
         };
+    }
 
+    private void initStatusUpdater() {
         statusUiUpdater = new StatusUiUpdater() {
             @Override
             public void onStatusChecked(boolean status) {
-
             }
 
             @Override
@@ -73,8 +79,10 @@ public class StatusUIModulesDispatcher {
                     index = indexModuleByName(moduleName);
                     if (lastLocation != null)
                         sendLocationByIndex(lastLocation, index);
-                    if (lastWindDirection != 1000)
+                    if (lastWindDirection != 10000){
                         sendWindByIndex(lastWindDirection, lastProvider, index);
+                        Log.i(PROJECT_LOG_TAG, " first time sending wind direction into module "+moduleName);
+                    }
                 }
             }
         };
@@ -82,8 +90,10 @@ public class StatusUIModulesDispatcher {
 
     private void sendLocationToAllModules(Location location) {
         for (int i =0; i < moduleNames.length; i++) {
-            if (moduleStatus[i])
+            if (moduleStatus[i]) {
                 sendLocationByIndex(location, i);
+                Log.i(PROJECT_LOG_TAG, " sending new location into module "+moduleNames[i]);
+            }
         }
     }
 
@@ -92,6 +102,7 @@ public class StatusUIModulesDispatcher {
     }
 
     private void sendWindToAllModules(int windDirection, WindProvider provider) {
+        Log.i("bugfix", " dispatcher: sending wind to all modules ");
         for (int i =0; i < moduleNames.length; i++) {
             if (moduleStatus[i])
                 sendWindByIndex(windDirection, provider, i);
@@ -99,7 +110,9 @@ public class StatusUIModulesDispatcher {
     }
 
     private void sendWindByIndex(int windDirection, WindProvider provider, int index) {
-        contentUpdaters[index].onWindDirectionChanged(windDirection, provider);
+        Log.i("bugfix", " dispatcher: sending wing to module index = " + index);
+        ContentUpdater currentUpdater = contentUpdaters[index];
+        currentUpdater.onWindDirectionChanged(windDirection, provider);
     }
 
     private int indexModuleByName (String moduleName) {

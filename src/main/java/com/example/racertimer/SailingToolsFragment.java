@@ -95,6 +95,11 @@ public class SailingToolsFragment extends Fragment {
 
 //        MainActivity mainActivity = (MainActivity) getActivity();
 //        mainActivity.setSailingToolsFragment(this);
+        if (mainActivity == null) {
+            mainActivity = (MainActivity) getActivity();
+            mainActivity.setSailingToolsFragment(this);
+        }
+
         initContentUpdater();
         return view;
     }
@@ -111,6 +116,8 @@ public class SailingToolsFragment extends Fragment {
         contentUpdater = new ContentUpdater() {
             @Override
             public void onLocationChanged(Location location) {
+                Log.i("bugfix", "sailingTools get new location from content updater ");
+
                 int bearing = (int) location.getBearing();
                 onBearingChanged(bearing);
                 int velocity = (int) location.getSpeed();
@@ -119,7 +126,8 @@ public class SailingToolsFragment extends Fragment {
 
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
-                onWindDirectionChanged(windDirection, provider);
+                Log.i("bugfix", "sailingTools get new wind from content updater. dir = " +windDirection+", provider = " +provider);
+                SailingToolsFragment.this.onWindDirectionChanged(windDirection, provider);
             }
         };
     }
@@ -127,10 +135,6 @@ public class SailingToolsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mainActivity == null) {
-            mainActivity = (MainActivity) getActivity();
-            mainActivity.setSailingToolsFragment(this);
-        }
         voiceover = new BeepSounds(mainActivity);
         statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
     }
