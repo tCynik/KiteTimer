@@ -64,7 +64,6 @@ public class MapUIToolsController {
         contentUpdater = new ContentUpdater() {
             @Override
             public void onLocationChanged(Location location) {
-                Log.i("bugfix", "mapUITools get new location from content updater ");
                 int bearing = (int) location.getBearing();
                 onBearingChanged(bearing);
             }
@@ -81,14 +80,13 @@ public class MapUIToolsController {
         return contentUpdater;
     }
 
-    public void onBearingChanged (int bearing) {
+    private void onBearingChanged (int bearing) {
         Log.i(PROJECT_LOG_TAG, "bearing on map was changed to "+bearing);
         if (directionArrow != null) directionArrow.setRotation(bearing);
     }
 
     public void setWindArrowDirection(int windDirection) {
         Log.i(PROJECT_LOG_TAG, "wind on map was changed to "+CoursesCalculator.invertCourse(windDirection) );
-        Log.i("bugfix", " mapUiTools: set windDirection = " +windDirection);
         windArrow.setRotation(CoursesCalculator.invertCourse(windDirection));
     }
 

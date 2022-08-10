@@ -11,77 +11,115 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class WindData {
+    private final static String PROJECT_LOG_TAG = "Wind_Data";
+
     private Context context;
+
+    private final int DEFAULT_WIND_DIRECTION = 202; // usual wind in developer's home spot
 
     public WindData (Context context) {
         this.context = context;
     }
 
     public void saveWindData (int windDirection, WindProvider windProvider) {
-        SavedWindState savedWindState = new SavedWindState(windDirection, windProvider);
-        outputWindStatus(savedWindState);
-        Log.i("bugfix", " windData: saving. wind = " +windDirection+", provider = " +windProvider);
+        if (windProvider == WindProvider.CALCULATED || windProvider == WindProvider.MANUAL) {
+            SavedWindState savedWindState = new SavedWindState(windDirection, windProvider);
+            outputWindStatus(savedWindState);
+        }
     }
 
     private void outputWindStatus (SavedWindState savedWindState) {
+        Log.i(PROJECT_LOG_TAG, " Try to save windState: ");
         try {
             FileOutputStream fileOutputStream = context.openFileOutput("saved.last_wind_dir.bin", Context.MODE_PRIVATE);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(savedWindState);
             objectOutputStream.close();
             fileOutputStream.close();
-            Log.i("bugfix", " windData: Data saved successful ");
+            Log.i(PROJECT_LOG_TAG, "    ...Data saved successful ");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            Log.i("bugfix", " windData: ERROR: file not found ");
+            Log.i(PROJECT_LOG_TAG, "    ...ERROR: file not found ");
         } catch (IOException e) {
             e.printStackTrace();
-            Log.i("bugfix", " windData: ERROR: IO exception ");
+            Log.i(PROJECT_LOG_TAG, "    ...ERROR: IO exception ");
         }
     }
 
     public void returnWindData (WindChangedHerald windChangedHerald) {
-        int windDirection = 10000;
+        int windDirection = DEFAULT_WIND_DIRECTION;
         WindProvider windProvider = WindProvider.DEFAULT;
         SavedWindState savedWindState = loadWindData();
         if (savedWindState != null) {
-            windDirection = 270;//savedWindState.getWindDirection();
-            windProvider = savedWindState.getWindProvider();
+            savedWindState.getWindDirection();
+            windProvider = analyzeProviderActuality(savedWindState);
         }
-        Log.i("bugfix", " windData: Data loaded. wind = " + windDirection+ ", provider = " +windProvider);
         windChangedHerald.onWindDirectionChanged(windDirection, windProvider);
+    }
+
+    private WindProvider analyzeProviderActuality(SavedWindState savedWindState) {
+        /** аналаиз актуальности данных по ветру
+         * тип данных \ сегодня  \  раньше
+         * -------------------------------------
+         * CALCULATED \ как есть \ HISTORY
+         * MANUAL     \ как есть \ HISTORY
+         * HISTORY - неприменимо, не подлежит сохранению
+         * DEFAULT - если нет никаких данных, не подлежит сохранению
+         * FORECAST - актуально только сейчас, не подлежит сохранению
+         * */
+        WindProvider windProvider;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd.");
+        String savedInstanceDate = dateFormat.format(savedWindState.getDate());
+        String currentDate = dateFormat.format(Calendar.getInstance().getTime());
+        if (savedInstanceDate.equals(currentDate)) windProvider = savedWindState.getWindProvider();
+        else windProvider = WindProvider.HISTORY;
+        return windProvider;
     }
 
     private SavedWindState loadWindData () {
         SavedWindState state = null;
+        Log.i(PROJECT_LOG_TAG, " Try to load the wind data from memory...");
         try{
-            FileInputStream fileInputStream = context.openFileInput("saved.lst_wind_dir.bin");
+            FileInputStream fileInputStream = context.openFileInput("saved.last_wind_dir.bin");
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             SavedWindState savedWindState = (SavedWindState) objectInputStream.readObject();
             objectInputStream.close();
             fileInputStream.close();
             state = savedWindState;
+            Log.i(PROJECT_LOG_TAG, "    ...Wind data read successful");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Log.i(PROJECT_LOG_TAG, "    ...ERROR: file not found");
         } catch (IOException e) {
             e.printStackTrace();
+            Log.i(PROJECT_LOG_TAG, "    ...ERROR: IO exception");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+            Log.i(PROJECT_LOG_TAG, "    ...ERROR: ClassNotFoundException");
         }
         return state;
     }
 }
 
-class SavedWindState {
+class SavedWindState implements Serializable {
     private int windDirection;
     private WindProvider windProvider;
+    private Date date;
 
     public SavedWindState(int windDirection, WindProvider windProvider) {
         this.windDirection = windDirection;
         this.windProvider = windProvider;
-        Log.i("bugfix", " windState: creating new instance ");
+        date = Calendar.getInstance().getTime();
+    }
+
+    public Date getDate() {
+        return date;
     }
 
     public int getWindDirection() {

@@ -43,7 +43,6 @@ import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
 import com.example.racertimer.map.MapUIToolsController;
-import com.example.racertimer.multimedia.BeepSounds;
 import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
@@ -77,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
     public MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 
-    private BeepSounds voiceover;
 
     private int bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
 
@@ -91,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
     private Location location = null; // текущее положение
 
     private boolean isRaceStarted = false; // флаг того то, происходит сейчас гонка
-    public StatusUiUpdater statusUiUpdater;
 
     private Intent intentLocationService; // интент для создания сервиса геолокации
     private BroadcastReceiver locationBroadcastReceiver;
@@ -114,13 +111,6 @@ public class MainActivity extends AppCompatActivity {
         findViews();
         setClickListeners();
 
-        // TODO: при первом запуске приходится вручную обновлять установленный ветер. Нужно чтобы
-        //  это происходило автоматически. + установка ветра при первом включении как в прошлый
-        //  раз или если есть сеть - по прогнозу
-
-        voiceover = new BeepSounds(this);
-//        sailingToolsFragment.setVoiceover(voiceover);
-
         createLocationService();
 
         windChangedHerald = initWindChangeHerald();
@@ -133,7 +123,14 @@ public class MainActivity extends AppCompatActivity {
                 infoBarPresenter.updateTheBar(timerStatus);
             }
         };
+        initInfoBar();
 
+        mapUITools = new MapUIToolsController(defaultMapScale);
+        runStatusUIDispatcher();
+        loadWindData();
+    }
+
+    private void initInfoBar() {
         TextViewController infoBarTVInterface = new TextViewController() {
             @Override
             public void updateTextView(String nexText) {
@@ -145,36 +142,23 @@ public class MainActivity extends AppCompatActivity {
                 return (String) racingTimerTV.getText();
             }
         };
-
         infoBarPresenter = new InfoBarPresenter(infoBarTVInterface);
         infoBarPresenter.greetings();
-
-        mapUITools = new MapUIToolsController(defaultMapScale);
-        runStatusUIDispatcher();
     }
-
-//            if (savedInstanceState == null) {
-//        windProvider = WindProvider.DEFAULT;
-//        Log.i("bugfix", " main onCreate, provider = " +windProvider );
-//        // TODO: крч это говно так не работает. В любом случае после сворачивания приложения
-//        //  перезапускает провайдера по дефолту. Нужно разбираться с перезапуском.
-//    }
 
     @Override
     protected void onStart() {
         super.onStart();
         if (location == null) {
-            initBroadcastListener(); // запускаем слушатель новых геоданных
+            initBroadcastListener();
             bindToLocationService();
         }
         if (locationService != null) locationService.appWasResumedOrStopped(true);
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     public void setMapFragment (MapFragment mapFragment) {
@@ -197,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        //Log.i("bugfix", " mainActivity: app is stopped ");
         locationService.appWasResumedOrStopped(false);
         super.onStop();
     }
@@ -253,10 +236,6 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-//    public void onSailingToolsReady () {
-//        loadWindData();
-//    }
-
     private void loadWindData() {
         WindChangedHerald windChangedHerald = new WindChangedHerald() {
             @Override
@@ -270,7 +249,6 @@ public class MainActivity extends AppCompatActivity {
         };
 
         if (windData == null) windData = new WindData(this);
-        Log.i("bugfix", " main: asking callback with loaded WindData ");
         windData.returnWindData(windChangedHerald);
     }
 
@@ -337,7 +315,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void setSailingToolsFragment(SailingToolsFragment sailingToolsFragment) {
         this.sailingToolsFragment = sailingToolsFragment;
-        sailingToolsFragment.setVoiceover(voiceover);
     }
 
     public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
@@ -345,12 +322,6 @@ public class MainActivity extends AppCompatActivity {
                                       Button menuTracks) {
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);
-
-        //mapUITools.setWindArrowDirection(CoursesCalculator.invertCourse(windDirection));
-
-        if (windProvider == WindProvider.DEFAULT) {
-            Log.i("bugfix", " Main: provider = "+windProvider );
-        }
 
         menuTracks.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -464,10 +435,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    public void updateWindDirectionFromService() { // получение ветра для событий, требующих этого
-//        if (locationService != null) locationService.updateWindDirection();
-//    }
-
     private void stopRace() { // остановка гонки
         super.onBackPressed();
     }
@@ -580,25 +547,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void onWindDirectionChanged (int updatedWindDirection, WindProvider provider) { // смена направления ветра
         if (windData == null) windData = new WindData(this);
-        Log.i("bugfix", " main: saving windData: wind = " +updatedWindDirection+", provider = " +provider);
         windData.saveWindData(updatedWindDirection, provider);
         proceedWindChanging(updatedWindDirection, provider);
     }
 
     private void proceedWindChanging(int updatedWindDirection, WindProvider provider) {
         Log.i(PROJECT_LOG_TAG, "wind direction changed by provider: "+provider);
-        Log.i("bugfix", " main: set provider = " +provider);
         windProvider = provider;
         windDirection = updatedWindDirection;
         statusUIModulesDispatcher.getWindChangedHerald().onWindDirectionChanged(updatedWindDirection, provider);
-        sailingToolsFragment.onWindDirectionChanged(updatedWindDirection, provider);
-        // TODO: переделать на передачу ветра и провайдера с помощью интерфейса
-        mapUITools.setWindArrowDirection(updatedWindDirection);
-
-//        if (mapUITools != null) {
-//            Log.i(PROJECT_LOG_TAG, "changing the wind in the map to "+windDirection);
-//            mapUITools.setWindArrowDirection(updatedWindDirection);
-//        }
     }
 
     public void manuallyWindManager () { // установка направления ветра вручную
@@ -630,29 +587,12 @@ public class MainActivity extends AppCompatActivity {
             infoBarPresenter.updateTheBar("gps");
             //TODO: for now the latitude/longitude are unuseful. think about to replace it on single boolean
         }
-//        else {
-//            latitude = location.getLatitude();
-//            longitude = location.getLongitude();
-//        }
-//        Log.i(PROJECT_LOG_TAG+"_coord", "location coordinates: latitude= "+latitude + ", longitude = " + longitude);
 
+        statusUIModulesDispatcher.getLocationChanger().onLocationChanged(location);
 
         if (location.hasSpeed()) {
-            statusUIModulesDispatcher.getLocationChanger().onLocationChanged(location);
-            Log.i("racer_timer_painter", "sending location to trackpainter from main activity" );
             if (!mapManager.isRecordingInProgress() & isRaceStarted) mapManager.beginNewCurrentTrackDrawing();
-            mapManager.onLocationChanged(location);
-            tracksDataManager.onLocationChanged(location);
-            tempVelocity = (double) location.getSpeed()*3.6;
-            int velocity = (int) tempVelocity;
-            if (sailingToolsFragment != null) {
-                Log.i("racer_timer", " sending into sailing tools velocity = "+ velocity);
-                sailingToolsFragment.onVelocityChanged(velocity);
-            }
-        } else sailingToolsFragment.onVelocityChanged(0);
-        bearing = courseAverage((int) location.getBearing()); // с учетом усреднения
-        if (sailingToolsFragment != null) sailingToolsFragment.onBearingChanged(bearing);
-        if (mapUITools != null) mapUITools.onBearingChanged(bearing);
+        }
     }
 
     public void muteChangedStatus(boolean b) { // выключение звука пищалки
@@ -697,16 +637,10 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 
-interface InfoBarUpdater {
-    void updateInfoBarStatus (String infoBarStatus);
-}
-
 interface StatusUiUpdater {
     void onStatusChecked(boolean status);
     void updateUIModuleStatus(String moduleName, boolean isItReady);
 }
-
-
 // TODO: make the track player to simulate riding recorded tracks on map, tools, and wind calculater.
 //  Implement one with the UI testing
 
@@ -717,6 +651,4 @@ interface StatusUiUpdater {
 //       если началась гонка, включаем запуск сравнения, если нет данных по ручному ветру -
 // исходим из того, что у нас правый бейдевинд
 //       либо запускаем если выбран чек поле "запуск сравнения"
-
-// TODO: make no GPS signal info in map
 

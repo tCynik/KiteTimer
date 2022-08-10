@@ -116,17 +116,17 @@ public class SailingToolsFragment extends Fragment {
         contentUpdater = new ContentUpdater() {
             @Override
             public void onLocationChanged(Location location) {
-                Log.i("bugfix", "sailingTools get new location from content updater ");
-
                 int bearing = (int) location.getBearing();
                 onBearingChanged(bearing);
-                int velocity = (int) location.getSpeed();
+                int velocity = 0;
+                if (location.hasSpeed()) {
+                    velocity = (int) (location.getSpeed()*3.6);
+                }
                 onVelocityChanged(velocity);
             }
 
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
-                Log.i("bugfix", "sailingTools get new wind from content updater. dir = " +windDirection+", provider = " +provider);
                 SailingToolsFragment.this.onWindDirectionChanged(windDirection, provider);
             }
         };
@@ -153,7 +153,7 @@ public class SailingToolsFragment extends Fragment {
      * блок управляющийх воздействий по новым данным
      */
 
-    public void onVelocityChanged(int valueVelocity) { // новые данные по скорости
+    private void onVelocityChanged(int valueVelocity) { // новые данные по скорости
         Log.i(PROJECT_LOG_TAG, " velocity in the tools fragment changed. New one = "+ valueVelocity);
         if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
             renewVelocity(valueVelocity);
@@ -166,7 +166,7 @@ public class SailingToolsFragment extends Fragment {
             updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }
-    public void onBearingChanged(int valueBearing) { // новые данные по курсу
+    private void onBearingChanged(int valueBearing) { // новые данные по курсу
         Log.i(PROJECT_LOG_TAG, " bearing in the tools fragment changed. New one = "+ valueBearing);
         if (valueBearing != bearing) {// если вновь поступившие цифры отличаются от старых
             renewBearing(valueBearing);
@@ -176,7 +176,6 @@ public class SailingToolsFragment extends Fragment {
     public void onWindDirectionChanged(int valueWindDirection, WindProvider provider) { // новые данные по направлению ветра
         Log.i(PROJECT_LOG_TAG, " wind dir in the tools fragment changed. New one = "+ valueWindDirection+
                 " provider = " + provider);
-        Log.i("bugfix", " Sailing tools: provider = " +provider);
         if (valueWindDirection != windDirection) {
             renewWindDirection(valueWindDirection);
             updateVmgByNewWindOrVelocity();

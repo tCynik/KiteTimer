@@ -22,8 +22,6 @@ public class StatusUIModulesDispatcher {
     private WindProvider lastProvider = null;
 
     public StatusUIModulesDispatcher (String[] moduleNames, ContentUpdater[] contentUpdaters) {
-
-        Log.i("bugfix", " dispatcher: running status dispatcher ");
         this.moduleNames = moduleNames;
         moduleStatus = new boolean[moduleNames.length];
         this.contentUpdaters = contentUpdaters;
@@ -102,7 +100,6 @@ public class StatusUIModulesDispatcher {
     }
 
     private void sendWindToAllModules(int windDirection, WindProvider provider) {
-        Log.i("bugfix", " dispatcher: sending wind to all modules ");
         for (int i =0; i < moduleNames.length; i++) {
             if (moduleStatus[i])
                 sendWindByIndex(windDirection, provider, i);
@@ -110,7 +107,6 @@ public class StatusUIModulesDispatcher {
     }
 
     private void sendWindByIndex(int windDirection, WindProvider provider, int index) {
-        Log.i("bugfix", " dispatcher: sending wing to module index = " + index);
         ContentUpdater currentUpdater = contentUpdaters[index];
         currentUpdater.onWindDirectionChanged(windDirection, provider);
     }

@@ -63,15 +63,16 @@ public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChan
     }
 
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (seekBar == bearingSB) {
-            int bearing = i;
-            mainActivity.sailingToolsFragment.onBearingChanged(bearing);
-            mainActivity.mapUITools.onBearingChanged(bearing);
-        }
-        if (seekBar == velocitySB) {
-            int velocity = i;
-            mainActivity.sailingToolsFragment.onVelocityChanged(velocity);
-        }
+//        if (seekBar == bearingSB) {
+//            int bearing = i;
+//            mainActivity.sailingToolsFragment.onBearingChanged(bearing);
+//            mainActivity.mapUITools.onBearingChanged(bearing);
+//        }
+//        if (seekBar == velocitySB) {
+//            int velocity = i;
+//            mainActivity.sailingToolsFragment.onVelocityChanged(velocity);
+//        }
+        // TODO: вроде как отображение всякого налажено. пора убирать этот функционал
     }
 
     @Override
