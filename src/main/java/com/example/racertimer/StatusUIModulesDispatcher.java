@@ -29,6 +29,10 @@ public class StatusUIModulesDispatcher {
         initInterfaces();
     }
 
+    public void sendWindToContentUpdater(ContentUpdater contentUpdater) {
+        contentUpdater.onWindDirectionChanged(lastWindDirection, lastProvider);
+    }
+
     public LocationChanger getLocationChanger () {
         return locationChanger;
     }

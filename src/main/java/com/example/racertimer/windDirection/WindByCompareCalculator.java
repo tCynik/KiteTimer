@@ -40,6 +40,7 @@ public class WindByCompareCalculator {
 
     public void setCalculatorStatus(boolean isItOn) {
         isCalculatorOn = isItOn;
+        Log.i(PROJECT_LOG_TAG, " Wind calculator changing work status to " +isCalculatorOn);
         // TODO: определиться с логикой запуска/останова обработки
     }
 
@@ -47,21 +48,24 @@ public class WindByCompareCalculator {
      * определяем, является ли галс первым из серии бейдевинда. Если является - расчет ведется заново.
      * каждый галс проверяется на отход от минимального радиуса для исключения ошибки при развороте не оверштаг.
      * Пока отход не зафиксирован, данный галс в расчет не принимается.
-     * Серия апвинда заканчивается переходом в бакшатг (с выходом из радиуса)
-     * При анализе серии галсов апвинд смотрим, меняется ли галс.
      * При выходе очередного галса из радиуса и если зафиксирован противоположный бейдевинд,
      * пересчитывается направление ветра. От текущего галса берутся две точки (первая, и точка выхода из радиуса),
      * для предыдущего галса - лучшее значение, на их основе получаем ветер.
      * При дальнейшем движении этим галсом улучшаем значение угла к ветру по лучшему ВМГ.
      * Каждый пересчет угла для любог бейдевинда - пересчет и обновление данных по ветру.
+     * Серия апвинда (и расчет) заканчивается переходом в бакшатг (после выхода из радиуса)
+     * При анализе серии галсов апвинд смотрим, меняется ли галс.
      */
     public void onLocationChanged (Location location) { // прием новых данных по геолокации
         if (isCalculatorOn) {
-            Log.i(PROJECT_LOG_TAG, " got new location velocity = "+ location.getSpeed());
             TackDirection tackDirection = CoursesCalculator.numberOfTack(windDirection, (int) location.getBearing());
-            if (isUpwind(tackDirection))
-                if (currentTack == null) // первый галс из серии бейдевиндов
+            Log.i(PROJECT_LOG_TAG, " got new location to calculate wind. Tack is " +tackDirection);
+            if (isUpwind(tackDirection)) {
+                if (currentTack == null) { // первый галс из серии бейдевиндов
+                    Log.i(PROJECT_LOG_TAG, " bugfix: starting the first tack ");
                     currentTack = firstTackCreateInstances(tackDirection, location);
+                }
+            }
             if (isDeadZoneEnded(location)){
                 if (isTackChanged(tackDirection))
                     registerTackChanged(tackDirection, location);
@@ -76,6 +80,7 @@ public class WindByCompareCalculator {
         if (tackDirection == TackDirection.UPWIND_LEFT) {
             if (upwindLeftTack == null)
                 upwindLeftTack = new TackMoving.UpwindLeft(location);
+            // TODO: what's about saving counter-tack?
             tackMoving = upwindLeftTack;
         }
         if (tackDirection == TackDirection.UPWIND_RIGHT) {
@@ -97,7 +102,7 @@ public class WindByCompareCalculator {
 
     private boolean isTackChanged(TackDirection tackDirection){
         if (tackDirection != lastTackDirection) { // если новый галс не равен прежнему
-            Log.i("PROJECT_LOG_TAG", " tack was changed from "+ lastTackDirection +" to "+tackDirection);
+            Log.i(PROJECT_LOG_TAG, " tack was changed from "+ lastTackDirection +" to "+tackDirection);
             return true;
         }
         else return false;
@@ -146,6 +151,7 @@ public class WindByCompareCalculator {
         Log.i(PROJECT_LOG_TAG, " recalculating. LeftBearing = "+ bearingLeft +", right one = "+bearingRight);
 
         windDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingLeft, bearingRight);
+        Log.i(PROJECT_LOG_TAG, " calculated wind direction is = "+ windDirection +", sending the broadcast ");
         windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
 
         forceCalculating = false;

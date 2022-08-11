@@ -17,6 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
+import com.example.racertimer.ContentUpdater;
 import com.example.racertimer.windDirection.WindByCompareCalculator;
 import com.example.racertimer.windDirection.WindByStatistics;
 import com.example.racertimer.windDirection.WindChangedHerald;
@@ -43,6 +44,7 @@ public class LocationService extends Service {
 
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private ContentUpdater contentUpdater;
 
     private int windDirection = 10000;
     // TODO: need to make channel to transfer the wind direction into location service
@@ -67,12 +69,31 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        initContentUpdater();
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is created");
         makeWindChangeHerald(); // экземпляр интерфейса для формировани бродкаста с новым ветром
         selectWindCalculator(selectedWindCalculationWay);
 
         createLocationListener();
         requestLocationUpdates();
+    }
+
+    public ContentUpdater getContentUpdater() {
+        return contentUpdater;
+    }
+
+    private void initContentUpdater() {
+        contentUpdater = new ContentUpdater() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+            }
+
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+                setWindDirection(windDirection);
+            }
+        };
     }
 
     private void makeWindChangeHerald() {
@@ -226,4 +247,5 @@ public class LocationService extends Service {
         }
     }
 }
+
 

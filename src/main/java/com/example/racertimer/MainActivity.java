@@ -166,17 +166,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void runStatusUIDispatcher() {
-        String[] moduleNames = new String[] {"sailing_tools", "map_tools", "map"};
         // TODO: need to add here mapManager to transfer new geolocation info into one
         ContentUpdater updaterMapTools = mapUITools.getContentUpdater();
         ContentUpdater updaterTools = sailingToolsFragment.getContentUpdater();
         ContentUpdater updaterMap = mapManager.getContentUpdater();
-        ContentUpdater[] contentUpdaters = new ContentUpdater[]{updaterTools, updaterMapTools, updaterMap};
+        ContentUpdater[] contentUpdaters = new ContentUpdater[]{
+                updaterTools,
+                updaterMapTools,
+                updaterMap};
+
+        String[] moduleNames = new String[] {
+                "sailing_tools",
+                "map_tools",
+                "map"};
 
         statusUIModulesDispatcher = new StatusUIModulesDispatcher(moduleNames, contentUpdaters);
         StatusUiUpdater updaterStatusUi = statusUIModulesDispatcher.getStatusUiUpdater();
         mapFragment.setStatusUiUpdater(updaterStatusUi);
         sailingToolsFragment.setStatusUiUpdater(updaterStatusUi);
+    }
+
+    private void serviceIsRan() {
+        ContentUpdater updaterLocationService = new ContentUpdater() {
+            @Override
+            public void onLocationChanged(Location location) {
+            }
+
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+                locationService.setWindDirection(windDirection);
+            }
+        };
+        statusUIModulesDispatcher.sendWindToContentUpdater(updaterLocationService);
+    }
+
+    public StatusUiUpdater getUpdaterStatusUI() {
+        return statusUIModulesDispatcher.getStatusUiUpdater();
     }
 
     @Override
@@ -490,6 +515,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("racer_timer", "Location service binded ");
                 binder = (LocationService.MyBinder) iBinder; // приводим биндер к кастомному биндеру с методом связи
                 locationService = ((LocationService.MyBinder) binder).getService(); // получаем экземпляр нашего сервиса через биндер
+                serviceIsRan();
             }
 
             @Override
@@ -541,10 +567,6 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
     }
 
-    private void setStartedWindDirection(int windDirection) {
-        loadWindData();
-    }
-
     private void onWindDirectionChanged (int updatedWindDirection, WindProvider provider) { // смена направления ветра
         if (windData == null) windData = new WindData(this);
         windData.saveWindData(updatedWindDirection, provider);
@@ -564,7 +586,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
                 MainActivity.this.onWindDirectionChanged(windDirection, provider);
-                locationService.setWindDirection(windDirection);
             }
         };
         ManuallyWind manuallyWind = new ManuallyWind(this, windDirection, windChangedHerald);
@@ -637,10 +658,6 @@ public class MainActivity extends AppCompatActivity {
     }
 }
 
-interface StatusUiUpdater {
-    void onStatusChecked(boolean status);
-    void updateUIModuleStatus(String moduleName, boolean isItReady);
-}
 // TODO: make the track player to simulate riding recorded tracks on map, tools, and wind calculater.
 //  Implement one with the UI testing
 
