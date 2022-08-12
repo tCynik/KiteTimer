@@ -22,7 +22,6 @@ public class WindByCompareCalculator {
     private int windDirection; // направление ветра, 10000 = нет данных
     private TackDirection lastTackDirection; // последний номер галса: 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
     private WindChangedHerald windChangedHerald; // экземпляр интерфейса для отправки измененного направления
-    private CalculatedWindUpdater roughWindUpdater, dynamicWindUpdater;
 
     public WindByCompareCalculator(WindChangedHerald windChangedHerald, int windDirection) {
         this.windChangedHerald = windChangedHerald;
@@ -31,11 +30,6 @@ public class WindByCompareCalculator {
 
     public void setWindDirection (int windDirection) {
         this.windDirection = windDirection;
-    }
-
-    public void forceCalculatingWithNoInformation () {
-        forceCalculating = true;
-        setCalculatorStatus(true);
     }
 
     public void setCalculatorStatus(boolean isItOn) {
@@ -62,16 +56,26 @@ public class WindByCompareCalculator {
             Log.i(PROJECT_LOG_TAG, " got new location to calculate wind. Tack is " +tackDirection);
             if (isUpwind(tackDirection)) {
                 if (currentTack == null) { // первый галс из серии бейдевиндов
-                    Log.i(PROJECT_LOG_TAG, " bugfix: starting the first tack ");
                     currentTack = firstTackCreateInstances(tackDirection, location);
                 }
             }
             if (isDeadZoneEnded(location)){
+                if (isUpwind(tackDirection))
+                    analyzeFirstTimeSecondPoint(location);
                 if (isTackChanged(tackDirection))
                     registerTackChanged(tackDirection, location);
-                else if (isUpwind(tackDirection))
+                else if (isUpwind(tackDirection)) {
                     keepGoingUpwindAnalyse(location);
+                }
             }
+        }
+    }
+
+    private void analyzeFirstTimeSecondPoint (Location location) {
+        if (!currentTack.isSecondPointExist()) { // первая точка текущего галса
+            currentTack.initSecondPoint(location);
+            if (upwindLeftTack != null && upwindRightTack != null)
+                recalculateDirection(upwindRightTack, upwindLeftTack);
         }
     }
 
@@ -115,39 +119,40 @@ public class WindByCompareCalculator {
     }
 
     private void keepGoingUpwindAnalyse(Location location) {
-        if (upwindLeftTack != null && upwindRightTack != null)
+        /**
+         * варианты действий:
+         *                          первый галс \ второй галс
+         * второй точки пока нет \ ставим точку \ ставим точку, пересчитываем
+         * вторая точка уже есть \ ничего       \ проверяем ВМГ, если обновили максимум, пересчитываем
+         */
+        if (upwindLeftTack != null && upwindRightTack != null) {
             if (currentTack.checkAndUpdateMaxVmg(location, windDirection))
                 recalculateDirection(upwindRightTack, upwindLeftTack);
+        }
     }
 
     private void registerTackChanged(TackDirection tackDirection, Location location) { // если у нас изменился номер курса
-        if (!isUpwind(tackDirection)) {
+        if (!isUpwind(tackDirection)) { // если идем в бакштаг, все сбрасываем, ждем бейдевинда
             upwindLeftTack = null;
             upwindRightTack = null;
             currentTack = null;
         }
-        else {
+        else { // если идем в бейдевинд, считаем
             if (tackDirection == TackDirection.UPWIND_LEFT) {
                 upwindLeftTack = new TackMoving.UpwindLeft(location);
                 currentTack = upwindLeftTack;
-                if (upwindRightTack != null) {
-                    recalculateDirection(upwindRightTack, upwindLeftTack);
-                }
             }
             if (tackDirection == TackDirection.UPWIND_RIGHT) {
                 upwindRightTack = new TackMoving.UpwindRight(location);
                 currentTack = upwindRightTack;
-                if (upwindLeftTack != null) {
-                    recalculateDirection(upwindRightTack, upwindLeftTack);
-                }
             }
         }
         lastTackDirection = tackDirection;
     }
 
     private void recalculateDirection (TackMoving tackRight, TackMoving tactLeft) {
-        int bearingLeft = tactLeft.getBearing();
-        int bearingRight = tackRight.getBearing();
+        int bearingLeft = tactLeft.getBestBearing();
+        int bearingRight = tackRight.getBestBearing();
         Log.i(PROJECT_LOG_TAG, " recalculating. LeftBearing = "+ bearingLeft +", right one = "+bearingRight);
 
         windDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingLeft, bearingRight);

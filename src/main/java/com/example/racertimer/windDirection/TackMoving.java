@@ -8,34 +8,38 @@ import com.example.racertimer.Instruments.CoursesCalculator;
 public abstract class TackMoving {
     private final static String PROJECT_LOG_TAG = "racer_timer_windCompare";
     private final Location firstLocation;
-    private Location endLocation;
-    private Location bestVmgLocation;
+    private String tackName;
+    private Location secondLocation = null;
     private int bestVmg = 0;
     private int bearingWithBestVmg = 10000;
 
-    public TackMoving(Location location) {
+    public TackMoving(Location location, String tackName) {
         firstLocation = location;
+        this.tackName = tackName;
     }
 
-    protected int getBearing () {
-        int bearing = 10000;
-        if (bearingWithBestVmg != 10000) bearing = bearingWithBestVmg;
-        else if (endLocation != null) firstLocation.bearingTo(endLocation);
-        return bearing;
+    protected int getBestBearing() {
+        return bearingWithBestVmg;
+
+//        int bearing = 10000;
+//        if (bearingWithBestVmg != 10000) bearing = bearingWithBestVmg;
+//        else if (secondLocation != null) firstLocation.bearingTo(secondLocation);
+//        return bearing;
     }
 
-    protected void changeSecondPoint(Location location) {
-        endLocation = location;
+    protected void initSecondPoint(Location location) {
+        secondLocation = location;
+        bearingWithBestVmg = (int) location.getBearing();
+        Log.i(PROJECT_LOG_TAG, tackName+" has it secondPoint first time. Now best bearing = " +bearingWithBestVmg);
     }
 
     protected boolean checkAndUpdateMaxVmg(Location location, int windDirection) {
-        endLocation = location;
         int currentBearing = (int) location.getBearing();
         int currentVelocity = (int) location.getSpeed();
         int currentVmg = CoursesCalculator.VMGByWindBearingVelocity(windDirection, currentBearing, currentVelocity);
         if (currentVmg > bestVmg) {
             bestVmg = currentVmg;
-            Log.i(PROJECT_LOG_TAG, " current tack got new best VMG = " +bestVmg);
+            Log.i(PROJECT_LOG_TAG, " current "+tackName+" got new best VMG = " +bestVmg);
             bearingWithBestVmg = currentBearing;
             return true;
         }
@@ -49,21 +53,24 @@ public abstract class TackMoving {
             deadZoneEnded = true;
             Log.i(PROJECT_LOG_TAG, " tack dead zone = "+deadRadius+"m is ended! " );
         }
-
         return deadZoneEnded;
+    }
+
+    public boolean isSecondPointExist() {
+        return secondLocation != null;
     }
 
     public static class UpwindRight extends TackMoving {
         public UpwindRight(Location location) {
-            super(location);
+            super(location, "rightTack");
             Log.i(PROJECT_LOG_TAG, " new upwind right tack instance was created ");
         }
     }
 
     public static class UpwindLeft extends TackMoving {
         public UpwindLeft(Location location) {
-            super(location);
-            Log.i(PROJECT_LOG_TAG, " new upwind right tack instance was created ");
+            super(location, "leftTack");
+            Log.i(PROJECT_LOG_TAG, " new upwind left tack instance was created ");
         }
     }
 }
