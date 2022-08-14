@@ -92,8 +92,6 @@ public class SailingToolsFragment extends Fragment {
             }
         });
 
-//        MainActivity mainActivity = (MainActivity) getActivity();
-//        mainActivity.setSailingToolsFragment(this);
         if (mainActivity == null) {
             mainActivity = (MainActivity) getActivity();
             mainActivity.setSailingToolsFragment(this);
@@ -184,7 +182,7 @@ public class SailingToolsFragment extends Fragment {
                     windTV.setTextColor(Color.RED);
                     break;
                 case HISTORY:
-                    windTV.setTextColor(Color.GRAY);
+                    windTV.setTextColor(Color.RED);
                     break;
                 case FORECAST:
                     windTV.setTextColor(Color.GREEN);

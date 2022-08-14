@@ -56,10 +56,9 @@ public class MainActivity extends AppCompatActivity {
     private final static String PROJECT_LOG_TAG = "racer_timer_main";
     final String BROADCAST_ACTION = "com.example.racertimer.action.new_location"; // значение для фильтра приемника
 
-    final int DEFAULT_WIND_DIRECTION = 135; // usual wind direction on the main developer's spot "Shumiha"
+    final int DEFAULT_WIND_DIRECTION = 202; // usual wind direction on the main developer's spot "Shumiha"
 
     private Button btnStopStartTimerAndStopRace;
-
     private ImageButton btnMenu;
     private TextView racingTimerTV;
 

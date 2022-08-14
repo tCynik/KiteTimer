@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -21,6 +20,7 @@ public class WindData {
 
     private Context context;
 
+    private final int TIME_WIND_INFORMATION_ACTUALITY = 6;
     private final int DEFAULT_WIND_DIRECTION = 202; // usual wind in developer's home spot
 
     public WindData (Context context) {
@@ -74,11 +74,16 @@ public class WindData {
          * FORECAST   \ актуально только сейчас, не подлежит сохранению
          * */
         WindProvider windProvider;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd.");
-        String savedInstanceDate = dateFormat.format(savedWindState.getDate());
-        String currentDate = dateFormat.format(Calendar.getInstance().getTime());
-        if (savedInstanceDate.equals(currentDate)) windProvider = savedWindState.getWindProvider();
-        else windProvider = WindProvider.HISTORY;
+
+        Date currentTime = Calendar.getInstance().getTime();
+        long savedInstanceTime = savedWindState.getDate().getTime();
+        int timeDifferenceMin = (int) (currentTime.getTime() - savedInstanceTime) / 1000 / 60;
+        if (timeDifferenceMin < TIME_WIND_INFORMATION_ACTUALITY * 60) {
+            windProvider = savedWindState.getWindProvider();
+        }
+        else {
+            windProvider = WindProvider.HISTORY;
+        }
         return windProvider;
     }
 
