@@ -76,7 +76,6 @@ public class SailingToolsFragment extends Fragment {
         View windDialogView = windDialogLayoutInflater.inflate(R.layout.manually_input_wind, null);
 
         resetAllMaximums(); // выставляем в ноль все вьюшки
-        Log.i(PROJECT_LOG_TAG, " fragment tools view was created by onCreateView");
 
         /** установка направления ветра вручную нажатием на поле "ветер" */
 
@@ -185,7 +184,7 @@ public class SailingToolsFragment extends Fragment {
                     windTV.setTextColor(Color.RED);
                     break;
                 case HISTORY:
-                    windTV.setTextColor(Color.GREEN);
+                    windTV.setTextColor(Color.GRAY);
                     break;
                 case FORECAST:
                     windTV.setTextColor(Color.GREEN);

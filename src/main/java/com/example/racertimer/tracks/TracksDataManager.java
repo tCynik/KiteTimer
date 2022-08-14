@@ -2,6 +2,8 @@ package com.example.racertimer.tracks;
 
 import android.location.Location;
 
+import com.example.racertimer.ContentUpdater;
+import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.MainActivity;
 
 import java.text.SimpleDateFormat;
@@ -19,6 +21,7 @@ public class TracksDataManager {
     private TracksSaver tracksSaver;
 
     private MainActivity mainActivity;
+    private ContentUpdater contentUpdater;
 
     private Long currentDate;
 
@@ -28,16 +31,21 @@ public class TracksDataManager {
         trackPoints = new ArrayList<>();
         gpsTrackLoader = new GPSTrackLoader(mainActivity, packageAddress);
         tracksSaver = new TracksSaver(mainActivity);
+        contentUpdater = new ContentUpdater() {
+            @Override
+            public void onLocationChanged(Location location) {
+                TracksDataManager.this.onLocationChanged(location);
+            }
+
+            @Override
+            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
+
+            }
+        };
     }
 
-    public void onLocationChanged (Location location) {
-        if (isTrackRecordingProgress) {
-            trackPoints.add(location);
-        }
-
-        if (currentDate == null) {
-            currentDate = location.getTime();
-        }
+    public ContentUpdater getContentUpdater(){
+        return contentUpdater;
     }
 
     public void beginRecordTrack () {
@@ -59,6 +67,16 @@ public class TracksDataManager {
             trackNameToBeSaved = trackNameUniquer(trackNameToBeSaved);
             askUserToSave(trackNameToBeSaved);
         } else mainActivity.clearCurrentTrack();
+    }
+
+    private void onLocationChanged (Location location) {
+        if (isTrackRecordingProgress) {
+            trackPoints.add(location);
+        }
+
+        if (currentDate == null) {
+            currentDate = location.getTime();
+        }
     }
 
     private String generateTrackName () {

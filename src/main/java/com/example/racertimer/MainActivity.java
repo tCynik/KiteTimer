@@ -170,20 +170,25 @@ public class MainActivity extends AppCompatActivity {
         ContentUpdater updaterMapTools = mapUITools.getContentUpdater();
         ContentUpdater updaterTools = sailingToolsFragment.getContentUpdater();
         ContentUpdater updaterMap = mapManager.getContentUpdater();
+        ContentUpdater updaterDataManager = tracksDataManager.getContentUpdater();
         ContentUpdater[] contentUpdaters = new ContentUpdater[]{
                 updaterTools,
                 updaterMapTools,
-                updaterMap};
+                updaterMap,
+                updaterDataManager};
 
         String[] moduleNames = new String[] {
                 "sailing_tools",
                 "map_tools",
-                "map"};
+                "map",
+                "tracks_data_manager"};
 
         statusUIModulesDispatcher = new StatusUIModulesDispatcher(moduleNames, contentUpdaters);
         StatusUiUpdater updaterStatusUi = statusUIModulesDispatcher.getStatusUiUpdater();
         mapFragment.setStatusUiUpdater(updaterStatusUi);
         sailingToolsFragment.setStatusUiUpdater(updaterStatusUi);
+        StatusUiUpdater dataManagerUpdater = statusUIModulesDispatcher.getStatusUiUpdater();
+        dataManagerUpdater.updateUIModuleStatus("tracks_data_manager", true);
     }
 
     private void serviceIsRan() {
@@ -198,10 +203,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         statusUIModulesDispatcher.sendWindToContentUpdater(updaterLocationService);
-    }
-
-    public StatusUiUpdater getUpdaterStatusUI() {
-        return statusUIModulesDispatcher.getStatusUiUpdater();
     }
 
     @Override
@@ -236,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else { // timer = 0,
                     if (isRaceStarted) { // race = 1 : stop the race
+                        Log.i(PROJECT_LOG_TAG, "bugfix: init save the track ");
                         tracksDataManager.initSavingRecordedTrack();
                     } else { // race = 0, timer = 0 : start the timer
                         deployTimerFragment();

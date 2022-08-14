@@ -69,9 +69,9 @@ public class WindData {
          * -------------------------------------
          * CALCULATED \ как есть \ HISTORY
          * MANUAL     \ как есть \ HISTORY
-         * HISTORY - неприменимо, не подлежит сохранению
-         * DEFAULT - если нет никаких данных, не подлежит сохранению
-         * FORECAST - актуально только сейчас, не подлежит сохранению
+         * HISTORY    \ неприменимо, не подлежит сохранению
+         * DEFAULT    \ если нет никаких данных, не подлежит сохранению
+         * FORECAST   \ актуально только сейчас, не подлежит сохранению
          * */
         WindProvider windProvider;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd.");
