@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
 
     private StatusUIModulesDispatcher statusUIModulesDispatcher;
 
+    private boolean isWindDataFresh = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         infoBarPresenter = new InfoBarPresenter(infoBarTVInterface);
-        infoBarPresenter.greetings();
+        infoBarPresenter.updateTheBar("greetings");
     }
 
     @Override
@@ -576,9 +578,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void proceedWindChanging(int updatedWindDirection, WindProvider provider) {
         Log.i(PROJECT_LOG_TAG, "wind direction changed by provider: "+provider);
+        Toast.makeText(this, "Wind direction was updated", Toast.LENGTH_LONG);
         windProvider = provider;
         windDirection = updatedWindDirection;
         statusUIModulesDispatcher.getWindChangedHerald().onWindDirectionChanged(updatedWindDirection, provider);
+        if (provider == WindProvider.DEFAULT || provider == WindProvider.HISTORY)
+            infoBarPresenter.updateTheBar("set wind");
+        else infoBarPresenter.updateTheBar("wind ok");
+        // TODO: если после запуска вручную ввели новое направление?
     }
 
     public void manuallyWindManager () { // установка направления ветра вручную
@@ -602,6 +609,7 @@ public class MainActivity extends AppCompatActivity {
         //  если нет кординат, прогноз открывается для ранее использованной точки, а при
         //  попытке выбрать current location выходит тост, что нет связи со спутником
         if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
+            Toast.makeText(this, "GPS is online", Toast.LENGTH_LONG);
             this.location = location;
             latitude = location.getLatitude();
 
@@ -638,7 +646,6 @@ public class MainActivity extends AppCompatActivity {
         sailingToolsFragment.startTheRace();
         isRaceStarted = true;
         undeployTimerFragment();
-        infoBarPresenter.unlockTheBar();
         infoBarPresenter.updateTheBar("start");
         locationService.setCalculatorStatus(true);
         btnStopStartTimerAndStopRace.setText("STOP RACE");
