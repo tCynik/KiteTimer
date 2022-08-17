@@ -3,10 +3,15 @@ package com.example.racertimer;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.sql.Statement;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class InfoBarPresenter {
+    private final static String PROJECT_LOG_TAG = "racer_timer_info_bar";
     private final int BLINKING_PERIOD_MILSEC = 1000;
 
     private TextViewController infoBarTVInterface;
@@ -16,47 +21,100 @@ public class InfoBarPresenter {
     private String currentBarStatus = "";
     private String nextStatusAfterUnlock = "empty";
 
-    private TimeMessage lastTimeMessage;
+    private Status currentStatus;
+    private LinkedList<Message> messageList;
+    private LinkedList<BarStatement> statementQueue;
+    private Date nextStatementTime;
+    private Message lastMessage;
 
-    public BarUpdater barUpdater;
+    public BarUpdater barUpdater, statusBarUpdater, messageBarUpdater, warningBarUpdater;
 
 
     public InfoBarPresenter(TextViewController infoBarTVInterface) {
+        initBarUpdaters();
         this.infoBarTVInterface = infoBarTVInterface;
+        updateStartingStatus();
+    }
+
+    public void setInfoBarTVInterface (TextViewController infoBarTVInterface) {
+        this.infoBarTVInterface = infoBarTVInterface;
+        if (currentStatus == null)
+            currentStatus = (Status) statementQueue.get(0);
+        updateBarByStatement(currentStatus);
+    }
+
+    private void updateStartingStatus() {
+        currentStatus = new Status(barUpdater, "No GPS");
+        updateBarByStatement(currentStatus);
+    }
+
+    private void updateBarByStatement(BarStatement barStatement) {
+        if (infoBarTVInterface != null || theBarIsNotLocked) {
+            barStatement.printWithHolding(infoBarTVInterface);
+        }
+        else
+            addToQueue(barStatement);
+    }
+
+    private void addToQueue(BarStatement barStatement) {
+        statementQueue.add(barStatement);
+    }
+
+    private void makeNextMessage() {
+        theBarIsNotLocked = true;
+        BarStatement nextStatement = ejectNextFromQueue();
+        if (nextStatement == null)
+            nextStatement = currentStatus;
+        nextStatement.printWithHolding(infoBarTVInterface);
+    }
+
+    private BarStatement ejectNextFromQueue() {
+        BarStatement nextStatement = null;
+        if (!statementQueue.isEmpty())
+            nextStatement = statementQueue.get(0);
+        statementQueue.remove(0);
+        return nextStatement;
+    }
+
+    void greetings() {
+        Message helloMessage = new Message(barUpdater, "Hello!", 2000);
+        helloMessage.print();
+    }
+
+    private void initBarUpdaters() {
         barUpdater = new BarUpdater() {
             @Override
-            public void instantUpdateStatus(String statusName) {
-                updateTheBar(statusName);
+            public void makeDeferredStatusUpdating(long timeoutMilSec) {
+                theBarIsNotLocked = false;
+                Timer timer = new Timer();
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        makeNextMessage();
+                    }
+                }, timeoutMilSec, 1);
             }
 
             @Override
-            public void setTimer(String timerSrting) {
-
+            public void printMeNow(String message) {
+                infoBarTVInterface.updateTextView(message);
             }
         };
     }
 
-
     public void updateTheBar(String nextBarStatus) {
         String message = "empty";
+        Statement statement;
         switch (nextBarStatus) {
-            case "greetings":
-                greetings();
-            case "stop race":
-                stopRace();
-                //message = "last: " + infoBarTVInterface.getTextFromView();
-                break;
+
+            /** --- STATUSES --- */
             case "cancel race":
-                cancelRace();
+                statement = new Status(barUpdater, "Go chase!");
                 //message = "Go chase!";
                 break;
             case "ready to go":
                 readyToGo();
                 //message = "Go chase!";
-                break;
-            case "timer":
-                initTimer();
-                //message = "Get ready";
                 break;
             case "timer three":
                 timerTicking("THEE!");
@@ -70,6 +128,33 @@ public class InfoBarPresenter {
                 timerTicking("ONE!!!");
                 //message = "ONE!!!";
                 break;
+
+            case "stop race":
+                stopRace();
+                //message = "last: " + infoBarTVInterface.getTextFromView();
+                break;
+
+            /** --- MESSAGES --- */
+
+            case "greetings":
+                greetings();
+                break;
+            case "wind ok":
+                askWindDirection(true);
+                //blinkingNotificationOff();
+                break;
+            case "gps":
+                setGPSOnline();
+//                message = "GPS online";
+//                isGpsConnected = true;
+                break;
+
+            /** --- WARNINGS --- */
+
+            case "timer":
+                initTimer();
+                //message = "Get ready";
+                break;
             case "start":
                 startTheRace();
 //                message = "GO! GO! GO!!!";
@@ -81,17 +166,8 @@ public class InfoBarPresenter {
                 Log.i("bugfix", "call the blinky to set wind");
                 blinkingNotificationOn("SET WIND DIR!");
                 break;
-            case "wind ok":
-                askWindDirection(true);
-                //blinkingNotificationOff();
-                break;
-            case "gps":
-                setGPSOnline();
-//                message = "GPS online";
-//                isGpsConnected = true;
-                break;
             default:
-                break;
+                Log.i(PROJECT_LOG_TAG, "unknown command "+message);
         }
 
         Log.i("bugfix", "the bar updater got new command: " +nextBarStatus+", bar is  NOT locked = " +theBarIsNotLocked);
@@ -104,7 +180,15 @@ public class InfoBarPresenter {
         }
     }
 
+    private void timerTicking(String message) {
+        Status status = new Status(statusBarUpdater, message);
+        changeStatus(status);
+        if (theBarIsNotLocked) status.print();
+    }
 
+    private void changeStatus(Status nextStatus){
+        currentStatus = nextStatus;
+    }
 
     private void manageTheStatus(String nextBarStatus) {
         Log.i("bugfix", "managing next: " +nextBarStatus);
@@ -180,6 +264,7 @@ public class InfoBarPresenter {
             @Override
             public void run() {
                 theBarIsNotLocked = true;
+                showNextMessage();
                 if (!nextStatusAfterUnlock.equals("empty"))
                     manageTheStatus(nextStatusAfterUnlock);
                 nextStatusAfterUnlock = "empty";
@@ -188,53 +273,79 @@ public class InfoBarPresenter {
         }, timeToLockMilSec, 1);
     }
 
+    private void showNextMessage() {
+        Message nextMessage;
+        if (!messageList.isEmpty()) {
+            nextMessage = messageList.get(0);
+            messageList.remove(0);
+            nextMessage.print();
+        }
+    }
+
     private void printDefferedMessage(String message) {
         updateTheBar(message);
         nextStatusAfterUnlock = "empty";
     }
 
-    void greetings() {
-        RegularMessage hello = new RegularMessage("Hello!", 2000);
-        hello.print();
-        updateTheBar("Hello!");
-        lockTheBar(3000);
-    }
 }
 
 interface BarUpdater {
-    public void instantUpdateStatus(String statusName);
-    public void setTimer(String timerSrting);
+    void makeDeferredStatusUpdating(long timeoutMilSec);
+    void printMeNow(String message); // todo:
+    // TODO: here must be set of the next statement executing
+    // plus starting sheduleAtFixedRate with checking the time and after that executing
         }
 
-abstract class BarStatus{
-    private final String statusName;
+abstract class BarStatement {
+    final String statusName;
+    final BarUpdater barUpdater;
+    long timeoutMilSec = 1000;
 
-    BarStatus(String statusName) {
+    BarStatement(BarUpdater barUpdater, String statusName) {
+        this.barUpdater = barUpdater;
         this.statusName = statusName;
     }
 
+    protected void printWithHolding(TextViewController infoBarTVInterface) {
+        printSelf(infoBarTVInterface);
+        barUpdater.makeDeferredStatusUpdating(timeoutMilSec);
+    }
 
+    protected void printSelf(TextViewController infoBarTVInterface) {
+        infoBarTVInterface.updateTextView(statusName);
+    }
 
-}
-
-class Mode extends BarStatus {
-
-    Mode(String statusName) {
-        super(statusName);
+    public void print() {
+        barUpdater.printMeNow(statusName);
     }
 }
 
-class TimeMessage extends BarStatus{
+class Message extends BarStatement {
 
-    public TimeMessage(String statusName) {
-        super(statusName);
+    public Message(BarUpdater barUpdater, String statusName, long lockTime) {
+        super(barUpdater, statusName);
+        this.timeoutMilSec = lockTime;
+    }
+
+    @Override
+    public void print() {
+        barUpdater.printMeNow(statusName);
+        barUpdater.lockTheBar(timeoutMilSec);
     }
 }
 
-class RegularMessage extends BarStatus{
-    long barLockTimeMilSec;
-    public RegularMessage(String statusName, long lockTime) {
-        super(statusName);
-        this.barLockTimeMilSec = lockTime;
+class Status extends BarStatement {
+    public Status(BarUpdater barUpdater, String statusName) {
+        super(barUpdater, statusName);
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+}
+
+class Warning extends BarStatement {
+    public Warning(BarUpdater barUpdater, String statusName) {
+        super(barUpdater, statusName);
     }
 }
