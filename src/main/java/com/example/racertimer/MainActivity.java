@@ -135,7 +135,8 @@ public class MainActivity extends AppCompatActivity {
         TextViewController infoBarTVInterface = new TextViewController() {
             @Override
             public void updateTextView(String nexText) {
-                racingTimerTV.setText(nexText);
+                if (true)
+                    racingTimerTV.setText(nexText);
             }
 
             @Override
@@ -143,7 +144,8 @@ public class MainActivity extends AppCompatActivity {
                 return (String) racingTimerTV.getText();
             }
         };
-        infoBarPresenter = new InfoBarPresenter(infoBarTVInterface);
+        infoBarPresenter = new InfoBarPresenter();
+        infoBarPresenter.setInfoBarTVInterface(infoBarTVInterface);
         infoBarPresenter.updateTheBar("greetings");
     }
 

@@ -11,6 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class InfoBarPresenterTest {
+    //todo: delete this, wrong package
     String currentResult;
 
     TextViewController infoBarTVInterface = new TextViewController() {
@@ -25,7 +26,8 @@ public class InfoBarPresenterTest {
             return "10:20.33";
         }
     };
-    InfoBarPresenter infoBarPresenter = new InfoBarPresenter(infoBarTVInterface);
+    InfoBarPresenter infoBarPresenter = new InfoBarPresenter();
+    //infoBarPresenter.setInfoBarTVInterface(infoBarTVInterface);
 
     @Test
     public void checkCommandStop () throws Exception {

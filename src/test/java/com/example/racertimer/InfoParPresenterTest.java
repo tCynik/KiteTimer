@@ -3,7 +3,6 @@ package com.example.racertimer;
 import static org.junit.Assert.assertEquals;
 
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.junit.Test;
 
@@ -17,22 +16,27 @@ public class InfoParPresenterTest {
     MessagesChecker messagesChecker = new MessagesChecker() {
         @Override
         public boolean checkHistory(ArrayList<String> history, String[] sample) {
-            boolean messagesHistoryCorrect = true;
+            boolean isMessagesHistoryCorrect = true;
             if (sample.length != history.size()) {
-                messagesHistoryCorrect = false;
+                isMessagesHistoryCorrect = false;
                 //Log.i(LOG_TAG, "history length incorrect! it's " +history.size()+", must be "+sample.length);
             }
             else {
                 for (int i = 0; i < sample.length; i++) {
                     if (!sample[i].equals(history.get(i))) {
                         //Log.i(LOG_TAG, "message #"+i+" is incorrect! It is /"+history.get(i)+"/, must be /"+sample[i]+"/");
-                        messagesHistoryCorrect = false;
+                        isMessagesHistoryCorrect = false;
                     }
                 }
             }
             messagesHistory.clear();
-            return messagesHistoryCorrect;
+            return isMessagesHistoryCorrect;
         }
+
+        public String getLastMessage(ArrayList<String> history) {
+            return history.get(history.size()-1);
+        }
+
     };
 
     TextViewController testingInfoBarController = new TextViewController() {
@@ -47,13 +51,53 @@ public class InfoParPresenterTest {
         }
     };
 
-    InfoBarPresenter testingPresenter = new InfoBarPresenter(testingInfoBarController);
+    private void initTestingPresenter() {
+        InfoBarPresenter testingPresenter = new InfoBarPresenter();
+        testingPresenter.setInfoBarTVInterface(testingInfoBarController);
+    }
+
+    @Test
+    public void statusStartBarWorking() throws Exception{
+        initTestingPresenter();
+        sampleHistory = new String[]{"Hello!"};
+        boolean checkigFlag = messagesChecker.checkHistory(messagesHistory, sampleHistory);
+        assertEquals(true, checkigFlag);
+    }
+
+    @Test
+    public void lastMessageStartAppTimer() throws Exception {
+        initTestingPresenter();
+        SystemClock.sleep(4000);
+        String correctAnswer = "App ready";
+        String answer = messagesHistory.get(messagesHistory.size() - 1);
+        assertEquals(correctAnswer, answer);
+    }
+
+
+
+    @Test
+    public void lastMessageItOneNoTimeout() throws Exception {
+        initTestingPresenter();
+        String correctAnswer = "App ready";
+        String answer = messagesHistory.get(messagesHistory.size() - 1);
+        assertEquals(correctAnswer, answer);
+    }
+
+    @Test
+    public void lastMessageItTwoNoTimeout() throws Exception {
+        initTestingPresenter();
+        testingInfoBarController.updateTextView("ready to go");
+        String correctAnswer = "Hello!";
+        String answer = messagesHistory.get(messagesHistory.size() - 1);
+        assertEquals(correctAnswer, answer);
+    }
+
 
     @Test
     public void regularMessageNoTimeout() throws Exception {
-        Log.i(LOG_TAG, " checking ");
-        sampleHistory = new String[]{"Hello!"};
-        testingInfoBarController.updateTextView("greetings");
+        initTestingPresenter();
+        sampleHistory = new String[]{"Hello!", "Go chase!"};
+        testingInfoBarController.updateTextView("ready to go");
         boolean flag = messagesChecker.checkHistory(messagesHistory, sampleHistory);
         assertEquals(true, flag);
     }
@@ -81,4 +125,5 @@ public class InfoParPresenterTest {
 
 interface MessagesChecker {
     public boolean checkHistory(ArrayList<String> history, String[] sample);
+    String getLastMessage(ArrayList<String> history);
 }
