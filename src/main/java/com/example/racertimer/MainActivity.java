@@ -104,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isWindDataFresh = false;
 
+    private String lastTimer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -637,6 +639,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void endRace() {
+        infoBarPresenter.stopRaceOnTimer(lastTimer);
         racingTimer.stop();
         isRaceStarted = false;
         sailingToolsFragment.stopTheRace();
@@ -659,8 +662,9 @@ public class MainActivity extends AppCompatActivity {
         racingTimer.start();
     }
 
-    public void onStartingTimerPeriodChanged (String nextStatus) {
+    public void onStartingTimerPeriodChanged (String nextStatus) {// todo: spaghetti code! To be fixed
         infoBarPresenter.updateTheBar(nextStatus);
+        lastTimer = nextStatus;
     }
 
     public String getTracksPackage() {

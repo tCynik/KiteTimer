@@ -20,11 +20,12 @@ public class InfoBarPresenter {
 
     public BarUpdater barUpdater;
 
+    private String lastTimer = "null";
+    private boolean waitNextStatus = false;
 
     public InfoBarPresenter() {
         initBarUpdaters();
-        updateStartingStatus();
-        currentStatus = new Status(barUpdater, "App ready");
+        currentStatus = new Status(barUpdater, "No GPS");
     }
 
     public void setInfoBarTVInterface (TextViewController infoBarTVInterface) {
@@ -34,7 +35,6 @@ public class InfoBarPresenter {
             currentStatus = (Status) statementQueue.get(0);
         Message helloMessage = new Message(barUpdater, "Hello!", 3000);
         helloMessage.print();
-        //updateBarByStatement(currentStatus);
     }
 
     private void initBarUpdaters() {
@@ -48,63 +48,54 @@ public class InfoBarPresenter {
             @Override
             public void lockTheBar(long timeoutMilSec) {
                 theBarIsNotLocked = false;
+                //todo: runOnUiThread()
                 Timer timer = new Timer();
-                timer.scheduleAtFixedRate(new TimerTask() {
+                timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        timeoutIsEnded();
+                        timeoutEndedCheckQueue();
+                        theBarIsNotLocked = true;
                     }
-                }, timeoutMilSec, 1);
+                }, timeoutMilSec);
             }
         };
     }
 
-    private void updateStartingStatus() {
-        currentStatus = new Status(barUpdater, "No GPS");
-        updateBarByStatement(currentStatus);
-    }
-
-    private void updateBarByStatement(BarStatement barStatement) {
-        if (infoBarTVInterface != null || theBarIsNotLocked) {
-            barStatement.print();
-        }
-        else
-            addToQueue(barStatement);
-    }
-
-    private void timeoutIsEnded() {
-        checkQueueHasMessages();
-    }
-
-    private void checkQueueHasMessages () {
+    private void timeoutEndedCheckQueue() {
         if (statementQueue.isEmpty())
             currentStatus.print();
         else
-            makeNextMessage();
-    }
+            //makeNextMessage();
+            nextMessageFromQueue().print();
 
-    private void makeNextMessage() {
-        BarStatement nextMessage = ejectNextFromQueue();
-        nextMessage.print();
     }
 
     private void manageQueueStatement(BarStatement barStatement) {
         if (theBarIsNotLocked)
             barStatement.print();
         else
-            addToQueue(barStatement);
+            statementQueue.add(barStatement);
     }
 
-    private void addToQueue(BarStatement barStatement) {
-        statementQueue.add(barStatement);
-    }
-
-    private BarStatement ejectNextFromQueue() {
+    private BarStatement nextMessageFromQueue() {
         BarStatement nextStatement = null;
         if (!statementQueue.isEmpty())
             nextStatement = statementQueue.get(0);
         statementQueue.remove(0);
         return nextStatement;
+    }
+
+    private void updateCurrentStatus (Status status){
+        currentStatus = status;
+        if (theBarIsNotLocked){
+            Log.i("racer_timer_info_bar", "bugfix: printing new status ="+ status.statusName);
+            status.print();
+        }
+    }
+
+    public void stopRaceOnTimer(String timerNumbers) {
+        Status status = new Status(barUpdater, " "+timerNumbers);
+        updateCurrentStatus(status);
     }
 
     public void updateTheBar(String nextBarStatus) {
@@ -115,23 +106,23 @@ public class InfoBarPresenter {
             /** --- STATUSES --- */
             case "ready to go":
                 status = new Status(barUpdater, "Go chase!");
-                currentStatus = status;
+                updateCurrentStatus(status);
                 break;
-            case "timer on":
+            case "timer":
                 status = new Status(barUpdater, "Get ready!");
-                currentStatus = status;
+                updateCurrentStatus(status);
                 break;
             case "timer three":
                 status = new Status(barUpdater, "THEE!");
-                currentStatus = status;
+                updateCurrentStatus(status);
                 break;
             case "timer two":
                 status = new Status(barUpdater, "TWO!");
-                currentStatus = status;
+                updateCurrentStatus(status);
                 break;
             case "timer one":
                 status = new Status(barUpdater, "ONE!");
-                currentStatus = status;
+                updateCurrentStatus(status);
                 break;
 
             //TODO: case "stop race":
@@ -146,6 +137,7 @@ public class InfoBarPresenter {
                 manageQueueStatement(message);
                 break;
             case "gps":
+                currentStatus = new Status(barUpdater, "App ready");
                 message = new Message(barUpdater, "GPS online", 2000);
                 manageQueueStatement(message);
                 break;
@@ -153,8 +145,14 @@ public class InfoBarPresenter {
                 message = new Message(barUpdater, "GO! GO! GO!!!", 2000);
                 manageQueueStatement(message);
                 break;
-            case "new wind":
-                message = new Message(barUpdater, "wind dir updated", 2000);
+            case "set wind":
+                message = new Message(barUpdater, "wind dir upd.", 2000);
+                manageQueueStatement(message);
+                break;
+            case "stop race":
+                status = new Status(barUpdater, "last: "+lastTimer);
+                updateCurrentStatus(status);
+                message = new Message(barUpdater, "FINISH!", 2000);
                 manageQueueStatement(message);
                 break;
 
@@ -174,52 +172,13 @@ public class InfoBarPresenter {
 //                blinkingNotificationOn("SET WIND DIR!");
 //                break;
             default:
-                Log.i(PROJECT_LOG_TAG, "unknown command "+nextBarStatus);
+                lastTimer = nextBarStatus;
+                InstantMessage instantMessage = new InstantMessage(barUpdater, nextBarStatus);
+                if (theBarIsNotLocked)
+                    instantMessage.print();
         }
-
-        //Log.i("bugfix", "the bar updater got new command: " +nextBarStatus+", bar is  NOT locked = " +theBarIsNotLocked);
     }
 
-//
-//    private void manageTheStatus(String nextBarStatus) {
-//        Log.i("bugfix", "managing next: " +nextBarStatus);
-//        String message = "empty";
-//        switch (nextBarStatus) {
-//            case "greetings":
-//                greetings();
-//            case "stop race": message = "last: " + infoBarTVInterface.getTextFromView();
-//                break;
-//            case "cancel race": message = "Go chase!";
-//                break;
-//            case "ready to go": message = "Go chase!";
-//                break;
-//            case "timer": message = "Get ready";
-//                break;
-//            case "timer three": message = "THREE!";
-//                break;
-//            case "timer two": message = "TWO!";
-//                break;
-//            case "timer one": message = "ONE!!!";
-//                break;
-//            case "start": message = "GO! GO! GO!!!";
-//                infoBarTVInterface.updateTextView(message);
-//                lockTheBar(2000);
-//                break;
-//            case "set wind":
-//                Log.i("bugfix", "call the blinky to set wind");
-//                blinkingNotificationOn("SET WIND DIR!");
-//                break;
-//            case "wind ok":
-//                blinkingNotificationOff();
-//                break;
-//            case "gps": message = "GPS online";
-//                isGpsConnected = true;
-//                break;
-//            default: break;
-//        }
-//        if (! message.equals("empty"))
-//            if (theBarIsNotLocked) fillTextView(message);
-//    }
 
 //    private void blinkingNotificationOn(String message) {
 //        blinkingInProgress = true;
@@ -263,7 +222,7 @@ abstract class BarStatement {
     }
 
     public void print() {
-        //Log.i(PROJECT_LOG_TAG, "printing the next message " +statusName);
+        Log.i(PROJECT_LOG_TAG, "printing the next message " +statusName);
         printToBar(statusName);
         lockTheBar(timeoutMilSec);
     }
@@ -282,6 +241,18 @@ class Message extends BarStatement {
     public Message(BarUpdater barUpdater, String statusName, long lockTime) {
         super(barUpdater, statusName);
         this.timeoutMilSec = lockTime;
+    }
+}
+
+class InstantMessage extends BarStatement {
+    public InstantMessage(BarUpdater barUpdater, String statusName) {
+        super(barUpdater, statusName);
+        Log.i("racer_timer_info_bar", "creating new default message ="+ statusName);
+    }
+
+    @Override
+    public void print() {
+        printToBar(statusName);
     }
 }
 
