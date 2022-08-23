@@ -131,6 +131,9 @@ public class MainActivity extends AppCompatActivity {
         mapUITools = new MapUIToolsController(defaultMapScale);
         runStatusUIDispatcher();
         loadWindData();
+
+//        MyKotlinClass myKotlinClass = new MyKotlinClass("hello world!");
+//        String someText = myKotlinClass.getText();
     }
 
     private void initInfoBar() {
@@ -586,8 +589,9 @@ public class MainActivity extends AppCompatActivity {
         windProvider = provider;
         windDirection = updatedWindDirection;
         statusUIModulesDispatcher.getWindChangedHerald().onWindDirectionChanged(updatedWindDirection, provider);
+        infoBarPresenter.updateTheBar("set wind");
         if (provider == WindProvider.DEFAULT || provider == WindProvider.HISTORY)
-            infoBarPresenter.updateTheBar("set wind");
+            infoBarPresenter.updateTheBar("wind old");
         else infoBarPresenter.updateTheBar("wind ok");
         // TODO: если после запуска вручную ввели новое направление?
     }

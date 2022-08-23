@@ -57,7 +57,7 @@ public class WindData {
         WindProvider windProvider = WindProvider.DEFAULT;
         SavedWindState savedWindState = loadWindData();
         if (savedWindState != null) {
-            savedWindState.getWindDirection();
+            windDirection = savedWindState.getWindDirection();
             windProvider = analyzeProviderActuality(savedWindState);
         }
         windChangedHerald.onWindDirectionChanged(windDirection, windProvider);
