@@ -57,7 +57,7 @@ public class InfoBarPresenter {
     }
 
     private void lockBarForTime (long timeoutMilSec) {
-        Log.i("racer_timer_info_bar", "bugfix: timeout ="+timeoutMilSec+ " is started ");
+        Log.i(PROJECT_LOG_TAG, "bugfix: timeout ="+timeoutMilSec+ " is started ");
         theBarIsNotLocked = false;
         //todo: runOnUiThread()
         Timer timer = new Timer();

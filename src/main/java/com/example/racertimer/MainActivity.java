@@ -132,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
         runStatusUIDispatcher();
         loadWindData();
 
-//        MyKotlinClass myKotlinClass = new MyKotlinClass("hello world!");
-//        String someText = myKotlinClass.getText();
+        MyKotlinClass myKotlinClass = new MyKotlinClass("hello world!");
+        String someText = myKotlinClass.getText();
     }
 
     private void initInfoBar() {
