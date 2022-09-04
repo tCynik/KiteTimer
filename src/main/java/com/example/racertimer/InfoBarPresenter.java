@@ -57,6 +57,7 @@ public class InfoBarPresenter {
     }
 
     private void lockBarForTime (long timeoutMilSec) {
+        Log.i("racer_timer_info_bar", "bugfix: timeout ="+timeoutMilSec+ " is started ");
         theBarIsNotLocked = false;
         //todo: runOnUiThread()
         Timer timer = new Timer();
@@ -268,7 +269,7 @@ interface BarUpdater {
         }
 
 abstract class BarStatement {
-    private final static String PROJECT_LOG_TAG = "racer_timer_info_bar";
+    final static String PROJECT_LOG_TAG = "racer_timer_info_bar";
     final String statusName;
     final BarUpdater barUpdater;
     long timeoutMilSec;
@@ -304,7 +305,7 @@ class Message extends BarStatement {
 class InstantMessage extends BarStatement {
     public InstantMessage(BarUpdater barUpdater, String statusName) {
         super(barUpdater, statusName);
-        Log.i("racer_timer_info_bar", "creating new default message ="+ statusName);
+        Log.i(PROJECT_LOG_TAG, "creating new default message ="+ statusName);
     }
 
     @Override
@@ -339,7 +340,7 @@ class EmptyMessage extends BarStatement {
 
     @Override
     public void print() {
-        Log.i("racer_timer_info_bar", "the empty message get started");
+        Log.i(PROJECT_LOG_TAG, "the empty message get started");
         lockTheBar(1000);
     }
 }
