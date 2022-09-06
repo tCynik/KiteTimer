@@ -141,7 +141,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void updateTextView(String nexText) {
                 if (true)
-                    racingTimerTV.setText(nexText);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            racingTimerTV.setText(nexText);
+                        }
+                    });
             }
 
             @Override
