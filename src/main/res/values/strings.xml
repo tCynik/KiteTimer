@@ -5,4 +5,8 @@
     <string name="action_settings">Settings</string>
     <string name="menuButton">Menu</string>
     <string name="new_race">new race</string>
+    <string name="warning_wind">set wind dir!</string>
+    <string name="forecast">FORECAST</string>
+    <string name="for_next_location">For next location:</string>
+    <string name="current_position">current position</string>
 </resources>

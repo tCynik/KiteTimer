@@ -2,13 +2,13 @@ package com.example.racertimer;
 
 import android.util.Log;
 
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 //todo: implement the blinking of warnings
 public class InfoBarPresenter {
     private final static String PROJECT_LOG_TAG = "racer_timer_info_bar";
-    private final int BLINKING_PERIOD_MILSEC = 1000;
 
     private TextViewController infoBarTVInterface;
     private boolean theBarIsNotLocked = false;
@@ -16,7 +16,7 @@ public class InfoBarPresenter {
     private boolean isRaceStarted = false;
 
     private Status currentStatus;
-    private LinkedList<Warning> warningsList = new LinkedList<>();
+    private LinkedHashSet<String> warningsList = new LinkedHashSet<>();
     private LinkedList<BarStatement> statementQueue = new LinkedList<>();
 
     private EmptyMessage emptyMessage;
@@ -91,7 +91,10 @@ public class InfoBarPresenter {
             if (!warningsList.isEmpty()) {
                 EmptyMessage emptyMessage = new EmptyMessage(barUpdater);
                 statementQueue.add(emptyMessage);
-                putWarningsToQueue();
+                for (String nextWarning: warningsList) {
+                    Warning warning = new Warning(barUpdater, nextWarning, 1000);
+                    incomingStatementCheckQueue(warning);
+                }
                 statementQueue.get(0).print();
             }
             theBarIsNotLocked = true;
@@ -101,51 +104,6 @@ public class InfoBarPresenter {
             theBarIsNotLocked = true;
             BarStatement nextStatement = nextMessageFromQueue();
             if (nextStatement != null) nextStatement.print();
-        }
-    }
-
-    private void putWarningsToQueue() {
-//        EmptyMessage emptyMessage = new EmptyMessage(barUpdater);
-//        emptyMessage.print();
-        //statementQueue.add(new EmptyMessage(barUpdater));
-        for (Warning nextWarning: warningsList) {
-            incomingStatementCheckQueue(nextWarning);
-        }
-    }
-
-    private void addWarningToList(Warning warning) {
-        if (checkWarningNotRepeat(warning)) {
-            warningsList.add(warning);
-            if (statementQueue.isEmpty()) {
-                putWarningsToQueue();
-            }
-        }
-    }
-
-    private boolean checkWarningNotRepeat(Warning warning) {
-        if (warningsList.isEmpty())
-            return true;
-        else {
-            boolean isWarningAlreadyExist = true;
-            for (Warning current: warningsList) {
-                if (current.statusName.equals(warning.statusName)) {
-                    isWarningAlreadyExist = false;
-                    break;
-                }
-            }
-            return isWarningAlreadyExist;
-        }
-    }
-
-    private void removeWarningByName (String name) {
-        if (warningsList.size() > 0) {
-            for (int i = 0; i < warningsList.size(); i++) {
-                String nextWarningName = warningsList.get(i).statusName;
-                if (name.equals(nextWarningName)){
-                    warningsList.remove(i);
-                    break;
-                }
-            }
         }
     }
 
@@ -184,7 +142,6 @@ public class InfoBarPresenter {
         instantMessage = null;
         Status status;
         Message message;
-        Warning warning;
         switch (nextBarStatus) {
 
             /** --- STATUSES --- */
@@ -238,14 +195,12 @@ public class InfoBarPresenter {
                 updateCurrentStatus(status);
                 break;
 
-            // todo:
             /** --- WARNINGS --- */
             case "wind old":
-                warning = new Warning(barUpdater,"set wind dir!", 1000);
-                addWarningToList(warning);
+                warningsList.add("set wind dir!");
                 break;
             case "wind ok":
-                removeWarningByName("set wind dir!");
+                warningsList.remove("set wind dir!"); // TODO: extract the resourses!
                 break;
 
             default:
