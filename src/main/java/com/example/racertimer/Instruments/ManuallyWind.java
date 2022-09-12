@@ -19,10 +19,10 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
     Context context;
     private int windDirection;
     private LayoutInflater windDialogLayoutInflater;
-    private View windDialogView; // наш лайаут
+    private View windDialogView;
 
-    private EditText inputText; // поле ввода
-    private SeekBar seekbarWind; // бар настройки ветра
+    private EditText inputText;
+    private SeekBar seekbarWind;
     private Button buttonIncrease, buttonDecrease;
 
     private WindChangedHerald windChangedHerald;

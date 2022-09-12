@@ -142,10 +142,6 @@ public class SailingToolsFragment extends Fragment {
         statusUiUpdater.updateUIModuleStatus(MODULE_NAME, false);
     }
 
-    public void setVoiceover (BeepSounds voiceover) {
-        //this.voiceover = voiceover;
-    }
-
     /**
      * блок управляющийх воздействий по новым данным
      */
