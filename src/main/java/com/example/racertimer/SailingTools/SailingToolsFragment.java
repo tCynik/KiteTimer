@@ -1,4 +1,4 @@
-package com.example.racertimer;
+package com.example.racertimer.SailingTools;
 
 import android.graphics.Color;
 import android.location.Location;
@@ -12,9 +12,14 @@ import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.example.racertimer.ContentUpdater;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.MainActivity;
+import com.example.racertimer.R;
+import com.example.racertimer.StatusUiUpdater;
 import com.example.racertimer.multimedia.BeepSounds;
 
 /**
@@ -24,10 +29,10 @@ import com.example.racertimer.multimedia.BeepSounds;
 public class SailingToolsFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_sailing_tools";
     private final String MODULE_NAME = "sailing_tools";
+    private SailingToolsViewModel viewModel;
 
     BeepSounds voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
-    LayoutInflater windDialogLayoutInflater;
     ImageView arrowVelocityIV, arrowDirectionIV;
     TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
 
@@ -58,6 +63,19 @@ public class SailingToolsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sailing_tools, null); // инфлейтим вьюшку фрагмента
 
+        findViews(view);
+
+        viewModel = new ViewModelProvider(this).get(SailingToolsViewModel.class);
+        Log.i("racer_timer_sailing_tools_vm", " viewModel code = "+ viewModel.hashCode());
+
+        initManualWindSetting();
+        passInstanceToMain();
+
+        initContentUpdater();
+        return view;
+    }
+
+    private void findViews(View view) {
         arrowsLayoutCL = view.findViewById(R.id.arrows_layout); // вьюшка для стрелок скорости
         centralParametersCL = view.findViewById(R.id.central_params_cl); // вьюшка для ограничения движения стрелок
         windLayoutCL = view.findViewById(R.id.wind_layout);
@@ -71,14 +89,9 @@ public class SailingToolsFragment extends Fragment {
         maxVelocityTV = view.findViewById(R.id.max_velocity);
         bestUpwindTV = view.findViewById(R.id.best_upwind);
         courseToWindTV = view.findViewById(R.id.course_to_wind);
+    }
 
-        windDialogLayoutInflater = LayoutInflater.from(getActivity());
-        View windDialogView = windDialogLayoutInflater.inflate(R.layout.manually_input_wind, null);
-
-        resetAllMaximums(); // выставляем в ноль все вьюшки
-
-        /** установка направления ветра вручную нажатием на поле "ветер" */
-
+    private void initManualWindSetting() {
         windTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -91,14 +104,13 @@ public class SailingToolsFragment extends Fragment {
                 }
             }
         });
+    }
 
+    private void passInstanceToMain(){
         if (mainActivity == null) {
             mainActivity = (MainActivity) getActivity();
             mainActivity.setSailingToolsFragment(this);
         }
-
-        initContentUpdater();
-        return view;
     }
 
     public void setStatusUiUpdater(StatusUiUpdater statusUiUpdater) {
@@ -120,6 +132,7 @@ public class SailingToolsFragment extends Fragment {
                     velocity = (int) (location.getSpeed()*3.6);
                 }
                 onVelocityChanged(velocity);
+                viewModel.onLocationChanged(velocity, bearing);
             }
 
             @Override
@@ -155,7 +168,6 @@ public class SailingToolsFragment extends Fragment {
                 renewMaxVelocity(velocity);
             }
             updateArrowPosition(velocity);// перемещаем стрелку
-//                updateMaxVelocity(velocity);
             updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }

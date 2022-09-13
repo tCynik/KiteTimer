@@ -11,7 +11,7 @@
     <!-- главное размещение UI элементов -->
     <fragment
         android:id="@+id/fr_sailing_tools"
-        android:name="com.example.racertimer.SailingToolsFragment"
+        android:name="com.example.racertimer.SailingTools.SailingToolsFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         app:layout_constraintDimensionRatio="H, 1"
