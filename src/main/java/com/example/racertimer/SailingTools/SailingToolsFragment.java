@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.racertimer.ContentUpdater;
@@ -66,7 +67,7 @@ public class SailingToolsFragment extends Fragment {
         findViews(view);
 
         viewModel = new ViewModelProvider(this).get(SailingToolsViewModel.class);
-        Log.i("racer_timer_sailing_tools_vm", " viewModel code = "+ viewModel.hashCode());
+        initObservers();
 
         initManualWindSetting();
         passInstanceToMain();
@@ -89,6 +90,17 @@ public class SailingToolsFragment extends Fragment {
         maxVelocityTV = view.findViewById(R.id.max_velocity);
         bestUpwindTV = view.findViewById(R.id.best_upwind);
         courseToWindTV = view.findViewById(R.id.course_to_wind);
+    }
+
+    private void initObservers() {
+        viewModel.getSpeedLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                velocityTV.setText(value.toString());
+            }
+        });
+        
+        // TODO: init field observers to observ ViewModel
     }
 
     private void initManualWindSetting() {
@@ -182,6 +194,7 @@ public class SailingToolsFragment extends Fragment {
         Log.i(PROJECT_LOG_TAG, " wind dir in the tools fragment changed. New one = "+ valueWindDirection+
                 " provider = " + provider);
         if (valueWindDirection != windDirection) {
+            viewModel.onWindChanged(valueWindDirection);
             renewWindDirection(valueWindDirection);
             updateVmgByNewWindOrVelocity();
 
