@@ -15,22 +15,22 @@ public class StatusUIModulesDispatcher {
 
     private String[] moduleNames;
     private boolean[] moduleStatus;
-    private ContentUpdater[] contentUpdaters;
+    private LocationHerald[] locationHeralds;
 
     private Location lastLocation = null;
     private int lastWindDirection = 10000;
     private WindProvider lastProvider = null;
 
-    public StatusUIModulesDispatcher (String[] moduleNames, ContentUpdater[] contentUpdaters) {
+    public StatusUIModulesDispatcher (String[] moduleNames, LocationHerald[] locationHeralds) {
         this.moduleNames = moduleNames;
         moduleStatus = new boolean[moduleNames.length];
-        this.contentUpdaters = contentUpdaters;
+        this.locationHeralds = locationHeralds;
         initStatusUpdater();
         initInterfaces();
     }
 
-    public void sendWindToContentUpdater(ContentUpdater contentUpdater) {
-        contentUpdater.onWindDirectionChanged(lastWindDirection, lastProvider);
+    public void sendWindToContentUpdater(LocationHerald locationHerald) {
+        locationHerald.onWindDirectionChanged(lastWindDirection, lastProvider);
     }
 
     public LocationChanger getLocationChanger () {
@@ -100,7 +100,7 @@ public class StatusUIModulesDispatcher {
     }
 
     private void sendLocationByIndex(Location location, int index) {
-        contentUpdaters[index].onLocationChanged(location);
+        locationHeralds[index].onLocationChanged(location);
     }
 
     private void sendWindToAllModules(int windDirection, WindProvider provider) {
@@ -111,7 +111,7 @@ public class StatusUIModulesDispatcher {
     }
 
     private void sendWindByIndex(int windDirection, WindProvider provider, int index) {
-        ContentUpdater currentUpdater = contentUpdaters[index];
+        LocationHerald currentUpdater = locationHeralds[index];
         currentUpdater.onWindDirectionChanged(windDirection, provider);
     }
 

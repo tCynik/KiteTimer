@@ -181,11 +181,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void runStatusUIDispatcher() {
         // TODO: need to add here mapManager to transfer new geolocation info into one
-        ContentUpdater updaterMapTools = mapUITools.getContentUpdater();
-        ContentUpdater updaterTools = sailingToolsFragment.getContentUpdater();
-        ContentUpdater updaterMap = mapManager.getContentUpdater();
-        ContentUpdater updaterDataManager = tracksDataManager.getContentUpdater();
-        ContentUpdater[] contentUpdaters = new ContentUpdater[]{
+        LocationHerald updaterMapTools = mapUITools.getContentUpdater();
+        LocationHerald updaterTools = sailingToolsFragment.getContentUpdater();
+        LocationHerald updaterMap = mapManager.getContentUpdater();
+        LocationHerald updaterDataManager = tracksDataManager.getContentUpdater();
+        LocationHerald[] locationHeralds = new LocationHerald[]{
                 updaterTools,
                 updaterMapTools,
                 updaterMap,
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                 "map",
                 "tracks_data_manager"};
 
-        statusUIModulesDispatcher = new StatusUIModulesDispatcher(moduleNames, contentUpdaters);
+        statusUIModulesDispatcher = new StatusUIModulesDispatcher(moduleNames, locationHeralds);
         StatusUiUpdater updaterStatusUi = statusUIModulesDispatcher.getStatusUiUpdater();
         mapFragment.setStatusUiUpdater(updaterStatusUi);
         sailingToolsFragment.setStatusUiUpdater(updaterStatusUi);
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void serviceIsRan() {
-        ContentUpdater updaterLocationService = new ContentUpdater() {
+        LocationHerald updaterLocationService = new LocationHerald() {
             @Override
             public void onLocationChanged(Location location) {
             }

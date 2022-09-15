@@ -2,7 +2,7 @@ package com.example.racertimer.tracks;
 
 import android.location.Location;
 
-import com.example.racertimer.ContentUpdater;
+import com.example.racertimer.LocationHerald;
 import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.MainActivity;
 
@@ -21,7 +21,7 @@ public class TracksDataManager {
     private TracksSaver tracksSaver;
 
     private MainActivity mainActivity;
-    private ContentUpdater contentUpdater;
+    private LocationHerald locationHerald;
 
     private Long currentDate;
 
@@ -31,7 +31,7 @@ public class TracksDataManager {
         trackPoints = new ArrayList<>();
         gpsTrackLoader = new GPSTrackLoader(mainActivity, packageAddress);
         tracksSaver = new TracksSaver(mainActivity);
-        contentUpdater = new ContentUpdater() {
+        locationHerald = new LocationHerald() {
             @Override
             public void onLocationChanged(Location location) {
                 TracksDataManager.this.onLocationChanged(location);
@@ -44,8 +44,8 @@ public class TracksDataManager {
         };
     }
 
-    public ContentUpdater getContentUpdater(){
-        return contentUpdater;
+    public LocationHerald getContentUpdater(){
+        return locationHerald;
     }
 
     public void beginRecordTrack () {

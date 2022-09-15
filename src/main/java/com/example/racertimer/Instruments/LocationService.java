@@ -17,7 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import com.example.racertimer.ContentUpdater;
+import com.example.racertimer.LocationHerald;
 import com.example.racertimer.windDirection.WindByCompareCalculator;
 import com.example.racertimer.windDirection.WindByStatistics;
 import com.example.racertimer.windDirection.WindChangedHerald;
@@ -44,7 +44,7 @@ public class LocationService extends Service {
 
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private ContentUpdater contentUpdater;
+    private LocationHerald locationHerald;
 
     private int windDirection = 10000;
     // TODO: need to make channel to transfer the wind direction into location service
@@ -78,12 +78,12 @@ public class LocationService extends Service {
         requestLocationUpdates();
     }
 
-    public ContentUpdater getContentUpdater() {
-        return contentUpdater;
+    public LocationHerald getContentUpdater() {
+        return locationHerald;
     }
 
     private void initContentUpdater() {
-        contentUpdater = new ContentUpdater() {
+        locationHerald = new LocationHerald() {
             @Override
             public void onLocationChanged(Location location) {
 

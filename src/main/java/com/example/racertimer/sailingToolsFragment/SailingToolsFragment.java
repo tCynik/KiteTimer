@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.racertimer.ContentUpdater;
+import com.example.racertimer.LocationHerald;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.MainActivity;
@@ -48,7 +48,7 @@ public class SailingToolsFragment extends Fragment {
     private MainActivity mainActivity;
 
     private StatusUiUpdater statusUiUpdater;
-    private ContentUpdater contentUpdater;
+    private LocationHerald locationHerald;
 
     public SailingToolsFragment() {
         // Required empty public constructor
@@ -73,7 +73,7 @@ public class SailingToolsFragment extends Fragment {
         initManualWindSetting();
         passInstanceToMain();
 
-        initContentUpdater();
+        initLocationHerald();
         return view;
     }
 
@@ -97,7 +97,9 @@ public class SailingToolsFragment extends Fragment {
         viewModel.getSpeedLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer value) {
-                onVelocityChanged(value);
+                velocity = value;
+                velocityTV.setText(String.valueOf(velocity));
+                updateArrowPosition(velocity);// перемещаем стрелку
             }
         });
 
@@ -105,6 +107,14 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 maxVelocityTV.setText(value.toString());
+            }
+        });
+
+        viewModel.getBearingLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                bearingTV.setText(String.valueOf(bearing));
+                arrowsLayoutCL.setRotation(bearing);// поворачиваем вьюшку
             }
         });
 
@@ -132,7 +142,8 @@ public class SailingToolsFragment extends Fragment {
         viewModel.getBearingLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer value) {
-                onBearingChanged(value);
+                bearingTV.setText(String.valueOf(bearing));
+                arrowsLayoutCL.setRotation(bearing);
             }
         });
 
@@ -172,21 +183,22 @@ public class SailingToolsFragment extends Fragment {
         this.statusUiUpdater = statusUiUpdater;
     }
 
-    public ContentUpdater getContentUpdater() {
-        return contentUpdater;
+    public LocationHerald getContentUpdater() {
+        return locationHerald;
     }
 
-    private void initContentUpdater() {
-        contentUpdater = new ContentUpdater() {
+    private void initLocationHerald() {
+        locationHerald = new LocationHerald() {
             @Override
             public void onLocationChanged(Location location) {
                 int bearing = (int) location.getBearing();
-                onBearingChanged(bearing);
+                //onBearingChanged(bearing);
                 int velocity = 0;
                 if (location.hasSpeed()) {
-                    velocity = (int) (location.getSpeed()*3.6);
+                    velocity = (int) location.getSpeed();
+                    //velocity = (int) (location.getSpeed()*3.6);
                 }
-                onVelocityChanged(velocity);
+                //onVelocityChanged(velocity);
                 viewModel.onLocationChanged(velocity, bearing);
             }
 
@@ -221,7 +233,7 @@ public class SailingToolsFragment extends Fragment {
             renewVelocity(valueVelocity);
             Log.i(PROJECT_LOG_TAG, " got new velocity = "+ valueVelocity+ ", old one = "+velocity);
 //            if (velocity > maxVelocity) { // обновляем максимум
-//                renewMaxVelocity(velocity);
+                renewMaxVelocity(velocity);
 //            }
             updateArrowPosition(velocity);// перемещаем стрелку
             updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
@@ -239,8 +251,8 @@ public class SailingToolsFragment extends Fragment {
                 " provider = " + provider);
         if (valueWindDirection != windDirection) {
             viewModel.onWindChanged(valueWindDirection);
-            renewWindDirection(valueWindDirection);
-            updateVmgByNewWindOrVelocity();
+            //renewWindDirection(valueWindDirection);
+            //updateVmgByNewWindOrVelocity();
 
             switch (provider) {
                 case DEFAULT:
@@ -267,7 +279,9 @@ public class SailingToolsFragment extends Fragment {
      */
 
     public void resetPressed () { // нажата кнопка сброса максимумов
-        resetAllMaximums();
+        viewModel.resetMaximums();
+
+//        resetAllMaximums();
     }
 
     public void muteChangedStatus (boolean valueMute) { // изменен статус переключателя звука пищалки
@@ -325,9 +339,10 @@ public class SailingToolsFragment extends Fragment {
      */
 
     private void resetAllMaximums () { // обнуление всех максимумов
-        renewBestUpwind(0);
-        renewBestDownwind(0);
-        renewMaxVelocity(0);
+        viewModel.resetMaximums();
+//        renewBestUpwind(0);
+//        renewBestDownwind(0);
+//        renewMaxVelocity(0);
     }
 
     private void updateVmgByNewWindOrVelocity() { // обновление максимумов ВМГ

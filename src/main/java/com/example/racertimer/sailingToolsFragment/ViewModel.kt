@@ -1,13 +1,11 @@
 package com.example.racertimer.sailingToolsFragment
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class ViewModel: ViewModel() {
     private val LOG_TAG = "racer_timer_sailing_tools_vm"
     private val model: Model
-    private var windDir = 10000
 
     var speedLive = MutableLiveData<Int>()
     var maxSpeedLive = MutableLiveData<Int>()
@@ -20,15 +18,21 @@ class ViewModel: ViewModel() {
 
     init {
         //Log.i(LOG_TAG, "view model was created")
-        val fieldsUpdaters = initFieldsUpdaters()
+        val fieldsUpdaters = initFieldsUpdatersByModel()
         model = Model(fieldsUpdaters)
     }
 
-    private fun initFieldsUpdaters(): Map<Fields, FieldUpdater> {
+    private fun initFieldsUpdatersByModel(): Map<Fields, FieldUpdater> {
         val mapOfUpdaters = mutableMapOf<Fields, FieldUpdater>()
 
-        var updater = FieldUpdater { value -> maxSpeedLive.value = value }
+        var updater = FieldUpdater { value -> speedLive.value = value }
+        mapOfUpdaters[Fields.VELOCITY] = updater
+
+        updater = FieldUpdater { value -> maxSpeedLive.value = value }
         mapOfUpdaters[Fields.MAX_VELOCITY] = updater
+
+        updater = FieldUpdater { value -> bearingLive.value = value }
+        mapOfUpdaters[Fields.BEARING] = updater
 
         updater = FieldUpdater { value -> courseToWindLive.value = value }
         mapOfUpdaters[Fields.COURSE_TO_WIND] = updater
@@ -45,15 +49,19 @@ class ViewModel: ViewModel() {
         return mapOfUpdaters
     }
 
-    fun onLocationChanged(velocity: Int, bearing: Int) {
-        model.onLocationChanged(velocity, bearing)
-        speedLive.value = velocity
+    fun onLocationChanged(velocityMpS: Int, bearing: Int) {
+        //val velocityKMH = (velocityMS * 3.6).toInt()
+        model.onLocationChanged(velocityMpS, bearing)
+        //speedLive.value = velocityMS
         bearingLive.value = bearing
     }
 
     fun onWindChanged(windDirection: Int) {
-        windDir = windDirection
         model.onWindChanged(windDirection)
+    }
+
+    fun resetMaximums() {
+        model.setMaximums(0, 0, 0)
     }
 
     override fun onCleared() {

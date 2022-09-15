@@ -4,6 +4,6 @@ import android.location.Location;
 
 import com.example.racertimer.windDirection.WindChangedHerald;
 
-public interface ContentUpdater extends WindChangedHerald {
+public interface LocationHerald extends WindChangedHerald {
     void onLocationChanged(Location location);
 }

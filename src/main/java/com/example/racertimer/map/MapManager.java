@@ -11,7 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.example.racertimer.ContentUpdater;
+import com.example.racertimer.LocationHerald;
 import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.tracks.GeoTrack;
 
@@ -24,7 +24,7 @@ public class MapManager {
     private Context context;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
 
-    private ContentUpdater contentUpdater;
+    private LocationHerald locationHerald;
 
     private CurrentTrackLine currentTrackLine;
     private LoadedTrackLine loadedTrackLine;
@@ -59,7 +59,7 @@ public class MapManager {
     }
 
     private void initContentUpdater() {
-        contentUpdater = new ContentUpdater() {
+        locationHerald = new LocationHerald() {
             @Override
             public void onLocationChanged(Location location) {
                 MapManager.this.onLocationChanged(location);
@@ -71,8 +71,8 @@ public class MapManager {
         };
     }
 
-    public ContentUpdater getContentUpdater() {
-        return contentUpdater;
+    public LocationHerald getContentUpdater() {
+        return locationHerald;
     }
 
     private void makeTrackGirdCalculator (Location location) {
