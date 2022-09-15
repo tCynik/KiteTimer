@@ -9,7 +9,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 public class InfoParPresenterTest {
-    final String LOG_TAG = "InfoParPresenterTest";
     String[] sampleHistory;
     ArrayList<String> messagesHistory = new ArrayList<>();
 
@@ -65,20 +64,9 @@ public class InfoParPresenterTest {
     }
 
     @Test
-    public void lastMessageStartAppTimer() throws Exception {
-        initTestingPresenter();
-        SystemClock.sleep(4000);
-        String correctAnswer = "App ready";
-        String answer = messagesHistory.get(messagesHistory.size() - 1);
-        assertEquals(correctAnswer, answer);
-    }
-
-
-
-    @Test
     public void lastMessageItOneNoTimeout() throws Exception {
         initTestingPresenter();
-        String correctAnswer = "App ready";
+        String correctAnswer = "Hello!";
         String answer = messagesHistory.get(messagesHistory.size() - 1);
         assertEquals(correctAnswer, answer);
     }

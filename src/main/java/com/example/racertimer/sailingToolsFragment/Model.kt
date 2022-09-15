@@ -1,4 +1,4 @@
-package com.example.racertimer.SailingTools
+package com.example.racertimer.sailingToolsFragment
 
 import com.example.racertimer.Instruments.CoursesCalculator
 
@@ -7,7 +7,6 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
     private var lastBearing = 10000
     private var maxVelocity = 0
     private var lastVMG = 0
-    private var maxVMG = 0
     private var courseToWind = 0
     private var maxUpwindVMG = 0
     private var maxDownwindVMG = 0
@@ -44,10 +43,6 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
         if (lastVMG != currentVMG) {
             lastVMG = currentVMG
             fieldUpdaters[Fields.VMG]?.updateIntField(lastVMG)
-        }
-        if (currentVMG > maxVMG) {
-            maxVMG = currentVMG
-            fieldUpdaters[Fields.MAX_VMG]?.updateIntField(maxVMG)
         }
         if (lastVMG > maxUpwindVMG) {
             maxUpwindVMG = lastVMG

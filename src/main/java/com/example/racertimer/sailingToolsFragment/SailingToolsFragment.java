@@ -1,4 +1,4 @@
-package com.example.racertimer.SailingTools;
+package com.example.racertimer.sailingToolsFragment;
 
 import android.graphics.Color;
 import android.location.Location;
@@ -30,7 +30,7 @@ import com.example.racertimer.multimedia.BeepSounds;
 public class SailingToolsFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_sailing_tools";
     private final String MODULE_NAME = "sailing_tools";
-    private SailingToolsViewModel viewModel;
+    private ViewModel viewModel;
 
     BeepSounds voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
@@ -66,8 +66,9 @@ public class SailingToolsFragment extends Fragment {
 
         findViews(view);
 
-        viewModel = new ViewModelProvider(this).get(SailingToolsViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ViewModel.class);
         initObservers();
+        viewModel.onWindChanged(windDirection);
 
         initManualWindSetting();
         passInstanceToMain();
@@ -96,10 +97,52 @@ public class SailingToolsFragment extends Fragment {
         viewModel.getSpeedLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer value) {
-                velocityTV.setText(value.toString());
+                onVelocityChanged(value);
             }
         });
-        
+
+        viewModel.getMaxSpeedLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                maxVelocityTV.setText(value.toString());
+            }
+        });
+
+        viewModel.getVMGLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                velocityMadeGoodTV.setText(value.toString());
+            }
+        });
+
+        viewModel.getMaxUpwindLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                bestUpwindTV.setText(value.toString());
+            }
+        });
+
+        viewModel.getMaxDownwindLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                bestDownwindTV.setText(value.toString());
+            }
+        });
+
+        viewModel.getBearingLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                onBearingChanged(value);
+            }
+        });
+
+        viewModel.getCourseToWindLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                courseToWindTV.setText(value.toString());
+            }
+        });
+
         // TODO: init field observers to observ ViewModel
     }
 
@@ -150,6 +193,7 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
                 SailingToolsFragment.this.onWindDirectionChanged(windDirection, provider);
+                viewModel.onWindChanged(windDirection);
             }
         };
     }
@@ -176,9 +220,9 @@ public class SailingToolsFragment extends Fragment {
         if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
             renewVelocity(valueVelocity);
             Log.i(PROJECT_LOG_TAG, " got new velocity = "+ valueVelocity+ ", old one = "+velocity);
-            if (velocity > maxVelocity) { // обновляем максимум
-                renewMaxVelocity(velocity);
-            }
+//            if (velocity > maxVelocity) { // обновляем максимум
+//                renewMaxVelocity(velocity);
+//            }
             updateArrowPosition(velocity);// перемещаем стрелку
             updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }

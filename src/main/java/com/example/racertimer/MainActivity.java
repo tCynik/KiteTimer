@@ -39,7 +39,7 @@ import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
 import com.example.racertimer.Instruments.WindProvider;
-import com.example.racertimer.SailingTools.SailingToolsFragment;
+import com.example.racertimer.sailingToolsFragment.SailingToolsFragment;
 import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;

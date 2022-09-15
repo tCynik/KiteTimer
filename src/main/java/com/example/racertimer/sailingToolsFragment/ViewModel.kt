@@ -1,25 +1,25 @@
-package com.example.racertimer.SailingTools
+package com.example.racertimer.sailingToolsFragment
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SailingToolsViewModel: ViewModel() {
+class ViewModel: ViewModel() {
     private val LOG_TAG = "racer_timer_sailing_tools_vm"
-    val model: Model
+    private val model: Model
+    private var windDir = 10000
 
+    var speedLive = MutableLiveData<Int>()
     var maxSpeedLive = MutableLiveData<Int>()
-    var maxVMGLive = MutableLiveData<Int>()
+    var VMGLive = MutableLiveData<Int>()
     var maxUpwindLive = MutableLiveData<Int>()
     var maxDownwindLive = MutableLiveData<Int>()
-    var speedLive = MutableLiveData<Int>()
     var bearingLive = MutableLiveData<Int>()
-    var VMGLive = MutableLiveData<Int>()
     var courseToWindLive = MutableLiveData<Int>()
-    var windDirLive = MutableLiveData<Int>()
+
 
     init {
-        Log.i(LOG_TAG, "view model was created")
+        //Log.i(LOG_TAG, "view model was created")
         val fieldsUpdaters = initFieldsUpdaters()
         model = Model(fieldsUpdaters)
     }
@@ -29,9 +29,6 @@ class SailingToolsViewModel: ViewModel() {
 
         var updater = FieldUpdater { value -> maxSpeedLive.value = value }
         mapOfUpdaters[Fields.MAX_VELOCITY] = updater
-
-        updater = FieldUpdater { value -> maxVMGLive.value = value }
-        mapOfUpdaters[Fields.MAX_VMG] = updater
 
         updater = FieldUpdater { value -> courseToWindLive.value = value }
         mapOfUpdaters[Fields.COURSE_TO_WIND] = updater
@@ -55,7 +52,7 @@ class SailingToolsViewModel: ViewModel() {
     }
 
     fun onWindChanged(windDirection: Int) {
-        windDirLive.value = windDirection
+        windDir = windDirection
         model.onWindChanged(windDirection)
     }
 

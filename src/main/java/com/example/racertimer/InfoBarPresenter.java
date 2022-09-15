@@ -57,7 +57,7 @@ public class InfoBarPresenter {
     }
 
     private void lockBarForTime (long timeoutMilSec) {
-        Log.i(PROJECT_LOG_TAG, "bugfix: timeout ="+timeoutMilSec+ " is started ");
+        //Log.i(PROJECT_LOG_TAG, "bugfix: timeout ="+timeoutMilSec+ " is started ");
         theBarIsNotLocked = false;
         //todo: runOnUiThread()
         Timer timer = new Timer();
@@ -235,7 +235,7 @@ abstract class BarStatement {
     }
 
     public void print() {
-        Log.i(PROJECT_LOG_TAG, "printing the next message " +statusName);
+//        Log.i(PROJECT_LOG_TAG, "printing the next message " +statusName);
         printToBar(statusName);
         lockTheBar(timeoutMilSec);
     }
