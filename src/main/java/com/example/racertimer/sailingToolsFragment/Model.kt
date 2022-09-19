@@ -1,7 +1,9 @@
 package com.example.racertimer.sailingToolsFragment
 
 import com.example.racertimer.Instruments.CoursesCalculator
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.sin
 
 class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
@@ -26,16 +28,22 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
             fieldUpdaters[Fields.BEARING]?.updateIntField(lastBearing)
             checkCourseToWind()
         } else isVMGParamsChanged = false
-        if (isVMGParamsChanged) checkVMG(velocityMpS, bearing)
+        if (isVMGParamsChanged) checkVMG(lastVelocity, bearing)
     }
 
     fun onWindChanged(windDir: Int) {
         if (windDir != this.windDir) {
             val windDiff = abs(this.windDir - windDir)
-            if (windDiff > 90) setMaximums(maxVelocity, 0, 0)
+            if (windDiff >= 90) setMaximums(maxVelocity, 0, 0)
             else {
-                val reduceRate = sin(windDiff.toDouble()) // TODO: проверить правильность расчета
-                setMaximums(maxVelocity, (maxUpwindVMG*reduceRate).toInt(), (maxDownwindVMG*reduceRate).toInt() )
+                val reduceRate = sin(windDiff * PI / 180) // TODO: проверить правильность расчета
+                var reduceUpwind = maxUpwindVMG * reduceRate
+                if (reduceUpwind < 1.0 ) reduceUpwind = 1.0
+                var reduceDownwind = maxDownwindVMG * reduceRate
+                if (reduceDownwind < 1.0) reduceDownwind = 1.0
+                setMaximums(maxVelocity,
+                    (maxUpwindVMG - reduceUpwind).toInt(),
+                    (maxDownwindVMG - reduceDownwind).toInt() )
             }
 
             this.windDir = windDir
