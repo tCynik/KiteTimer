@@ -36,20 +36,26 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
             val windDiff = abs(this.windDir - windDir)
             if (windDiff >= 90) setMaximums(maxVelocity, 0, 0)
             else {
-                val reduceRate = sin(windDiff * PI / 180) // TODO: проверить правильность расчета
-                var reduceUpwind = maxUpwindVMG * reduceRate
-                if (reduceUpwind < 1.0 ) reduceUpwind = 1.0
-                var reduceDownwind = maxDownwindVMG * reduceRate
-                if (reduceDownwind < 1.0) reduceDownwind = 1.0
+                val reduceRate = sin(windDiff * PI / 180)
+                var reduceUpwind = (maxUpwindVMG * reduceRate).toInt()
+                if (reduceUpwind < 1 ) reduceUpwind = 1
+
+                var reduceDownwind = abs(maxDownwindVMG * reduceRate).toInt()
+                if (reduceDownwind < 1) reduceDownwind = 1
+
                 setMaximums(maxVelocity,
-                    (maxUpwindVMG - reduceUpwind).toInt(),
-                    (maxDownwindVMG - reduceDownwind).toInt() )
+                    (maxUpwindVMG - reduceUpwind),
+                    (maxDownwindVMG + reduceDownwind) )
             }
 
             this.windDir = windDir
             checkCourseToWind()
             checkVMG(lastVelocity, lastBearing)
         }
+    }
+
+    private fun reduceMaximumsVMG (rate: Int) {
+
     }
 
     fun setMaximums(maxVelocity: Int, maxUpwindVMG: Int, maxDownwindVMG: Int) {
