@@ -1,5 +1,6 @@
 package com.example.racertimer.sailingToolsFragment
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
@@ -13,6 +14,7 @@ class ViewModel: ViewModel() {
     var maxUpwindLive = MutableLiveData<Int>()
     var maxDownwindLive = MutableLiveData<Int>()
     var bearingLive = MutableLiveData<Int>()
+    var windDirectionLive = MutableLiveData<Int>()
     var courseToWindLive = MutableLiveData<Int>()
 
 
@@ -50,14 +52,13 @@ class ViewModel: ViewModel() {
     }
 
     fun onLocationChanged(velocityMpS: Int, bearing: Int) {
-        //val velocityKMH = (velocityMS * 3.6).toInt()
         model.onLocationChanged(velocityMpS, bearing)
-        //speedLive.value = velocityMS
         bearingLive.value = bearing
     }
 
     fun onWindChanged(windDirection: Int) {
         model.onWindChanged(windDirection)
+        windDirectionLive.value = windDirection
     }
 
     fun resetMaximums() {

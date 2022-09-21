@@ -72,6 +72,7 @@ public class SailingToolsFragment extends Fragment {
 
         initManualWindSetting();
         passInstanceToMain();
+        arrowsLayoutCL.setRotation(135);// поворачиваем вьюшку
 
         initLocationHerald();
         return view;
@@ -114,6 +115,7 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 bearingTV.setText(String.valueOf(bearing));
+                Log.i("bugfix", "bearing is $bearing");
                 arrowsLayoutCL.setRotation(bearing);// поворачиваем вьюшку
             }
         });
@@ -154,7 +156,12 @@ public class SailingToolsFragment extends Fragment {
             }
         });
 
-        // TODO: init field observers to observ ViewModel
+        viewModel.getWindDirectionLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                windTV.setText(value.toString());
+            }
+        });
     }
 
     private void initManualWindSetting() {
