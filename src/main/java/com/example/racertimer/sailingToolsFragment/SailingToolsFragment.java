@@ -100,7 +100,7 @@ public class SailingToolsFragment extends Fragment {
             public void onChanged(Integer value) {
                 velocity = value;
                 velocityTV.setText(String.valueOf(velocity));
-                updateArrowPosition(velocity);// перемещаем стрелку
+                updateArrowPosition(value);// перемещаем стрелку
             }
         });
 
@@ -108,6 +108,8 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 maxVelocityTV.setText(value.toString());
+                maxVelocity = value;
+                updateArrowPosition(velocity);// перемещаем стрелку
             }
         });
 
@@ -115,8 +117,8 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 bearingTV.setText(String.valueOf(bearing));
-                Log.i("bugfix", "bearing is $bearing");
-                arrowsLayoutCL.setRotation(bearing);// поворачиваем вьюшку
+                arrowsLayoutCL.setRotation(value);
+                updateArrowPosition(value);// перемещаем стрелку
             }
         });
 
@@ -141,14 +143,6 @@ public class SailingToolsFragment extends Fragment {
             }
         });
 
-        viewModel.getBearingLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer value) {
-                bearingTV.setText(String.valueOf(bearing));
-                arrowsLayoutCL.setRotation(bearing);
-            }
-        });
-
         viewModel.getCourseToWindLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer value) {
@@ -160,6 +154,7 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 windTV.setText(value.toString());
+                windLayoutCL.setRotation(-1*CoursesCalculator.invertCourse(value));
             }
         });
     }
@@ -250,7 +245,7 @@ public class SailingToolsFragment extends Fragment {
         Log.i(PROJECT_LOG_TAG, " bearing in the tools fragment changed. New one = "+ valueBearing);
         if (valueBearing != bearing) {// если вновь поступившие цифры отличаются от старых
             renewBearing(valueBearing);
-            updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
+            //updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }
     public void onWindDirectionChanged(int valueWindDirection, WindProvider provider) { // новые данные по направлению ветра
