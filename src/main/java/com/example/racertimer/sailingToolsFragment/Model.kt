@@ -1,9 +1,9 @@
 package com.example.racertimer.sailingToolsFragment
 
+import android.util.Log
 import com.example.racertimer.Instruments.CoursesCalculator
 import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.cos
 import kotlin.math.sin
 
 class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
@@ -22,6 +22,7 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
         if (checkVelocityChanged(velocityMpS)) {
             checkMaxVelocity(lastVelocity)
             fieldUpdaters[Fields.VELOCITY]?.updateIntField(lastVelocity)
+            fieldUpdaters[Fields.PERCENT_VELOCITY]?.updateIntField(checkPercentVelocity())
             isVMGParamsChanged = true
         }
         if (checkBearingChanged(bearing)) {
@@ -77,6 +78,12 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
             lastVelocity = velocityKmH
             true
         } else false
+    }
+
+    private fun checkPercentVelocity(): Int {
+        return if (maxVelocity != 0)
+            (lastVelocity * 100 / maxVelocity).toInt()
+        else 0
     }
 
     private fun checkBearingChanged(bearing: Int): Boolean {

@@ -1,6 +1,5 @@
 package com.example.racertimer.sailingToolsFragment
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
@@ -16,6 +15,7 @@ class ViewModel: ViewModel() {
     var bearingLive = MutableLiveData<Int>()
     var windDirectionLive = MutableLiveData<Int>()
     var courseToWindLive = MutableLiveData<Int>()
+    var percentVelocityLive = MutableLiveData<Int>()
 
 
     init {
@@ -47,6 +47,9 @@ class ViewModel: ViewModel() {
 
         updater = FieldUpdater { value -> maxDownwindLive.value = value }
         mapOfUpdaters[Fields.MAX_DOWNWIND]=updater
+
+        updater = FieldUpdater { value -> percentVelocityLive.value = value }
+        mapOfUpdaters[Fields.PERCENT_VELOCITY]=updater
 
         return mapOfUpdaters
     }

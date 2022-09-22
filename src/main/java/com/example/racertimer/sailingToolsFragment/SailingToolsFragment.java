@@ -100,7 +100,7 @@ public class SailingToolsFragment extends Fragment {
             public void onChanged(Integer value) {
                 velocity = value;
                 velocityTV.setText(String.valueOf(velocity));
-                updateArrowPosition(value);// перемещаем стрелку
+                //updateArrowPosition(value);// перемещаем стрелку
             }
         });
 
@@ -109,7 +109,7 @@ public class SailingToolsFragment extends Fragment {
             public void onChanged(Integer value) {
                 maxVelocityTV.setText(value.toString());
                 maxVelocity = value;
-                updateArrowPosition(velocity);// перемещаем стрелку
+                //updateArrowPosition(velocity);// перемещаем стрелку
             }
         });
 
@@ -118,7 +118,7 @@ public class SailingToolsFragment extends Fragment {
             public void onChanged(Integer value) {
                 bearingTV.setText(String.valueOf(bearing));
                 arrowsLayoutCL.setRotation(value);
-                updateArrowPosition(value);// перемещаем стрелку
+                //updateArrowPosition(value);// перемещаем стрелку
             }
         });
 
@@ -157,6 +157,14 @@ public class SailingToolsFragment extends Fragment {
                 windLayoutCL.setRotation(-1*CoursesCalculator.invertCourse(value));
             }
         });
+
+        viewModel.getPercentVelocityLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer value) {
+                updateArrowPositionByPercent(value);
+            }
+        });
+
     }
 
     private void initManualWindSetting() {
@@ -237,7 +245,7 @@ public class SailingToolsFragment extends Fragment {
 //            if (velocity > maxVelocity) { // обновляем максимум
                 renewMaxVelocity(velocity);
 //            }
-            updateArrowPosition(velocity);// перемещаем стрелку
+            //updateArrowPosition(velocity);// перемещаем стрелку
             updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
         }
     }
@@ -372,14 +380,20 @@ public class SailingToolsFragment extends Fragment {
      * блок работы с графикой и звуком
      */
     private void updateArrowPosition (int velocity) { // обновление позиции стрелки скорости
-        if (fullSpeedSize == 0) calculateHeometric(); // получаем начальную позицию из размеров вьюшек
+        if (fullSpeedSize == 0) calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
         double percentVelocity = 0;
-        if (maxVelocity != 0) percentVelocity = 100 - (velocity * 100 / maxVelocity); // находим процент скорости от максимальной
+        if (maxVelocity != 0) percentVelocity = 100 - (this.velocity * 100 / maxVelocity); // находим процент скорости от максимальной
         float position = (float) ( ( percentVelocity * fullSpeedSize ) / 100 + fullSpeedSize/10);
-        arrowVelocityIV.setY(position);
+        //arrowVelocityIV.setY(position);
     }
 
-    private void calculateHeometric() { // готовимся к отображению динамических вьюшек
+    private void updateArrowPositionByPercent (int percent) { // обновление позиции стрелки скорости
+        if (fullSpeedSize == 0) calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
+        float position = (float) ( ( percent * fullSpeedSize )/100); //+ centralParametersCL.getHeight());
+        arrowVelocityIV.setY(fullSpeedSize - position);
+    }
+
+    private void calculateArrowHeometricFromViewses() { // готовимся к отображению динамических вьюшек
         int radiusArrowMin = centralParametersCL.getHeight()/2; // максимальный радиус
         int radiusArrowMax = arrowsLayoutCL.getHeight()/2; // минимальный радиус
         fullSpeedSize = radiusArrowMax - radiusArrowMin; // диапазон, в котором ходит стрелка
