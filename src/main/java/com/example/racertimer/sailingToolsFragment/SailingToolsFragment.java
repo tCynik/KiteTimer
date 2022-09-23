@@ -15,13 +15,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.racertimer.LocationHerald;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.LocationHerald;
 import com.example.racertimer.MainActivity;
 import com.example.racertimer.R;
 import com.example.racertimer.StatusUiUpdater;
-import com.example.racertimer.multimedia.BeepSounds;
 
 /**
  * фрагмент для отображения данных с текущими лавировочными параметрами
@@ -32,7 +31,8 @@ public class SailingToolsFragment extends Fragment {
     private final String MODULE_NAME = "sailing_tools";
     private ViewModel viewModel;
 
-    BeepSounds voiceover;
+    VmgBeeper beeperVMG;
+    //BeepSounds voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
     ImageView arrowVelocityIV, arrowDirectionIV;
     TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
@@ -100,7 +100,7 @@ public class SailingToolsFragment extends Fragment {
             public void onChanged(Integer value) {
                 velocity = value;
                 velocityTV.setText(String.valueOf(velocity));
-                //updateArrowPosition(value);// перемещаем стрелку
+                beeperVMG.updateVelocity(value);
             }
         });
 
@@ -109,7 +109,6 @@ public class SailingToolsFragment extends Fragment {
             public void onChanged(Integer value) {
                 maxVelocityTV.setText(value.toString());
                 maxVelocity = value;
-                //updateArrowPosition(velocity);// перемещаем стрелку
             }
         });
 
@@ -118,7 +117,6 @@ public class SailingToolsFragment extends Fragment {
             public void onChanged(Integer value) {
                 bearingTV.setText(String.valueOf(bearing));
                 arrowsLayoutCL.setRotation(value);
-                //updateArrowPosition(value);// перемещаем стрелку
             }
         });
 
@@ -126,6 +124,8 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 velocityMadeGoodTV.setText(value.toString());
+                //makeBeeping();
+                beeperVMG.updateVMG(value);
             }
         });
 
@@ -133,6 +133,7 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 bestUpwindTV.setText(value.toString());
+                beeperVMG.updateBestUpwind(value);
             }
         });
 
@@ -140,6 +141,7 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 bestDownwindTV.setText(value.toString());
+                beeperVMG.updateBestDownwind(value);
             }
         });
 
@@ -223,7 +225,8 @@ public class SailingToolsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        voiceover = new BeepSounds(mainActivity);
+        //voiceover = new BeepSounds(mainActivity);
+        beeperVMG = new VmgBeeper(mainActivity);
         statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
     }
 
@@ -295,18 +298,19 @@ public class SailingToolsFragment extends Fragment {
     }
 
     public void muteChangedStatus (boolean valueMute) { // изменен статус переключателя звука пищалки
-        voiceoverIsMuted = valueMute;
-        Log.i(PROJECT_LOG_TAG, " voiceover mute setted = " + voiceoverIsMuted);
-        if (voiceoverIsMuted) {
-            voiceover.voiceoverIsBeingMuted();
-            Log.i(PROJECT_LOG_TAG, " voiceover was muted");
-        }
-        else {
-            voiceover.vmgIsMuted = valueMute;
-            lastVMG = velocityMadeGood - 1;
-            Log.i(PROJECT_LOG_TAG, " voiceover was unmuted, VMG = "+velocityMadeGood+", last VMG = "+lastVMG);
-            makeBeeping();
-        }
+        beeperVMG.setMuteStatus(valueMute);
+//        voiceoverIsMuted = valueMute;
+//        Log.i(PROJECT_LOG_TAG, " voiceover mute setted = " + voiceoverIsMuted);
+//        if (voiceoverIsMuted) {
+//            //voiceover.voiceoverIsBeingMuted();
+//            Log.i(PROJECT_LOG_TAG, " voiceover was muted");
+//        }
+//        else {
+//            //voiceover.vmgIsMuted = valueMute;
+//            lastVMG = velocityMadeGood - 1;
+//            Log.i(PROJECT_LOG_TAG, " voiceover was unmuted, VMG = "+velocityMadeGood+", last VMG = "+lastVMG);
+//            makeBeeping();
+//        }
     }
 
     /**
@@ -363,7 +367,7 @@ public class SailingToolsFragment extends Fragment {
             velocityMadeGood = vmg;
             renewVmg(velocityMadeGood);
             onVmgUpdated(); // а так же запускаем обработку измененного ВМГ
-            makeBeeping();
+            //makeBeeping();
         }
     }
 
@@ -408,38 +412,40 @@ public class SailingToolsFragment extends Fragment {
         arrowDirectionIV.setVisibility(View.VISIBLE);
     }
 
-    private void makeBeeping() {
-        int threshold;
-        int percent;
-
-        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG & isRaceStarted) { // если изменилась VMG, перезапускаем прищалку
-            Log.i(PROJECT_LOG_TAG, " called makeBeeping, voiceoverMute = "+voiceoverIsMuted);
-            lastVMG = velocityMadeGood;
-
-            if (velocityMadeGood > 0) { // обрабатываем апвинд
-                threshold = (int) (bestUpwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
-                if (velocityMadeGood > threshold) { // если ВМГ выше порога,
-                    percent = calculateBeepingPercent(bestUpwind, threshold); // считаем % от максимульной частоты пиков
-                    if (velocity > 5) voiceover.playRepeatSound(percent); // перезапуск пищалки (с автоматической остановкой)
-                } else voiceover.stopRepeatSound();
-
-            } else { // обрабатываем даунвинд
-                threshold = (int) (bestDownwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
-                if (velocityMadeGood < threshold) { // если ВМГ меньше порога (больше по модулю, т.к. и то и то минус)
-                    percent = calculateBeepingPercent(bestDownwind, threshold); // запускаем/меняем пищалку
-                    if (velocity > 5) voiceover.playRepeatSound(percent);
-                } else voiceover.stopRepeatSound();
-            }
-        }
-    }
+//    private void makeBeeping() {
+//        int threshold;
+//        int percent;
+//        Log.i("bugfix", "make beeping called. VMG = ");
+//        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG & isRaceStarted) { // если изменилась VMG, перезапускаем прищалку
+//            Log.i(PROJECT_LOG_TAG, " called makeBeeping, voiceoverMute = "+voiceoverIsMuted);
+//            lastVMG = velocityMadeGood;
+//
+//            if (velocityMadeGood > 0) { // обрабатываем апвинд
+//                threshold = (int) (bestUpwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
+//                if (velocityMadeGood > threshold) { // если ВМГ выше порога,
+//                    percent = calculateBeepingPercent(bestUpwind, threshold); // считаем % от максимульной частоты пиков
+//                    if (velocity > 5) voiceover.playRepeatSound(percent); // перезапуск пищалки (с автоматической остановкой)
+//                } else voiceover.stopRepeatSound();
+//
+//            } else { // обрабатываем даунвинд
+//                threshold = (int) (bestDownwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
+//                if (velocityMadeGood < threshold) { // если ВМГ меньше порога (больше по модулю, т.к. и то и то минус)
+//                    percent = calculateBeepingPercent(bestDownwind, threshold); // запускаем/меняем пищалку
+//                    if (velocity > 5) voiceover.playRepeatSound(percent);
+//                } else voiceover.stopRepeatSound();
+//            }
+//        }
+//    }
 
     public void startTheRace() {
         isRaceStarted = true;
+        beeperVMG.setRaceStatus(true);
     }
 
     public void stopTheRace () {
         isRaceStarted = false;
-        voiceover.stopRepeatSound();
+        beeperVMG.setRaceStatus(false);
+        //voiceover.stopRepeatSound();
     }
 
     private int calculateBeepingPercent(int VMGmax, int threshold) {

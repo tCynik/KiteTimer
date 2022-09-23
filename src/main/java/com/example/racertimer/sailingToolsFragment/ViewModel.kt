@@ -1,7 +1,10 @@
 package com.example.racertimer.sailingToolsFragment
 
+import android.media.AudioAttributes
+import android.media.SoundPool
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.racertimer.R
 
 class ViewModel: ViewModel() {
     private val LOG_TAG = "racer_timer_sailing_tools_vm"

@@ -14,7 +14,7 @@ public class SystemSounds extends VoiceoverMain {
 //    public static int SOUND_ASSET_PAUSE = 2;
 
     public SystemSounds(Context context) {
-        super(context);
+        super();
 //        soundPool.load(context, R.raw.start_cow_bell, PRIORITY_SYSTEM); // 1
 //        soundPool.load(context, R.raw.eng_pause, PRIORITY_SYSTEM); // 21
 

@@ -1,12 +1,22 @@
 package com.example.racertimer.sailingToolsFragment
 
-import android.util.Log
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.SoundPool
 import com.example.racertimer.Instruments.CoursesCalculator
+import com.example.racertimer.R
+import com.example.racertimer.multimedia.BeepSounds
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
 
 class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
+
+    private val PRIORITY_BEEP = 2 // звуки индикации положения VMG
+
+
+//    private val voiceover: BeepSounds = BeepSounds(this)
+
     private var lastVelocity = 0
     private var windDir = 10000
     private var lastBearing = 10000
@@ -32,6 +42,7 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
         if (isVMGParamsChanged) checkVMG(lastVelocity, bearing)
     }
 
+
     fun onWindChanged(windDir: Int) {
         if (windDir != this.windDir) {
             val windDiff = abs(this.windDir - windDir)
@@ -40,7 +51,6 @@ class Model(private val fieldUpdaters: Map<Fields, FieldUpdater>) {
                 val reduceRate = sin(windDiff * PI / 180)
                 var reduceUpwind = (maxUpwindVMG * reduceRate).toInt()
                 if (reduceUpwind < 1 ) reduceUpwind = 1
-
                 var reduceDownwind = abs(maxDownwindVMG * reduceRate).toInt()
                 if (reduceDownwind < 1) reduceDownwind = 1
 

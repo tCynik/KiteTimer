@@ -1,6 +1,5 @@
 package com.example.racertimer.multimedia;
 
-import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 
@@ -18,12 +17,11 @@ public class VoiceoverMain {
     private static final int PRIORITY_TIMER = 3; // озвучка таймера
     public SoundPool soundPool;
 
-    private Context context;
     public boolean vmgIsMuted = false;
 
     int repeatSoundId = 0; // айди текущего повторяющегося звука
 
-    public VoiceoverMain(Context context) {
+    public VoiceoverMain() {
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ASSISTANT)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -31,7 +29,6 @@ public class VoiceoverMain {
         soundPool = new SoundPool.Builder()
                 .setAudioAttributes(audioAttributes)
                 .build();
-        this.context = context;
     }
 
     public void playSound(int soundAssertId){

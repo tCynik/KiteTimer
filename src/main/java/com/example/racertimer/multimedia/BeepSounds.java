@@ -12,7 +12,7 @@ public class BeepSounds extends VoiceoverMain {
     public static int SOUND_ASSET_BEEP_PATCH = 2;
 
     public BeepSounds(Context context) {
-        super(context);
+        super();
         soundPool.load(context, R.raw.beep, PRIORITY_BEEP); // 22
         soundPool.load(context, R.raw.patch_beep, (PRIORITY_BEEP +1)); // 23
     }

@@ -31,7 +31,7 @@ public class TimerVoiceover extends VoiceoverMain {
 
 
     public TimerVoiceover(Context context) {
-        super(context);
+        super();
 
         soundPool.load(context, R.raw.eng_one, PRIORITY_TIMER); // 1 - порядковый номер подгурзки ассета
         soundPool.load(context, R.raw.eng_two, PRIORITY_TIMER); // 2
