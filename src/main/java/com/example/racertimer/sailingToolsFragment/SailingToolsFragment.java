@@ -38,7 +38,7 @@ public class SailingToolsFragment extends Fragment {
     TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
 
     private int fullSpeedSize = 0; // максимальный ход стрелки
-    private int velocity, bearing, windDirection, velocityMadeGood, lastVMG, maxVelocity, bestUpwind, bestDownwind;
+    private int velocity, windDirection;
     private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от максимального ВМГ начинаем пикать
 
     private boolean voiceoverIsMuted = false; // переменная отключен ли звук пищалки
@@ -64,10 +64,11 @@ public class SailingToolsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sailing_tools, null); // инфлейтим вьюшку фрагмента
 
+        Log.i("bugfix", "sailing tools fragment was created");
         findViews(view);
 
         viewModel = new ViewModelProvider(this).get(ViewModel.class);
-        initObservers();
+
         viewModel.onWindChanged(windDirection);
 
         initManualWindSetting();
@@ -108,14 +109,13 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 maxVelocityTV.setText(value.toString());
-                maxVelocity = value;
             }
         });
 
         viewModel.getBearingLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer value) {
-                bearingTV.setText(String.valueOf(bearing));
+                bearingTV.setText(String.valueOf(value));
                 arrowsLayoutCL.setRotation(value);
             }
         });
@@ -124,7 +124,6 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onChanged(Integer value) {
                 velocityMadeGoodTV.setText(value.toString());
-                //makeBeeping();
                 beeperVMG.updateVMG(value);
             }
         });
@@ -166,7 +165,6 @@ public class SailingToolsFragment extends Fragment {
                 updateArrowPositionByPercent(value);
             }
         });
-
     }
 
     private void initManualWindSetting() {
@@ -204,13 +202,10 @@ public class SailingToolsFragment extends Fragment {
             @Override
             public void onLocationChanged(Location location) {
                 int bearing = (int) location.getBearing();
-                //onBearingChanged(bearing);
                 int velocity = 0;
                 if (location.hasSpeed()) {
                     velocity = (int) location.getSpeed();
-                    //velocity = (int) (location.getSpeed()*3.6);
                 }
-                //onVelocityChanged(velocity);
                 viewModel.onLocationChanged(velocity, bearing);
             }
 
@@ -225,8 +220,9 @@ public class SailingToolsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        //voiceover = new BeepSounds(mainActivity);
         beeperVMG = new VmgBeeper(mainActivity);
+        initObservers();
+
         statusUiUpdater.updateUIModuleStatus(MODULE_NAME, true);
     }
 
@@ -240,32 +236,12 @@ public class SailingToolsFragment extends Fragment {
      * блок управляющийх воздействий по новым данным
      */
 
-    private void onVelocityChanged(int valueVelocity) { // новые данные по скорости
-        Log.i(PROJECT_LOG_TAG, " velocity in the tools fragment changed. New one = "+ valueVelocity);
-        if (velocity != valueVelocity) { // если вновь поступившие цифры отличаются от старых
-            renewVelocity(valueVelocity);
-            Log.i(PROJECT_LOG_TAG, " got new velocity = "+ valueVelocity+ ", old one = "+velocity);
-//            if (velocity > maxVelocity) { // обновляем максимум
-                renewMaxVelocity(velocity);
-//            }
-            //updateArrowPosition(velocity);// перемещаем стрелку
-            updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
-        }
-    }
-    private void onBearingChanged(int valueBearing) { // новые данные по курсу
-        Log.i(PROJECT_LOG_TAG, " bearing in the tools fragment changed. New one = "+ valueBearing);
-        if (valueBearing != bearing) {// если вновь поступившие цифры отличаются от старых
-            renewBearing(valueBearing);
-            //updateVmgByNewWindOrVelocity();// считаем ВМГ -> пищим
-        }
-    }
     public void onWindDirectionChanged(int valueWindDirection, WindProvider provider) { // новые данные по направлению ветра
         Log.i(PROJECT_LOG_TAG, " wind dir in the tools fragment changed. New one = "+ valueWindDirection+
                 " provider = " + provider);
         if (valueWindDirection != windDirection) {
+            windDirection = valueWindDirection;
             viewModel.onWindChanged(valueWindDirection);
-            //renewWindDirection(valueWindDirection);
-            //updateVmgByNewWindOrVelocity();
 
             switch (provider) {
                 case DEFAULT:
@@ -293,103 +269,15 @@ public class SailingToolsFragment extends Fragment {
 
     public void resetPressed () { // нажата кнопка сброса максимумов
         viewModel.resetMaximums();
-
-//        resetAllMaximums();
     }
 
     public void muteChangedStatus (boolean valueMute) { // изменен статус переключателя звука пищалки
         beeperVMG.setMuteStatus(valueMute);
-//        voiceoverIsMuted = valueMute;
-//        Log.i(PROJECT_LOG_TAG, " voiceover mute setted = " + voiceoverIsMuted);
-//        if (voiceoverIsMuted) {
-//            //voiceover.voiceoverIsBeingMuted();
-//            Log.i(PROJECT_LOG_TAG, " voiceover was muted");
-//        }
-//        else {
-//            //voiceover.vmgIsMuted = valueMute;
-//            lastVMG = velocityMadeGood - 1;
-//            Log.i(PROJECT_LOG_TAG, " voiceover was unmuted, VMG = "+velocityMadeGood+", last VMG = "+lastVMG);
-//            makeBeeping();
-//        }
-    }
-
-    /**
-     * блок методов изменения вьюшек
-     */
-    private void renewBestUpwind(int value) {
-        bestUpwind = value;
-        bestUpwindTV.setText(String.valueOf(bestUpwind));
-    }
-    private void renewBestDownwind(int value) {
-        bestDownwind = value;
-        bestDownwindTV.setText(String.valueOf(bestDownwind));
-    }
-    private void renewMaxVelocity(int value) {
-        maxVelocity = value;
-        maxVelocityTV.setText(String.valueOf(maxVelocity));
-        Log.i(PROJECT_LOG_TAG, " new max velocity = "+value);
-    }
-    private void renewVelocity(int value) {
-        velocity = value;
-        velocityTV.setText(String.valueOf(velocity));
-    }
-    private void renewVmg (int value) {
-        velocityMadeGood = value;
-        velocityMadeGoodTV.setText(String.valueOf(velocityMadeGood));
-    }
-    private void renewBearing (int value) {
-        bearing = value;
-        bearingTV.setText(String.valueOf(bearing));
-        arrowsLayoutCL.setRotation(bearing);// поворачиваем вьюшку
-    }
-    private void renewWindDirection (int value) {
-        windDirection = value;
-        windTV.setText(String.valueOf(windDirection));
-        windLayoutCL.setRotation(-1*CoursesCalculator.invertCourse(windDirection));
-    }
-
-    /**
-     * блок технических методов
-     */
-
-    private void resetAllMaximums () { // обнуление всех максимумов
-        viewModel.resetMaximums();
-//        renewBestUpwind(0);
-//        renewBestDownwind(0);
-//        renewMaxVelocity(0);
-    }
-
-    private void updateVmgByNewWindOrVelocity() { // обновление максимумов ВМГ
-        int courseToWind = CoursesCalculator.calcWindCourseAngle(windDirection, bearing); // находим курс к ветру
-        int vmg = CoursesCalculator.VMGByWindBearingVelocity(windDirection, bearing, velocity);
-        courseToWindTV.setText(String.valueOf(courseToWind));
-        if (velocityMadeGood != vmg) { // если ВМГ изменилось, обновляем поле ВМГ и вьюшку
-            velocityMadeGood = vmg;
-            renewVmg(velocityMadeGood);
-            onVmgUpdated(); // а так же запускаем обработку измененного ВМГ
-            //makeBeeping();
-        }
-    }
-
-    private void onVmgUpdated () { // обработка измененного ВМГ
-        if (velocityMadeGood > bestUpwind) { // если ВМГ болше максимальной
-            renewBestUpwind(velocityMadeGood);
-        } else
-        if (velocityMadeGood < bestDownwind) { // если ВМГ меньше минимальной
-            renewBestDownwind(velocityMadeGood);
-        }
     }
 
     /**
      * блок работы с графикой и звуком
      */
-    private void updateArrowPosition (int velocity) { // обновление позиции стрелки скорости
-        if (fullSpeedSize == 0) calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
-        double percentVelocity = 0;
-        if (maxVelocity != 0) percentVelocity = 100 - (this.velocity * 100 / maxVelocity); // находим процент скорости от максимальной
-        float position = (float) ( ( percentVelocity * fullSpeedSize ) / 100 + fullSpeedSize/10);
-        //arrowVelocityIV.setY(position);
-    }
 
     private void updateArrowPositionByPercent (int percent) { // обновление позиции стрелки скорости
         if (fullSpeedSize == 0) calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
@@ -412,31 +300,6 @@ public class SailingToolsFragment extends Fragment {
         arrowDirectionIV.setVisibility(View.VISIBLE);
     }
 
-//    private void makeBeeping() {
-//        int threshold;
-//        int percent;
-//        Log.i("bugfix", "make beeping called. VMG = ");
-//        if (velocityMadeGood != 0 & velocityMadeGood != lastVMG & isRaceStarted) { // если изменилась VMG, перезапускаем прищалку
-//            Log.i(PROJECT_LOG_TAG, " called makeBeeping, voiceoverMute = "+voiceoverIsMuted);
-//            lastVMG = velocityMadeGood;
-//
-//            if (velocityMadeGood > 0) { // обрабатываем апвинд
-//                threshold = (int) (bestUpwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
-//                if (velocityMadeGood > threshold) { // если ВМГ выше порога,
-//                    percent = calculateBeepingPercent(bestUpwind, threshold); // считаем % от максимульной частоты пиков
-//                    if (velocity > 5) voiceover.playRepeatSound(percent); // перезапуск пищалки (с автоматической остановкой)
-//                } else voiceover.stopRepeatSound();
-//
-//            } else { // обрабатываем даунвинд
-//                threshold = (int) (bestDownwind * vmgBeeperSensitivity); // высчитываем порог чувствительности ВМГ
-//                if (velocityMadeGood < threshold) { // если ВМГ меньше порога (больше по модулю, т.к. и то и то минус)
-//                    percent = calculateBeepingPercent(bestDownwind, threshold); // запускаем/меняем пищалку
-//                    if (velocity > 5) voiceover.playRepeatSound(percent);
-//                } else voiceover.stopRepeatSound();
-//            }
-//        }
-//    }
-
     public void startTheRace() {
         isRaceStarted = true;
         beeperVMG.setRaceStatus(true);
@@ -445,12 +308,5 @@ public class SailingToolsFragment extends Fragment {
     public void stopTheRace () {
         isRaceStarted = false;
         beeperVMG.setRaceStatus(false);
-        //voiceover.stopRepeatSound();
-    }
-
-    private int calculateBeepingPercent(int VMGmax, int threshold) {
-        int activeVMG = velocityMadeGood - threshold;
-        int activeVMGmax = VMGmax - threshold;
-        return Math.abs(activeVMG * 100 / activeVMGmax);
     }
 }
