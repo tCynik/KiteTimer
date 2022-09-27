@@ -225,7 +225,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
     public boolean onMenuItemClick(MenuItem menuItem) {
         boolean flagReturn = false;
         if (menuItem.getItemId() == R.id.current) { // если выбрана текущая локация
-            Toast.makeText(this, "selected current location is current", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "forecast location is current GPS position", Toast.LENGTH_SHORT).show();
             flagReturn = true;
         } else { // если выбрана не текущая локация, а другая
             for (int i = 0; i < listLocationForecast.size(); i++) { // перебираем все варианты и сравниваем
