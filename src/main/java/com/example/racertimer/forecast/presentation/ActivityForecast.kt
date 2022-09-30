@@ -6,15 +6,24 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.racertimer.R
-import com.example.racertimer.forecast.data.ForecastURLReceiver
+import com.example.racertimer.forecast.data.LastForecastLocationRepository
+import com.example.racertimer.forecast.data.LocationsRepository
+import com.example.racertimer.forecast.data.ulrequest.ForecastURLReceiver
 import com.example.racertimer.forecast.domain.models.ForecastLocation
+import com.example.racertimer.forecast.domain.useCases.LoadLastUseCase
 import com.example.racertimer.forecast.domain.useCases.OpenLocationsListUseCase
+import com.example.racertimer.forecast.domain.useCases.SaveLastUseCase
 import com.example.racertimer.forecast.domain.useCases.UpdateForecastUseCase
 
 class ActivityForecast : AppCompatActivity() {
 
-    private val openLocationsListUseCase = OpenLocationsListUseCase()
-    private val updateForecastUseCase = UpdateForecastUseCase()
+    private val lastLocationRepository by lazy {LastForecastLocationRepository(context = applicationContext)}
+    private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
+    private val saveLastLocationUseCase by lazy {SaveLastUseCase(lastLocationRepository) }
+
+    private val locationsRepository by lazy {LocationsRepository(context = applicationContext)}
+    private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsRepository)}
+    private val updateForecastUseCase by lazy {UpdateForecastUseCase(lastLocationRepository)}
 
     private val forecastURLReceiver = ForecastURLReceiver()
     private var lastLocation: ForecastLocation? = null
@@ -29,8 +38,18 @@ class ActivityForecast : AppCompatActivity() {
         val listView = findViewById<LinearLayout>(R.id.listView)
         var lastLocation = updateLocation()
 
-
+        if (savedInstanceState != null) {
+            if (savedInstanceState.isEmpty) {
+                val lastLocationName: String = updateForecast(loadLastLocationUseCase.execute())
+                val forecastList = loadLastLocationUseCase.execute()
+                val forecastLocation = chooseLocationUseCase.execute(forecastList, lastLocationName)
+                updateForecastUseCase.execute(forecastLocation)
+                // todo: if forecast location from searching is null, make error toast
+            }
+        }
     }
+
+
 
     private fun updateLocation (): ForecastLocation? {
         /** если есть, принимаем даныне по местоположению из вывавшего интента  */
@@ -43,7 +62,7 @@ class ActivityForecast : AppCompatActivity() {
         return lastLocation
     }
 
-    private fun updateForecast(forecastLocation: ForecastLocation) {
+    private fun updateForecast(forecastLocation: String): String {
         val forecastData = forecastURLReceiver.update(forecastLocation)
     }
 

@@ -1,4 +1,10 @@
 package com.example.racertimer.forecast.domain.useCases
 
-class OpenLocationsListUseCase {
+import com.example.racertimer.forecast.domain.interfaces.LocationsListInterface
+import com.example.racertimer.forecast.domain.models.LocationsList
+
+class OpenLocationsListUseCase(val locationsListInterface: LocationsListInterface) {
+    fun execute(): LocationsList? {
+        return locationsListInterface.loadList()
+    }
 }
