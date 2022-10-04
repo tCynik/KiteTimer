@@ -4,7 +4,7 @@ import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList
 
 class ChooseLocationUseCase {
-    fun execute (list: LocationsList, locationName: String): ForecastLocation {
-
+    fun execute (list: LocationsList, locationName: String): ForecastLocation? {
+        return list[locationName]
     }
 }

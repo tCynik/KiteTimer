@@ -34,17 +34,19 @@ class LocationsRepository(context: Context): LocationsListInterface {
         return locationsList
     }
 
-    override fun saveList(locationsList: LocationsList) {
-        try { // записываем обьект список локаций в файл
+    override fun saveList(locationsList: LocationsList): Boolean {
+        return try { // записываем обьект список локаций в файл
             val objectOutputStream = ObjectOutputStream(fileOutputStream)
             objectOutputStream.writeObject(locationsList)
             objectOutputStream.close()
             fileOutputStream.close()
             Log.i("racer_timer, loc list serialization", " location saved ")
+            true
         } catch (e: IOException) {
             Log.i("racer_timer, loc list serialization", " location was not saved = $e")
             e.printStackTrace()
-        }    }
+            false
+        }
     }
 
 // TODO: берем список из сществующих точек и переписываем в эту модель. Написать преобразователь

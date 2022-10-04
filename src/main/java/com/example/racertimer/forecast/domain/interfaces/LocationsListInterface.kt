@@ -5,5 +5,5 @@ import com.example.racertimer.forecast.domain.models.LocationsList
 interface LocationsListInterface {
     fun loadList(): LocationsList?
 
-    fun saveList(locationsList: LocationsList)
+    fun saveList(locationsList: LocationsList): Boolean
 }
