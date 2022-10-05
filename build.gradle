@@ -39,6 +39,7 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'//
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // add - successful
+    implementation "org.jetbrains.kotlin:kotlinx-coroutines-android:1.4.1" // add for coroutines - successful
 
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
@@ -55,5 +56,4 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.1.0" // добавляем для отказа от findViewById
     testImplementation "android.arch.core:core-testing:1.1.0" // добавляем для отказа от findViewById
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0" // Для получения viewModel
-
 }

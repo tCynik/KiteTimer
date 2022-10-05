@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
 import com.example.racertimer.forecast.data.LastForecastLocationRepository
 import com.example.racertimer.forecast.data.LocationsRepository
@@ -17,6 +18,7 @@ import com.example.racertimer.forecast.data.urlequest.ForecastURLReceiver
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.useCases.*
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
+import java.util.*
 
 private const val CURRENT_POSITION = "Current"
 const val BROADCAST_ACTION =
@@ -24,6 +26,7 @@ const val BROADCAST_ACTION =
 
 
 class ActivityForecast : AppCompatActivity() {
+    private val forecastViewModel by lazy{ViewModelProvider(this).get(ForecastViewModel::class.java)}
 
     private val lastLocationRepository by lazy {LastForecastLocationRepository(context = applicationContext)}
     private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
@@ -99,10 +102,21 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun updateForecast(forecastLocation: ForecastLocation): Boolean {
-        updateForecastUseCase.execute(forecastLocation)
+        //var forecastStrings = Queue<String>//: Queue<String> = updateForecastUseCase.execute(forecastLocation)
         saveLastLocationUseCase.execute(forecastLocation)
         // todo: добавить обработку currentPositionIsShowh - должно срабатывать только когда выбрана никакая или текущая позиция
+        var result = false
+        result = viewModelScope.launch {
+            val forecastStrings: Queue<String> = updateForecastUseCase.execute(forecastLocation)
+           return@launch fillForecastTable(forecastStrings)
+        }
+        return result
     }
+
+    private fun fillForecastTable(forecastStrings: Queue<String>) {
+
+    }
+
 
     private fun updateForecastByCurrentPosition() {
         if (currentPositionLocation == null) {
