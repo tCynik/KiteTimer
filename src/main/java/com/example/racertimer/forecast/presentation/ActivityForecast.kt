@@ -14,7 +14,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
 import com.example.racertimer.forecast.data.LastForecastLocationRepository
 import com.example.racertimer.forecast.data.LocationsRepository
-import com.example.racertimer.forecast.data.urlequest.ForecastURLReceiver
+import com.example.racertimer.forecast.domain.interfaces.UpdateForecastLinesInterface
+import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.useCases.*
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
@@ -36,9 +37,17 @@ class ActivityForecast : AppCompatActivity() {
     private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsRepository)}
     private val saveLocationsListUseCase by lazy {SaveLocationListUseCase(context = applicationContext, locationsRepository)}
     private val chooseLocationUseCase by lazy {ChooseLocationUseCase()}
-    private val updateForecastUseCase by lazy {UpdateForecastUseCase()}
 
-    private val forecastURLReceiver = ForecastURLReceiver()
+    private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
+        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>) {
+            while (!queueForecastLines.isEmpty()) {
+                val currentLine = queueForecastLines.poll()
+                if (currentLine!=null) fillForecastTable(currentLine)
+            }
+        }
+    }
+    private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface)}
+
     private var lastLocation: ForecastLocation? = null
 
     private var currentPositionLocation: ForecastLocation? = null
@@ -106,14 +115,14 @@ class ActivityForecast : AppCompatActivity() {
         saveLastLocationUseCase.execute(forecastLocation)
         // todo: добавить обработку currentPositionIsShowh - должно срабатывать только когда выбрана никакая или текущая позиция
         var result = false
-        result = viewModelScope.launch {
-            val forecastStrings: Queue<String> = updateForecastUseCase.execute(forecastLocation)
-           return@launch fillForecastTable(forecastStrings)
-        }
+//        result = viewModelScope.launch {
+//            val forecastStrings: Queue<String> = updateForecastUseCase.execute(forecastLocation)
+//           return@launch fillForecastTable(forecastStrings)
+//        }
         return result
     }
 
-    private fun fillForecastTable(forecastStrings: Queue<String>) {
+    private fun fillForecastTable(forecastLine: ForecastLine) {
 
     }
 
