@@ -9,12 +9,11 @@ import com.example.racertimer.forecast.domain.models.ForecastLocation
 import org.json.JSONObject
 
 class UpdateForecastUseCase(val updateForecastLinesInterface: UpdateForecastLinesInterface) {
-// TODO: get jSon from interface and pass one to the parser to get forecastLines. Then pass the lines into UI
+// TODO: put the . Then pass the lines into UI
     fun execute(forecastLocation: ForecastLocation) {
         val resultInterface = object : ResultJsonInterface{
             override fun gotResult(jsonOnbject: JSONObject) {
-                val parser = ParserJsonToQueueLines()
-                val queueLines = parser.execute(jsonOnbject)
+                val queueLines = ParserJsonToQueueLines().execute(jsonOnbject)
                 updateForecastLinesInterface.updateForecastLines(queueLines)
             }
         }

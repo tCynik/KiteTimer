@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
@@ -19,6 +20,7 @@ import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.useCases.*
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
+import kotlinx.android.synthetic.main.activity_forecast2.*
 import java.util.*
 
 private const val CURRENT_POSITION = "Current"
@@ -40,10 +42,7 @@ class ActivityForecast : AppCompatActivity() {
 
     private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
         override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>) {
-            while (!queueForecastLines.isEmpty()) {
-                val currentLine = queueForecastLines.poll()
-                if (currentLine!=null) fillForecastTable(currentLine)
-            }
+            fillForecast(queueForecastLines)
         }
     }
     private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface)}
@@ -122,11 +121,6 @@ class ActivityForecast : AppCompatActivity() {
         return result
     }
 
-    private fun fillForecastTable(forecastLine: ForecastLine) {
-
-    }
-
-
     private fun updateForecastByCurrentPosition() {
         if (currentPositionLocation == null) {
             currentLocationIsShown = false
@@ -154,6 +148,27 @@ class ActivityForecast : AppCompatActivity() {
             IntentFilter(BROADCAST_ACTION) // прописываем интент фильтр для слушателя
         registerReceiver(locationBroadcastReceiver, locationIntentFilter) // регистрируем слушатель
     }
+
+    private fun fillForecast(forecastLines: Queue<ForecastLine>) {
+        while (!forecastLines.isEmpty()) {
+            val item = layoutInflater.inflate(R.layout.forecast_line, listView, false)
+            val currentLine = forecastLines.poll()
+            if (currentLine != null) {
+                val timeTV = item.findViewById<TextView>(R.id.forecast_string_time)
+                timeTV.text = currentLine.time
+
+                val tempTV
+                val windSpeedTV
+                val windGustTV
+                val windDirTV
+            }
+        }
+    }
+
+    private fun fillForecastLine(forecastLine: ForecastLine) {
+
+    }
+
 
 
 }
