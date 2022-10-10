@@ -29,7 +29,7 @@ const val BROADCAST_ACTION =
 
 
 class ActivityForecast : AppCompatActivity() {
-    private val forecastViewModel by lazy{ViewModelProvider(this).get(ForecastViewModel::class.java)}
+    //private val forecastViewModel by lazy{ViewModelProvider(this).get(ForecastViewModel::class.java)}
 
     private val lastLocationRepository by lazy {LastForecastLocationRepository(context = applicationContext)}
     private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
@@ -157,18 +157,18 @@ class ActivityForecast : AppCompatActivity() {
                 val timeTV = item.findViewById<TextView>(R.id.forecast_string_time)
                 timeTV.text = currentLine.time
 
-                val tempTV
-                val windSpeedTV
-                val windGustTV
-                val windDirTV
+                val tempTV = item.findViewById<TextView>(R.id.forecast_string_temp)
+                tempTV.text = currentLine.temperature
+
+                val windSpeedTV = item.findViewById<TextView>(R.id.forecast_string_wind)
+                windSpeedTV.text = currentLine.windSpeed
+
+                val windGustTV = item.findViewById<TextView>(R.id.forecast_string_gust)
+                windGustTV.text = currentLine.windGust
+
+                val windDirTV = item.findViewById<TextView>(R.id.forecast_string_dir)
+                windDirTV.text = currentLine.windDir
             }
         }
     }
-
-    private fun fillForecastLine(forecastLine: ForecastLine) {
-
-    }
-
-
-
 }
