@@ -13,6 +13,8 @@ import android.widget.ImageButton;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.racertimer.forecast.presentation.ActivityForecast;
+
 public class MenuFragment extends Fragment implements CompoundButton.OnCheckedChangeListener {
 
     private final static String PROJECT_LOG_TAG = "racer_timer";
@@ -86,7 +88,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
         Location location = mainActivity.getCurrentLocation();
         double longitude = location.getLongitude();
         double latitude = location.getLatitude();
-        Intent intent = new Intent(getActivity(), ActivityForecast.class);
+        Intent intent = new Intent(getActivity(), ActivityForecast.class); //ActivityForecast.class);
         intent.putExtra("latitude", latitude);
         intent.putExtra("longitude", longitude);
         startActivity(intent);

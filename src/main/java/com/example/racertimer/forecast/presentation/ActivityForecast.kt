@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.location.Location
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -61,29 +62,35 @@ class ActivityForecast : AppCompatActivity() {
         val listView = findViewById<LinearLayout>(R.id.listView)
         var lastLocation = updateLocation()
 
+        //buttonSelectLocation.setOnClickListener(View.OnClickListener {  })
+
         if (savedInstanceState != null) {
             if (savedInstanceState.isEmpty) {
-                val lastLocationName: String = loadLastLocationUseCase.execute()//updateForecast(loadLastLocationUseCase.execute())
-                // todo: потребуется обработка null. если проходит null, берем по текущему
-                if (lastLocationName == CURRENT_POSITION) {
-                    updateForecastByCurrentPosition()
-                }
-                val locationsList = openLocationsListUseCase.execute()
-                if (locationsList != null) {
-                    val forecastLocation = chooseLocationUseCase.execute(locationsList, lastLocationName)
-                    if (forecastLocation != null) {
-                        updateForecastUseCase.execute(forecastLocation)
-                    } else {
-                        updateForecastByCurrentPosition()
-                    }
-                } else {
-                    updateForecastByCurrentPosition()
-                }
-                // todo: if forecast location from searching is null, make error toast
-                // todo: make request by geoLocation (when last location name = "default")
+                updateByForecastOpening()
             }
         }
         firstTimeLaunch(saveLocationsListUseCase)
+    }
+
+    private fun updateByForecastOpening(){
+        val lastLocationName: String = loadLastLocationUseCase.execute()//updateForecast(loadLastLocationUseCase.execute())
+        // todo: потребуется обработка null. если проходит null, берем по текущему
+        if (lastLocationName == CURRENT_POSITION) {
+            updateForecastByCurrentPosition()
+        }
+        val locationsList = openLocationsListUseCase.execute()
+        if (locationsList != null) {
+            val forecastLocation = chooseLocationUseCase.execute(locationsList, lastLocationName)
+            if (forecastLocation != null) {
+                updateForecastUseCase.execute(forecastLocation)
+            } else {
+                updateForecastByCurrentPosition()
+            }
+        } else {
+            updateForecastByCurrentPosition()
+        }
+        // todo: if forecast location from searching is null, make error toast
+        // todo: make request by geoLocation (when last location name = "default")
     }
 
     private fun firstTimeLaunch(saveLocationListUseCase: SaveLocationListUseCase) {
@@ -96,6 +103,10 @@ class ActivityForecast : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         initBroadcastListener()
+    }
+
+    fun selectLocation(view: View){
+        //val layoutInflater = layoutInflater
     }
 
     private fun updateLocation (): ForecastLocation? {

@@ -39,7 +39,7 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.7.0'//
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.10" // add - successful
-    implementation "org.jetbrains.kotlin:kotlinx-coroutines-android:1.4.1" // add for coroutines - successful
+    //implementation "org.jetbrains.kotlin:kotlinx-coroutines-android:1.4.1" // add for coroutines - successful
 
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'

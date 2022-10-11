@@ -26,6 +26,16 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".forecast.presentation.ActivityForecast"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.ActivityForecast2"  />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".Instruments.LocationService"
             android:enabled="true"

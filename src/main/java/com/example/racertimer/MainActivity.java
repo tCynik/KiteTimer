@@ -132,9 +132,6 @@ public class MainActivity extends AppCompatActivity {
         mapUITools = new MapUIToolsController(defaultMapScale);
         runStatusUIDispatcher();
         loadWindData();
-
-        MyKotlinClass myKotlinClass = new MyKotlinClass("hello world!");
-        String someText = myKotlinClass.getText();
     }
 
     private void initInfoBar() {
