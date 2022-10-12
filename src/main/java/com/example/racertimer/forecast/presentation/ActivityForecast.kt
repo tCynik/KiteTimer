@@ -12,10 +12,10 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
 import com.example.racertimer.forecast.data.LastForecastLocationRepository
 import com.example.racertimer.forecast.data.LocationsRepository
+import com.example.racertimer.forecast.domain.interfaces.ChooseNameFromListInterface
 import com.example.racertimer.forecast.domain.interfaces.UpdateForecastLinesInterface
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
@@ -39,7 +39,7 @@ class ActivityForecast : AppCompatActivity() {
     private val locationsRepository by lazy {LocationsRepository(context = applicationContext)}
     private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsRepository)}
     private val saveLocationsListUseCase by lazy {SaveLocationListUseCase(context = applicationContext, locationsRepository)}
-    private val chooseLocationUseCase by lazy {ChooseLocationUseCase()}
+    private val chooseLocationByNameUseCase by lazy {ChooseLocationFromListUseCase()}
 
     private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
         override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>) {
@@ -47,6 +47,18 @@ class ActivityForecast : AppCompatActivity() {
         }
     }
     private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface)}
+
+    private val chooseNameFromListInterface = object: ChooseNameFromListInterface {
+        override fun choose(name: String) {
+            val listLocations = openLocationsListUseCase.execute()
+            var forecastLocation: ForecastLocation? = null
+            if (listLocations != null)
+                forecastLocation = chooseLocationByNameUseCase.execute(listLocations, name)
+            if (forecastLocation != null) updateForecastUseCase.execute(forecastLocation)
+        }
+    }
+
+    private val listLocationsOpenUseCase = ListLocationsOpenUseCase(this, chooseNameFromListInterface)
 
     private var lastLocation: ForecastLocation? = null
 
@@ -62,7 +74,12 @@ class ActivityForecast : AppCompatActivity() {
         val listView = findViewById<LinearLayout>(R.id.listView)
         var lastLocation = updateLocation()
 
-        //buttonSelectLocation.setOnClickListener(View.OnClickListener {  })
+        buttonSelectLocation.setOnClickListener(View.OnClickListener {
+            val view = findViewById<Button>(R.id.btn_select_location)
+            val layoutInflater = layoutInflater
+            val locationsList = openLocationsListUseCase.execute()
+            if (locationsList != null)
+                listLocationsOpenUseCase.execute(view, layoutInflater, locationsList)})
 
         if (savedInstanceState != null) {
             if (savedInstanceState.isEmpty) {
@@ -70,6 +87,10 @@ class ActivityForecast : AppCompatActivity() {
             }
         }
         firstTimeLaunch(saveLocationsListUseCase)
+    }
+
+    override fun onResume() {
+        super.onResume()
     }
 
     private fun updateByForecastOpening(){
@@ -80,7 +101,7 @@ class ActivityForecast : AppCompatActivity() {
         }
         val locationsList = openLocationsListUseCase.execute()
         if (locationsList != null) {
-            val forecastLocation = chooseLocationUseCase.execute(locationsList, lastLocationName)
+            val forecastLocation = chooseLocationByNameUseCase.execute(locationsList, lastLocationName)
             if (forecastLocation != null) {
                 updateForecastUseCase.execute(forecastLocation)
             } else {
@@ -105,7 +126,7 @@ class ActivityForecast : AppCompatActivity() {
         initBroadcastListener()
     }
 
-    fun selectLocation(view: View){
+    fun selectLocation(view: View){ // call from layout
         //val layoutInflater = layoutInflater
     }
 
@@ -161,6 +182,7 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun fillForecast(forecastLines: Queue<ForecastLine>) {
+        // todo: move to separate class when MVVM realization
         while (!forecastLines.isEmpty()) {
             val item = layoutInflater.inflate(R.layout.forecast_line, listView, false)
             val currentLine = forecastLines.poll()
