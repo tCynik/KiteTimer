@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
@@ -25,6 +26,7 @@ import kotlinx.android.synthetic.main.activity_forecast2.*
 import java.util.*
 
 private const val CURRENT_POSITION = "Current"
+private const val EMPTY = ""
 const val BROADCAST_ACTION =
     "com.example.racertimer.action.new_location" // значение для фильтра приемника
 
@@ -72,21 +74,31 @@ class ActivityForecast : AppCompatActivity() {
         val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
         val scrollView = findViewById<ScrollView>(R.id.scrollView)
         val listView = findViewById<LinearLayout>(R.id.listView)
-        var lastLocation = updateLocation()
+        currentPositionLocation = updateLocationFromIntent()
+        //if (lastLocation != null) updateForecast(lastLocation)
 
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
-            val view = findViewById<Button>(R.id.btn_select_location)
+            Log.i("bugfix", "ActivityForecast: the button was pressed")
             val layoutInflater = layoutInflater
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null)
-                listLocationsOpenUseCase.execute(view, layoutInflater, locationsList)})
+                listLocationsOpenUseCase.execute(buttonSelectLocation, layoutInflater, locationsList)})
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.isEmpty) {
+            if (savedInstanceState != null || savedInstanceState.isEmpty) {
                 updateByForecastOpening()
             }
-        }
-        firstTimeLaunch(saveLocationsListUseCase)
+        } else updateByForecastOpening()
+//        val catchLocation = intent
+//        if (catchLocation.hasExtra("latitude") and catchLocation.hasExtra("longitude")) {
+//            Log.i("bugfix", "ActivityForecast: has current location from intent ")
+//            val latitude = catchLocation.getDoubleExtra("latitude", 0.0)
+//            val longitude = catchLocation.getDoubleExtra("longitude", 0.0)
+//            val currentLocation = ForecastLocation(name = CURRENT_POSITION, latitude = latitude, longitude = longitude)
+//            updateForecast(currentLocation)
+//        }
+
+        //firstTimeLaunch(saveLocationsListUseCase)
     }
 
     override fun onResume() {
@@ -94,9 +106,13 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun updateByForecastOpening(){
+        // отработка после открытия - берем последнюю локацию (например - текущую, или любую из сохраненных)
         val lastLocationName: String = loadLastLocationUseCase.execute()//updateForecast(loadLastLocationUseCase.execute())
         // todo: потребуется обработка null. если проходит null, берем по текущему
-        if (lastLocationName == CURRENT_POSITION) {
+
+        if (lastLocationName == EMPTY || lastLocationName == CURRENT_POSITION) {
+            Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
+            Log.i("bugfix", "ActivityForecast: current location name = $ ")
             updateForecastByCurrentPosition()
         }
         val locationsList = openLocationsListUseCase.execute()
@@ -126,11 +142,11 @@ class ActivityForecast : AppCompatActivity() {
         initBroadcastListener()
     }
 
-    fun selectLocation(view: View){ // call from layout
-        //val layoutInflater = layoutInflater
-    }
+//    fun selectLocation(view: View){ // call from layout
+//        //val layoutInflater = layoutInflater
+//    }
 
-    private fun updateLocation (): ForecastLocation? {
+    private fun updateLocationFromIntent (): ForecastLocation? {
         /** если есть, принимаем даныне по местоположению из вывавшего интента  */
         val catchLocation = intent
         if (catchLocation.hasExtra("latitude") and catchLocation.hasExtra("longitude")) {
@@ -143,6 +159,9 @@ class ActivityForecast : AppCompatActivity() {
 
     private fun updateForecast(forecastLocation: ForecastLocation): Boolean {
         //var forecastStrings = Queue<String>//: Queue<String> = updateForecastUseCase.execute(forecastLocation)
+        Log.i("bugfix", "ActivityForecast: updating forecast by location = ${forecastLocation.name} ")
+        Log.i("bugfix", "ActivityForecast: longitude = ${forecastLocation.longitude}, latitude = ${forecastLocation.latitude} ")
+
         saveLastLocationUseCase.execute(forecastLocation)
         // todo: добавить обработку currentPositionIsShowh - должно срабатывать только когда выбрана никакая или текущая позиция
         var result = false
@@ -156,8 +175,11 @@ class ActivityForecast : AppCompatActivity() {
     private fun updateForecastByCurrentPosition() {
         if (currentPositionLocation == null) {
             currentLocationIsShown = false
+            Log.i("bugfix", "ActivityForecast: current position is null ")
+
         } else {
-            updateForecast(currentPositionLocation!!)
+            currentLocationIsShown = updateForecast(currentPositionLocation!!)
+            Log.i("bugfix", "ActivityForecast: currentPosition is not null ")
         }
     }
 
@@ -165,7 +187,9 @@ class ActivityForecast : AppCompatActivity() {
         val locationBroadcastReceiver = object : BroadcastReceiver() {
             // создаем broadcastlistener
             override fun onReceive(context: Context, intent: Intent) { // обработка интента
-                if (intent.hasExtra("location")) { // если в сообщении есть геолокация
+                if (intent.hasExtra("location")) { // если в сообщении есть геолокация            Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
+                    Log.i("bugfix", "ActivityForecast: broadcast listener has new location ")
+
                     currentPositionLocation = (intent.extras!!["location"] as Location?)?.let {
                         LocationMapper.androidLocationToForecastLocation(it)
                     }
@@ -173,7 +197,7 @@ class ActivityForecast : AppCompatActivity() {
                         updateForecastByCurrentPosition()
                         currentLocationIsShown = true
                     }
-                }
+                } else Log.i("bugfix", "ActivityForecast: receiver has broadcast but no location ")
             }
         }
         val locationIntentFilter =

@@ -10,7 +10,6 @@ import java.io.IOException
 import java.io.ObjectOutputStream
 
 class SaveLocationListUseCase(val context: Context, val locationsListInterface: LocationsListInterface) {
-    //private val appContext = context
     private var locationsList = LocationsList()
 
     fun setLocationsList (locationsList: LocationsList) {

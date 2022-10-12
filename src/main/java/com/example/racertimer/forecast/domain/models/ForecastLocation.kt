@@ -1,4 +1,6 @@
 package com.example.racertimer.forecast.domain.models
 
-class ForecastLocation (val name: String, val latitude: Double, val longitude: Double) {
+import java.io.Serializable
+
+data class ForecastLocation (val name: String, val latitude: Double, val longitude: Double): Serializable {
 }

@@ -64,7 +64,6 @@ public class SailingToolsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sailing_tools, null); // инфлейтим вьюшку фрагмента
 
-        Log.i("bugfix", "sailing tools fragment was created");
         findViews(view);
 
         viewModel = new ViewModelProvider(this).get(ViewModel.class);

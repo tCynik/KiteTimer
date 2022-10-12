@@ -16,10 +16,6 @@ class VmgBeeper(context: Context) {
     private var bestDownwind = 0
     private var isVoiceoverMuted = false
 
-    init {
-        Log.i("bugfix", "instance of beeper was created")
-    }
-
     fun updateVelocity(value: Int) {
         velocity = value
     }
