@@ -68,7 +68,7 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
         setContentView(R.layout.activity_forecast);
         context = this;
 
-        layoutToBeFilled = (LinearLayout) findViewById(R.id.listView); // пустая линия, в которой будем надувать таблицу
+        layoutToBeFilled = (LinearLayout) findViewById(R.id.viewToBeFiled); // пустая линия, в которой будем надувать таблицу
         selectLocationButton = findViewById(R.id.btn_select_location);
 
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", ForecastActivity is working " );
