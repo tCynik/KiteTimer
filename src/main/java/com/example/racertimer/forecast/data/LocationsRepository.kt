@@ -9,10 +9,10 @@ import java.io.*
 
 
 class LocationsRepository(context: Context): LocationsListInterface {
-    val fileInputStream: FileInputStream = context.openFileInput("saved.locations_list.bin")
-    val fileOutputStream: FileOutputStream = context.openFileOutput("saved.locations_list.bin", Context.MODE_PRIVATE)
+    private val fileInputStream: FileInputStream = context.openFileInput("saved.locations_list.bin")
+    private val fileOutputStream: FileOutputStream = context.openFileOutput("saved.locations_list.bin", Context.MODE_PRIVATE)
 
-    val contextToast = context
+    private val contextToast = context
 
     override fun loadList(): LocationsList? {
         var locationsList: LocationsList? = null
@@ -23,13 +23,17 @@ class LocationsRepository(context: Context): LocationsListInterface {
             //listLocationForecast = objectInputStream.readObject() as ListForecastLocations
             objectInputStream.close()
             fileInputStream.close()
-            Log.i("racer_timer, loc list serialization", " location downloaded ")
+            Log.i("bugfix", "locationsRepository: locations list loaded successfully ")
         } catch (e: FileNotFoundException) {
             Toast.makeText(contextToast, "No saved locations", Toast.LENGTH_LONG).show()
+            Log.i("bugfix", "locationsRepository: No saved locations ")
         } catch (e: IOException) {
-            Toast.makeText(contextToast, "Error while reading locations list", Toast.LENGTH_LONG).show()
+            Toast.makeText(contextToast, "IO error while reading locations list", Toast.LENGTH_LONG).show()
+            Log.i("bugfix", "locationsRepository: IO error while reading locations list ")
         } catch (e: ClassNotFoundException) {
-            Toast.makeText(contextToast, "Saved locations list read error", Toast.LENGTH_LONG).show()
+            Toast.makeText(contextToast, "repository class loading error", Toast.LENGTH_LONG).show()
+            Log.i("bugfix", "locationsRepository: repository class loading error ")
+
         }
         return locationsList
     }

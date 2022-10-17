@@ -44,19 +44,25 @@ class ActivityForecast : AppCompatActivity() {
     private val chooseLocationByNameUseCase by lazy {ChooseLocationFromListUseCase()}
 
     private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
-        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>) {
-            fillForecast(queueForecastLines)
+        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
+            Log.i("bugfix", "ActivityForecast: forecast queue is null = ${queueForecastLines == null}, size = ${queueForecastLines?.size} ")
+            if (queueForecastLines != null) {
+                fillForecast(queueForecastLines)
+                urlReceivedStatus(true)
+            } else {
+                urlReceivedStatus(false)
+            }
         }
     }
     private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface)}
-
+    private val forecastStatusManager by lazy {ForecastStatusManager(updateForecastUseCase)}
     private val chooseNameFromListInterface = object: ChooseNameFromListInterface {
         override fun choose(name: String) {
             val listLocations = openLocationsListUseCase.execute()
             var forecastLocation: ForecastLocation? = null
             if (listLocations != null)
                 forecastLocation = chooseLocationByNameUseCase.execute(listLocations, name)
-            if (forecastLocation != null) updateForecastUseCase.execute(forecastLocation)
+            if (forecastLocation != null) forecastStatusManager.updateLocation(forecastLocation)
         }
     }
 
@@ -93,24 +99,12 @@ class ActivityForecast : AppCompatActivity() {
 
         updateViewWhenForecastOpening()
 
-
-
-
-        if (savedInstanceState != null) { // если 
-            if (savedInstanceState != null || savedInstanceState.isEmpty) {
-                updateViewWhenForecastOpening()
-            }
-        } else updateViewWhenForecastOpening()
-//        val catchLocation = intent
-//        if (catchLocation.hasExtra("latitude") and catchLocation.hasExtra("longitude")) {
-//            Log.i("bugfix", "ActivityForecast: has current location from intent ")
-//            val latitude = catchLocation.getDoubleExtra("latitude", 0.0)
-//            val longitude = catchLocation.getDoubleExtra("longitude", 0.0)
-//            val currentLocation = ForecastLocation(name = CURRENT_POSITION, latitude = latitude, longitude = longitude)
-//            updateForecast(currentLocation)
-//        }
-
-        //firstTimeLaunch(saveLocationsListUseCase)
+        // todo: in release remove fun firstTimeLaunch and locations coordinates hardcode below:
+        /**
+         * для создания .bin файла запускаем метод с вбитыми координатами точек. В нормльном состоянии
+         * финального релиза этот участок программы не нужен
+         * //firstTimeLaunch(saveLocationsListUseCase)
+         */
     }
 
     override fun onResume() {
@@ -125,29 +119,36 @@ class ActivityForecast : AppCompatActivity() {
 
     private fun updateViewWhenForecastOpening(){
         // отработка после открытия - берем последнюю локацию (например - текущую, или любую из сохраненных)
-        val lastLocationName: String = loadLastLocationUseCase.execute()//updateForecast(loadLastLocationUseCase.execute())
-        // todo: потребуется обработка null. если проходит null, берем по текущему
+        val forecastLocation = lastForecastLocation()
+        if (forecastLocation == null) {
+            locationUpdateAwaiting = true
+        }
+        else {
+            Log.i("bugfix", "ActivityForecast: current forecast location = ${forecastLocation.name}, lat = ${forecastLocation.latitude} ")
+        forecastStatusManager.updateLocation(forecastLocation)
+        //updateForecastUseCase.execute(forecastLocation)
+        }
+    }
 
+    private fun lastForecastLocation(): ForecastLocation? {
+        var forecastLocation: ForecastLocation? = null
+
+        val lastLocationName: String = loadLastLocationUseCase.execute()//updateForecast(loadLastLocationUseCase.execute())
         if (lastLocationName == EMPTY || lastLocationName == CURRENT_POSITION) {
             Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
-            if (currentUserLocation == null) locationUpdateAwaiting = true
-            else chosenLocationToShowForecast = currentUserLocation
+            if (currentUserLocation == null) {
+                Log.i("bugfix", "ActivityForecast: current location is null ")
+                locationUpdateAwaiting = true
+            }
+            else forecastLocation = currentUserLocation
         } else {
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null) {
-                val forecastLocation =
+                forecastLocation =
                     chooseLocationByNameUseCase.execute(locationsList, lastLocationName)
-                if (forecastLocation != null) chosenLocationToShowForecast = forecastLocation
             }
         }
-        if (chosenLocationToShowForecast == null) isForecastAlreadyShown = false
-        else {
-            val forecastLocation = chosenLocationToShowForecast as ForecastLocation
-            updateForecastUseCase.execute(forecastLocation)
-        }
-
-        // todo: if forecast location from searching is null, make error toast
-        // todo: make request by geoLocation (when last location name = "default")
+        return forecastLocation
     }
 
     private fun firstTimeLaunch(saveLocationListUseCase: SaveLocationListUseCase) {
@@ -162,9 +163,9 @@ class ActivityForecast : AppCompatActivity() {
         initBroadcastListener()
     }
 
-//    fun selectLocation(view: View){ // call from layout
-//        //val layoutInflater = layoutInflater
-//    }
+    private fun urlReceivedStatus (isResponseReceived: Boolean) {
+        forecastStatusManager.updateUrlResponseStatus(isResponseReceived)
+    }
 
     private fun updateLocationFromIntent (): ForecastLocation? {
         /** если есть, принимаем даныне по местоположению из вывавшего интента  */
@@ -175,7 +176,6 @@ class ActivityForecast : AppCompatActivity() {
             val longitude: Double = catchLocation.getDoubleExtra("longitude", 0.0)
             lastUsersLocation = ForecastLocation("DEFAULT", latitude = latitude, longitude = longitude)
         }
-        //if (lastUsersLocation == null) locationUpdateAwaiting = true
         return lastUsersLocation
     }
 
@@ -184,6 +184,9 @@ class ActivityForecast : AppCompatActivity() {
         Log.i("bugfix", "ActivityForecast: updating forecast by location = ${forecastLocation.name} ")
         Log.i("bugfix", "ActivityForecast: longitude = ${forecastLocation.longitude}, latitude = ${forecastLocation.latitude} ")
 
+// далее: нужно проверить сохранение. Вызываем saveLast с локацией CURRENT_POSITION, проверяем через логи.
+// то же самое при загрузке  - логами смотрим что тут лежит
+        if (locationUpdateAwaiting)
         saveLastLocationUseCase.execute(forecastLocation)
         // todo: добавить обработку currentPositionIsShowh - должно срабатывать только когда выбрана никакая или текущая позиция
         var result = false
@@ -216,7 +219,7 @@ class ActivityForecast : AppCompatActivity() {
                         LocationMapper.androidLocationToForecastLocation(it)
                     }
                     if (locationUpdateAwaiting) {
-                        updateForecastByCurrentPosition()
+                        forecastStatusManager.updateLocation(currentUserLocation)
                         locationUpdateAwaiting = false
                     }
                 } else Log.i("bugfix", "ActivityForecast: receiver has broadcast but no location ")

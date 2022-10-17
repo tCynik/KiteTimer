@@ -12,9 +12,11 @@ class UpdateForecastUseCase(val updateForecastLinesInterface: UpdateForecastLine
 // TODO: put the . Then pass the lines into UI
     fun execute(forecastLocation: ForecastLocation) {
         val resultInterface = object : ResultJsonInterface{
-            override fun gotResult(jsonOnbject: JSONObject) {
-                val queueLines = ParserJsonToQueueLines().execute(jsonOnbject)
-                updateForecastLinesInterface.updateForecastLines(queueLines)
+            override fun gotResult(jsonOnObject: JSONObject?) {
+                if (jsonOnObject != null) {
+                    val queueLines = ParserJsonToQueueLines().execute(jsonOnObject)
+                    updateForecastLinesInterface.updateForecastLines(queueLines)
+                } else updateForecastLinesInterface.updateForecastLines(null)
             }
         }
     val requestString = UrlRequestBuilder().makeRequest(
