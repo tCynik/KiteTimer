@@ -60,9 +60,13 @@ class ActivityForecast : AppCompatActivity() {
         override fun choose(name: String) {
             val listLocations = openLocationsListUseCase.execute()
             var forecastLocation: ForecastLocation? = null
-            if (listLocations != null)
-                forecastLocation = chooseLocationByNameUseCase.execute(listLocations, name)
-            if (forecastLocation != null) forecastStatusManager.updateLocation(forecastLocation)
+            if (name == "current") {
+                forecastStatusManager.updateLocation(currentUserLocation)
+            } else {
+                if (listLocations != null)
+                    forecastLocation = chooseLocationByNameUseCase.execute(listLocations, name)
+                if (forecastLocation != null) forecastStatusManager.updateLocation(forecastLocation)
+            }
         }
     }
 
@@ -84,10 +88,11 @@ class ActivityForecast : AppCompatActivity() {
         val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
             Log.i("bugfix", "ActivityForecast: the button was pressed")
-            val layoutInflater = layoutInflater
+            //val layoutInflater = layoutInflater
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null)
-                listLocationsOpenUseCase.execute(buttonSelectLocation, layoutInflater, locationsList)})
+                listLocationsOpenUseCase.execute(buttonSelectLocation, locationsList)
+        })
 
         val scrollView = findViewById<ScrollView>(R.id.scrollView)
         val listView = findViewById<LinearLayout>(R.id.viewToBeFiled)
@@ -231,27 +236,79 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun fillForecast(forecastLines: Queue<ForecastLine>) {
+        viewToBeFiled.removeAllViews()
+        fillTitle()
         // todo: move to separate class when MVVM realization
         while (!forecastLines.isEmpty()) {
             val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
             val currentLine = forecastLines.poll()
             if (currentLine != null) {
-                val timeTV = item.findViewById<TextView>(R.id.forecast_string_time)
-                timeTV.text = currentLine.time
+                fillForecastLine(
+                    lineToFill = item,
+                    dateAndTime = currentLine.time,
+                    temperature = currentLine.temperature,
+                    windSpeed = currentLine.windSpeed,
+                    windGust = currentLine.windGust,
+                    windDir = currentLine.windDir
+                )
 
-                val tempTV = item.findViewById<TextView>(R.id.forecast_string_temp)
-                tempTV.text = currentLine.temperature
-
-                val windSpeedTV = item.findViewById<TextView>(R.id.forecast_string_wind)
-                windSpeedTV.text = currentLine.windSpeed
-
-                val windGustTV = item.findViewById<TextView>(R.id.forecast_string_gust)
-                windGustTV.text = currentLine.windGust
-
-                val windDirTV = item.findViewById<TextView>(R.id.forecast_string_dir)
-                windDirTV.text = currentLine.windDir
+//
+//                val timeTV = item.findViewById<TextView>(R.id.forecast_string_time)
+//                timeTV.text = currentLine.time
+//
+//                val tempTV = item.findViewById<TextView>(R.id.forecast_string_temp)
+//                tempTV.text = currentLine.temperature
+//
+//                val windSpeedTV = item.findViewById<TextView>(R.id.forecast_string_wind)
+//                windSpeedTV.text = currentLine.windSpeed
+//
+//                val windGustTV = item.findViewById<TextView>(R.id.forecast_string_gust)
+//                windGustTV.text = currentLine.windGust
+//
+//                val windDirTV = item.findViewById<TextView>(R.id.forecast_string_dir)
+//                windDirTV.text = currentLine.windDir
+//
+//                viewToBeFiled.addView(item)
             }
         }
         isForecastAlreadyShown = true
+    }
+
+    private fun fillTitle() {
+        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
+        fillForecastLine(
+            lineToFill = item,
+            dateAndTime = "date",
+            temperature = "temp",
+            windSpeed = "wind",
+            windGust = "gust",
+            windDir = "dir"
+        )
+    }
+
+    private fun fillForecastLine(
+        lineToFill: View,
+        dateAndTime: String,
+        temperature: String,
+        windSpeed: String,
+        windGust: String,
+        windDir: String) {
+
+        val timeTV = lineToFill.findViewById<TextView>(R.id.forecast_string_time)
+        timeTV.text = dateAndTime
+
+        val tempTV = lineToFill.findViewById<TextView>(R.id.forecast_string_temp)
+        tempTV.text = temperature
+
+        val windSpeedTV = lineToFill.findViewById<TextView>(R.id.forecast_string_wind)
+        windSpeedTV.text = windSpeed
+
+        val windGustTV = lineToFill.findViewById<TextView>(R.id.forecast_string_gust)
+        windGustTV.text = windGust
+
+        val windDirTV = lineToFill.findViewById<TextView>(R.id.forecast_string_dir)
+        windDirTV.text = windDir
+
+        viewToBeFiled.addView(lineToFill)
     }
 }
