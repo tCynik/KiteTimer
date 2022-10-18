@@ -8,5 +8,5 @@
     <string name="warning_wind">set wind dir!</string>
     <string name="forecast">FORECAST2</string>
     <string name="for_next_location">For next location:</string>
-    <string name="current_position">current position</string>
+    <string name="current_position">current</string>
 </resources>

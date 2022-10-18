@@ -15,7 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.racertimer.R
 import com.example.racertimer.forecast.data.LastForecastLocationRepository
-import com.example.racertimer.forecast.data.LocationsRepository
+import com.example.racertimer.forecast.data.LocationsListRepository
 import com.example.racertimer.forecast.domain.interfaces.ChooseNameFromListInterface
 import com.example.racertimer.forecast.domain.interfaces.UpdateForecastLinesInterface
 import com.example.racertimer.forecast.domain.models.ForecastLine
@@ -26,6 +26,7 @@ import kotlinx.android.synthetic.main.activity_forecast2.*
 import java.util.*
 
 private const val CURRENT_POSITION = "Current"
+private const val BUTTON_NAME_CURRENT = "current_position"
 private const val EMPTY = ""
 const val BROADCAST_ACTION =
     "com.example.racertimer.action.new_location" // значение для фильтра приемника
@@ -38,9 +39,9 @@ class ActivityForecast : AppCompatActivity() {
     private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
     private val saveLastLocationUseCase by lazy {SaveLastUseCase(lastLocationRepository) }
 
-    private val locationsRepository by lazy {LocationsRepository(context = applicationContext)}
-    private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsRepository)}
-    private val saveLocationsListUseCase by lazy {SaveLocationListUseCase(context = applicationContext, locationsRepository)}
+    private val locationsListRepository by lazy {LocationsListRepository(context = applicationContext)}
+    private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsListRepository)}
+    private val saveLocationsListUseCase by lazy {SaveLocationListUseCase(context = applicationContext, locationsListRepository)}
     private val chooseLocationByNameUseCase by lazy {ChooseLocationFromListUseCase()}
 
     private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
@@ -61,16 +62,29 @@ class ActivityForecast : AppCompatActivity() {
             val listLocations = openLocationsListUseCase.execute()
             var forecastLocation: ForecastLocation? = null
             if (name == "current") {
-                forecastStatusManager.updateLocation(currentUserLocation)
+                forecastLocation = currentUserLocation
+                forecastStatusManager.updateLocation(forecastLocation)
+                //button_update_forecast.text = BUTTON_NAME_CURRENT
             } else {
                 if (listLocations != null)
                     forecastLocation = chooseLocationByNameUseCase.execute(listLocations, name)
-                if (forecastLocation != null) forecastStatusManager.updateLocation(forecastLocation)
+
+//                if (forecastLocation != null) {
+//                    forecastStatusManager.updateLocation(forecastLocation)
+//                    button_update_forecast.text = forecastLocation.name
+//                }
+            }
+
+            if (forecastLocation != null) {
+                forecastStatusManager.updateLocation(forecastLocation)
+                Log.i("bugfix", "ActivityForecast: updating forecast by location named = ${forecastLocation.name}")
+                btn_select_location.text = forecastLocation.name
+                saveLastLocationUseCase.execute(forecastLocation)
             }
         }
     }
 
-    private val listLocationsOpenUseCase = ListLocationsOpenUseCase(this, chooseNameFromListInterface)
+    private val selectLocationPopupUseCase = SelectLocationPopupUseCase(this, chooseNameFromListInterface)
 
     private var currentUserLocation: ForecastLocation? = null
     private var chosenLocationToShowForecast: ForecastLocation? = null
@@ -91,7 +105,7 @@ class ActivityForecast : AppCompatActivity() {
             //val layoutInflater = layoutInflater
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null)
-                listLocationsOpenUseCase.execute(buttonSelectLocation, locationsList)
+                selectLocationPopupUseCase.execute(buttonSelectLocation, locationsList)
         })
 
         val scrollView = findViewById<ScrollView>(R.id.scrollView)
@@ -112,14 +126,19 @@ class ActivityForecast : AppCompatActivity() {
          */
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        // todo: exit to main
+    }
+
     override fun onResume() {
         super.onResume()
-        if (!isForecastAlreadyShown) {
-            if (chosenLocationToShowForecast != null) {
-                val currentForecastLocation: ForecastLocation = chosenLocationToShowForecast as ForecastLocation
-                updateForecast(currentForecastLocation)
-            }
-        }
+//        if (!isForecastAlreadyShown) {
+//            if (chosenLocationToShowForecast != null) {
+//                val currentForecastLocation: ForecastLocation = chosenLocationToShowForecast as ForecastLocation
+//                updateForecast(currentForecastLocation)
+//            }
+//        }
     }
 
     private fun updateViewWhenForecastOpening(){
@@ -131,7 +150,7 @@ class ActivityForecast : AppCompatActivity() {
         else {
             Log.i("bugfix", "ActivityForecast: current forecast location = ${forecastLocation.name}, lat = ${forecastLocation.latitude} ")
         forecastStatusManager.updateLocation(forecastLocation)
-        //updateForecastUseCase.execute(forecastLocation)
+        btn_select_location.text = forecastLocation.name
         }
     }
 
@@ -139,6 +158,7 @@ class ActivityForecast : AppCompatActivity() {
         var forecastLocation: ForecastLocation? = null
 
         val lastLocationName: String = loadLastLocationUseCase.execute()//updateForecast(loadLastLocationUseCase.execute())
+        Log.i("bugfix", "ActivityForecast: lastLocation name = $lastLocationName ")
         if (lastLocationName == EMPTY || lastLocationName == CURRENT_POSITION) {
             Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
             if (currentUserLocation == null) {
@@ -153,6 +173,7 @@ class ActivityForecast : AppCompatActivity() {
                     chooseLocationByNameUseCase.execute(locationsList, lastLocationName)
             }
         }
+        Log.i("bugfix", "ActivityForecast: chosen last location name = ${forecastLocation?.name} ")
         return forecastLocation
     }
 
@@ -184,34 +205,18 @@ class ActivityForecast : AppCompatActivity() {
         return lastUsersLocation
     }
 
-    private fun updateForecast(forecastLocation: ForecastLocation): Boolean {
-        //var forecastStrings = Queue<String>//: Queue<String> = updateForecastUseCase.execute(forecastLocation)
-        Log.i("bugfix", "ActivityForecast: updating forecast by location = ${forecastLocation.name} ")
-        Log.i("bugfix", "ActivityForecast: longitude = ${forecastLocation.longitude}, latitude = ${forecastLocation.latitude} ")
-
-// далее: нужно проверить сохранение. Вызываем saveLast с локацией CURRENT_POSITION, проверяем через логи.
-// то же самое при загрузке  - логами смотрим что тут лежит
-        if (locationUpdateAwaiting)
-        saveLastLocationUseCase.execute(forecastLocation)
-        // todo: добавить обработку currentPositionIsShowh - должно срабатывать только когда выбрана никакая или текущая позиция
-        var result = false
-//        result = viewModelScope.launch {
-//            val forecastStrings: Queue<String> = updateForecastUseCase.execute(forecastLocation)
-//           return@launch fillForecastTable(forecastStrings)
-//        }
-        return result
-    }
-
-    private fun updateForecastByCurrentPosition() {
-        if (currentUserLocation == null) {
-            isCurrentForecastDataReceived = false
-            Log.i("bugfix", "ActivityForecast: current position is null ")
-
-        } else {
-            isCurrentForecastDataReceived = updateForecast(currentUserLocation!!)
-            Log.i("bugfix", "ActivityForecast: currentPosition is not null ")
-        }
-    }
+//    private fun updateForecast(forecastLocation: ForecastLocation): Boolean {
+//        //var forecastStrings = Queue<String>//: Queue<String> = updateForecastUseCase.execute(forecastLocation)
+//        Log.i("bugfix", "ActivityForecast: updating forecast by location = ${forecastLocation.name} ")
+//
+//// далее: нужно проверить сохранение. Вызываем saveLast с локацией CURRENT_POSITION, проверяем через логи.
+//// то же самое при загрузке  - логами смотрим что тут лежит
+//        if (locationUpdateAwaiting)
+//            saveLastLocationUseCase.execute(forecastLocation)
+//        // todo: добавить обработку currentPositionIsShowh - должно срабатывать только когда выбрана никакая или текущая позиция
+//        var result = false
+//        return result
+//    }
 
     private fun initBroadcastListener() {
         val locationBroadcastReceiver = object : BroadcastReceiver() {
@@ -251,24 +256,6 @@ class ActivityForecast : AppCompatActivity() {
                     windGust = currentLine.windGust,
                     windDir = currentLine.windDir
                 )
-
-//
-//                val timeTV = item.findViewById<TextView>(R.id.forecast_string_time)
-//                timeTV.text = currentLine.time
-//
-//                val tempTV = item.findViewById<TextView>(R.id.forecast_string_temp)
-//                tempTV.text = currentLine.temperature
-//
-//                val windSpeedTV = item.findViewById<TextView>(R.id.forecast_string_wind)
-//                windSpeedTV.text = currentLine.windSpeed
-//
-//                val windGustTV = item.findViewById<TextView>(R.id.forecast_string_gust)
-//                windGustTV.text = currentLine.windGust
-//
-//                val windDirTV = item.findViewById<TextView>(R.id.forecast_string_dir)
-//                windDirTV.text = currentLine.windDir
-//
-//                viewToBeFiled.addView(item)
             }
         }
         isForecastAlreadyShown = true

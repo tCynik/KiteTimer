@@ -1,6 +1,7 @@
 package com.example.racertimer.forecast.data
 
 import android.content.Context
+import android.util.Log
 import com.example.racertimer.forecast.domain.interfaces.LastLocationInterface
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 
@@ -11,8 +12,9 @@ class LastForecastLocationRepository(context: Context): LastLocationInterface  {
     val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     override fun save(forecastLocation: ForecastLocation): Boolean {
-        sharedPreferences.edit().putString(LOCATION_NAME_KEY, forecastLocation.name)
-        return true
+        val result = sharedPreferences.edit().putString(LOCATION_NAME_KEY, forecastLocation.name).commit()
+        Log.i("bugfix", "LastLocationsRepo: save last = $result ")
+        return result
     }
 
     override fun load(): String {

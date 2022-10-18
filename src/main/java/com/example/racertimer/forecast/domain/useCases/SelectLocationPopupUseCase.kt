@@ -11,7 +11,7 @@ import com.example.racertimer.forecast.domain.interfaces.ChooseNameFromListInter
 import com.example.racertimer.forecast.domain.models.LocationsList
 import com.example.racertimer.forecast.presentation.ActivityForecast
 
-class ListLocationsOpenUseCase(private val context: Context, private val chooseInterface: ChooseNameFromListInterface) {
+class SelectLocationPopupUseCase(private val context: Context, private val chooseInterface: ChooseNameFromListInterface) {
     fun execute(view: View, locationsList: LocationsList) {
         val popup = PopupMenu(context, view)
         popup.inflate(R.menu.choose_location_layout)

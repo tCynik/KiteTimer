@@ -8,7 +8,7 @@ import com.example.racertimer.forecast.domain.models.LocationsList
 import java.io.*
 
 
-class LocationsRepository(private val context: Context): LocationsListInterface {
+class LocationsListRepository(private val context: Context): LocationsListInterface {
     //private val fileInputStream: FileInputStream = context.openFileInput("saved.locations_list.bin")
 //    private val fileOutputStream: FileOutputStream = context.openFileOutput("saved.locations_list.bin", Context.MODE_PRIVATE)
 
