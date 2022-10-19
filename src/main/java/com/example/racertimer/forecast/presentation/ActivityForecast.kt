@@ -23,6 +23,7 @@ import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.useCases.*
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
 import kotlinx.android.synthetic.main.activity_forecast2.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 private const val CURRENT_POSITION = "Current"
@@ -64,15 +65,9 @@ class ActivityForecast : AppCompatActivity() {
             if (name == "current") {
                 forecastLocation = currentUserLocation
                 forecastStatusManager.updateLocation(forecastLocation)
-                //button_update_forecast.text = BUTTON_NAME_CURRENT
             } else {
                 if (listLocations != null)
                     forecastLocation = chooseLocationByNameUseCase.execute(listLocations, name)
-
-//                if (forecastLocation != null) {
-//                    forecastStatusManager.updateLocation(forecastLocation)
-//                    button_update_forecast.text = forecastLocation.name
-//                }
             }
 
             if (forecastLocation != null) {
@@ -91,9 +86,6 @@ class ActivityForecast : AppCompatActivity() {
     private var isCurrentForecastDataReceived = false
     private var isForecastAlreadyShown = false
     private var locationUpdateAwaiting = false
-    // todo: нужно обработать выбор в меню текущей локации: если выбрана текущая, нужно проверить -
-    //  есть ли она, если есть - обновляем, если нет - выставляем флаг ожидания (при обновлении локации
-    //  автоматически запрашиваем данные и выводим прогноз
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,8 +93,6 @@ class ActivityForecast : AppCompatActivity() {
 
         val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
-            Log.i("bugfix", "ActivityForecast: the button was pressed")
-            //val layoutInflater = layoutInflater
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null)
                 selectLocationPopupUseCase.execute(buttonSelectLocation, locationsList)
@@ -121,7 +111,7 @@ class ActivityForecast : AppCompatActivity() {
         // todo: in release remove fun firstTimeLaunch and locations coordinates hardcode below:
         /**
          * для создания .bin файла запускаем метод с вбитыми координатами точек. В нормльном состоянии
-         * финального релиза этот участок программы не нужен
+         * финального релиза этот участок программы не нужен (потребуется при изменении структуры ForecastLocation)
          * //firstTimeLaunch(saveLocationsListUseCase)
          */
     }
@@ -131,18 +121,7 @@ class ActivityForecast : AppCompatActivity() {
         // todo: exit to main
     }
 
-    override fun onResume() {
-        super.onResume()
-//        if (!isForecastAlreadyShown) {
-//            if (chosenLocationToShowForecast != null) {
-//                val currentForecastLocation: ForecastLocation = chosenLocationToShowForecast as ForecastLocation
-//                updateForecast(currentForecastLocation)
-//            }
-//        }
-    }
-
     private fun updateViewWhenForecastOpening(){
-        // отработка после открытия - берем последнюю локацию (например - текущую, или любую из сохраненных)
         val forecastLocation = lastForecastLocation()
         if (forecastLocation == null) {
             locationUpdateAwaiting = true
@@ -186,7 +165,7 @@ class ActivityForecast : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        initBroadcastListener()
+        initLocationBroadcastListener()
     }
 
     private fun urlReceivedStatus (isResponseReceived: Boolean) {
@@ -205,22 +184,8 @@ class ActivityForecast : AppCompatActivity() {
         return lastUsersLocation
     }
 
-//    private fun updateForecast(forecastLocation: ForecastLocation): Boolean {
-//        //var forecastStrings = Queue<String>//: Queue<String> = updateForecastUseCase.execute(forecastLocation)
-//        Log.i("bugfix", "ActivityForecast: updating forecast by location = ${forecastLocation.name} ")
-//
-//// далее: нужно проверить сохранение. Вызываем saveLast с локацией CURRENT_POSITION, проверяем через логи.
-//// то же самое при загрузке  - логами смотрим что тут лежит
-//        if (locationUpdateAwaiting)
-//            saveLastLocationUseCase.execute(forecastLocation)
-//        // todo: добавить обработку currentPositionIsShowh - должно срабатывать только когда выбрана никакая или текущая позиция
-//        var result = false
-//        return result
-//    }
-
-    private fun initBroadcastListener() {
+    private fun initLocationBroadcastListener() {
         val locationBroadcastReceiver = object : BroadcastReceiver() {
-            // создаем broadcastlistener
             override fun onReceive(context: Context, intent: Intent) { // обработка интента
                 if (intent.hasExtra("location")) { // если в сообщении есть геолокация            Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
                     Log.i("bugfix", "ActivityForecast: broadcast listener has new location ")
@@ -247,10 +212,17 @@ class ActivityForecast : AppCompatActivity() {
         while (!forecastLines.isEmpty()) {
             val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
             val currentLine = forecastLines.poll()
+
+            val timeFormat = SimpleDateFormat("d MMM HH:mm")
+            val time: Long = currentLine.time
+            val dateTimeString: String = timeFormat.format(time)
+            val isItDay = checkDaytime(time)
+
             if (currentLine != null) {
                 fillForecastLine(
                     lineToFill = item,
-                    dateAndTime = currentLine.time,
+                    dateAndTime = dateTimeString,
+                    isItDay = isItDay,
                     temperature = currentLine.temperature,
                     windSpeed = currentLine.windSpeed,
                     windGust = currentLine.windGust,
@@ -261,11 +233,19 @@ class ActivityForecast : AppCompatActivity() {
         isForecastAlreadyShown = true
     }
 
+    private fun checkDaytime(time: Long): Boolean {
+        val timeFormat = SimpleDateFormat("HH")
+        val timeHour = timeFormat.format(time).toInt()
+
+        return timeHour in 9..19
+    }
+
     private fun fillTitle() {
         val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
         fillForecastLine(
             lineToFill = item,
             dateAndTime = "date",
+            isItDay = false,
             temperature = "temp",
             windSpeed = "wind",
             windGust = "gust",
@@ -276,10 +256,21 @@ class ActivityForecast : AppCompatActivity() {
     private fun fillForecastLine(
         lineToFill: View,
         dateAndTime: String,
+        isItDay: Boolean,
         temperature: String,
         windSpeed: String,
         windGust: String,
         windDir: String) {
+        if (isItDay) {
+            lineToFill.setBackgroundColor(android.graphics.Color.GRAY)
+            val textColor = android.graphics.Color.BLACK
+            lineToFill.findViewById<TextView>(R.id.forecast_string_time).setTextColor(textColor)
+            lineToFill.findViewById<TextView>(R.id.forecast_string_temp).setTextColor(textColor)
+            lineToFill.findViewById<TextView>(R.id.forecast_string_wind).setTextColor(textColor)
+            lineToFill.findViewById<TextView>(R.id.forecast_string_gust).setTextColor(textColor)
+            lineToFill.findViewById<TextView>(R.id.forecast_string_dir).setTextColor(textColor)
+            lineToFill.findViewById<TextView>(R.id.wind_speed_gust_separator).setTextColor(textColor)
+        }
 
         val timeTV = lineToFill.findViewById<TextView>(R.id.forecast_string_time)
         timeTV.text = dateAndTime

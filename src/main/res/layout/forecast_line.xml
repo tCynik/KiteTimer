@@ -25,6 +25,7 @@
         android:gravity="end"
         android:text="xx.x"/>
     <TextView
+        android:id="@+id/wind_speed_gust_separator"
         android:layout_width="10dp"
         android:layout_height="match_parent"
         android:gravity="end"

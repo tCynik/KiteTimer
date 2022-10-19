@@ -23,7 +23,7 @@ class ParserJsonToQueueLines {
             val windGust = windJson.getDouble("gust")
 
             val currentLine = ForecastLine(
-                time = timeFormat.format(time),
+                time = time,
                 temperature = temperature.toString(),
                 windSpeed = windSpeed.toString(),
                 windDir = windDir.toString(),
