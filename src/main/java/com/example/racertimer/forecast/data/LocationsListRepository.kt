@@ -9,6 +9,8 @@ import java.io.*
 
 
 class LocationsListRepository(private val context: Context): LocationsListInterface {
+    //private val fileInputStream: FileInputStream = context.openFileInput("saved.locations_list.bin")
+//    private val fileOutputStream: FileOutputStream = context.openFileOutput("saved.locations_list.bin", Context.MODE_PRIVATE)
 
     private val contextToast = context
 
@@ -19,14 +21,20 @@ class LocationsListRepository(private val context: Context): LocationsListInterf
                 "repository.locations_list.bin")
             val objectInputStream = ObjectInputStream(fileInputStream)
             locationsList = objectInputStream.readObject() as LocationsList
+            //listLocationForecast = objectInputStream.readObject() as ListForecastLocations
             objectInputStream.close()
             fileInputStream.close()
+            Log.i("bugfix", "locationsRepository: locations list loaded successfully ")
         } catch (e: FileNotFoundException) {
             Toast.makeText(contextToast, "No saved locations", Toast.LENGTH_LONG).show()
+            Log.i("bugfix", "locationsRepository: No saved locations ")
         } catch (e: IOException) {
             Toast.makeText(contextToast, "IO error while reading locations list", Toast.LENGTH_LONG).show()
+            Log.i("bugfix", "locationsRepository: IO error while reading locations list ")
         } catch (e: ClassNotFoundException) {
             Toast.makeText(contextToast, "repository class loading error", Toast.LENGTH_LONG).show()
+            Log.i("bugfix", "locationsRepository: repository class loading error ")
+
         }
         return locationsList
     }

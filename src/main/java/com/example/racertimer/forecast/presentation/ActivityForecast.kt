@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.racertimer.R
@@ -20,7 +22,7 @@ import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.useCases.*
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
-import kotlinx.android.synthetic.main.activity_forecast.*
+import kotlinx.android.synthetic.main.activity_forecast2.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -45,6 +47,7 @@ class ActivityForecast : AppCompatActivity() {
 
     private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
         override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
+            Log.i("bugfix", "ActivityForecast: forecast queue is null = ${queueForecastLines == null}, size = ${queueForecastLines?.size} ")
             if (queueForecastLines != null) {
                 fillForecast(queueForecastLines)
                 urlReceivedStatus(true)
@@ -69,6 +72,7 @@ class ActivityForecast : AppCompatActivity() {
 
             if (forecastLocation != null) {
                 forecastStatusManager.updateLocation(forecastLocation)
+                Log.i("bugfix", "ActivityForecast: updating forecast by location named = ${forecastLocation.name}")
                 btn_select_location.text = forecastLocation.name
                 saveLastLocationUseCase.execute(forecastLocation)
             }
@@ -83,13 +87,9 @@ class ActivityForecast : AppCompatActivity() {
     private var isForecastAlreadyShown = false
     private var locationUpdateAwaiting = false
 
-//todo: make the onBackPressed move to mainActivity, not closing the app
-//todo: on forecast running current location does'nt updating the forecast automaticly
-//todo: broadcast not receiving location updates
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_forecast)
+        setContentView(R.layout.activity_forecast2)
 
         val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
@@ -97,6 +97,9 @@ class ActivityForecast : AppCompatActivity() {
             if (locationsList != null)
                 selectLocationPopupUseCase.execute(buttonSelectLocation, locationsList)
         })
+
+        val scrollView = findViewById<ScrollView>(R.id.scrollView)
+        val listView = findViewById<LinearLayout>(R.id.viewToBeFiled)
 
         currentUserLocation = updateLocationFromIntent()
 
@@ -124,6 +127,7 @@ class ActivityForecast : AppCompatActivity() {
             locationUpdateAwaiting = true
         }
         else {
+            Log.i("bugfix", "ActivityForecast: current forecast location = ${forecastLocation.name}, lat = ${forecastLocation.latitude} ")
         forecastStatusManager.updateLocation(forecastLocation)
         btn_select_location.text = forecastLocation.name
         }
@@ -133,8 +137,11 @@ class ActivityForecast : AppCompatActivity() {
         var forecastLocation: ForecastLocation? = null
 
         val lastLocationName: String = loadLastLocationUseCase.execute()//updateForecast(loadLastLocationUseCase.execute())
+        Log.i("bugfix", "ActivityForecast: lastLocation name = $lastLocationName ")
         if (lastLocationName == EMPTY || lastLocationName == CURRENT_POSITION) {
+            Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
             if (currentUserLocation == null) {
+                Log.i("bugfix", "ActivityForecast: current location is null ")
                 locationUpdateAwaiting = true
             }
             else forecastLocation = currentUserLocation
@@ -145,6 +152,7 @@ class ActivityForecast : AppCompatActivity() {
                     chooseLocationByNameUseCase.execute(locationsList, lastLocationName)
             }
         }
+        Log.i("bugfix", "ActivityForecast: chosen last location name = ${forecastLocation?.name} ")
         return forecastLocation
     }
 
@@ -179,8 +187,7 @@ class ActivityForecast : AppCompatActivity() {
     private fun initLocationBroadcastListener() {
         val locationBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) { // обработка интента
-                Log.i("bugfix", "ActivityForecast: receiver has new broadcast ")
-                if (intent.hasExtra("location")) { // если в сообщении есть геолокация
+                if (intent.hasExtra("location")) { // если в сообщении есть геолокация            Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
                     Log.i("bugfix", "ActivityForecast: broadcast listener has new location ")
 
                     currentUserLocation = (intent.extras!!["location"] as Location?)?.let {

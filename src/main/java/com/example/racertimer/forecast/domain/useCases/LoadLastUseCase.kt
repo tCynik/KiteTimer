@@ -7,6 +7,8 @@ import com.example.racertimer.forecast.domain.models.ForecastLocation
 class LoadLastUseCase(private val lastLocationInterface: LastLocationInterface) {
 
     fun execute() : String {
+        Log.i("bugfix", "LoadLastLocation: LastLocation = ${lastLocationInterface.load()} ")
+
         return lastLocationInterface.load()
     }
 }

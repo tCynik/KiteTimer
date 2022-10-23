@@ -16,12 +16,21 @@
         android:theme="@style/Theme.AppCompat.NoActionBar"
         tools:remove="android:appComponentFactory"
         tools:targetApi="p">
+        <activity
+            android:name=".ActivityForecast"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.ActivityForecast" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".forecast.presentation.ActivityForecast"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.ActivityForecast"  />
+                <action android:name="android.intent.action.ActivityForecast2"  />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
