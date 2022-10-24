@@ -18,6 +18,7 @@ public class MakeRequest extends AsyncTask<String, String, String> {
 
     private String line = "";
     private String connectionError = "connection error";
+    private String errorDescription = "no error";
 
     private Handler handler; // handler для отправки результата заказчику
 
@@ -38,11 +39,14 @@ public class MakeRequest extends AsyncTask<String, String, String> {
         HttpURLConnection httpURLConnection = null; // соединение
         BufferedReader bufferedReader = null; // читатель буфера
         Log.i(PROJECT_LOG_TAG, " Thread: " + Thread.currentThread().getName() + " preparing new URL reqest as: " + strings[0]);
+        Log.i("bugfix", "MakeRequest: making request: "+strings[0]);
         try {
-            URL url = new URL(strings[0]); // открываем ЮРЛ соединение
+            //URL url = new URL(strings[0]); // открываем ЮРЛ соединение
+            URL url = new URL("http://api.openweathermap.org/data/2.5/forecast?lat=55.91477&lon=92.27641999999999&appid=fc35b8ee90f4ee45109149cc13ee7a4f&units=metric"); // открываем ЮРЛ соединение
 
             httpURLConnection = (HttpURLConnection) url.openConnection(); // открываем HTTP соединение
             httpURLConnection.connect(); // соединяемся
+            Log.i("bugfix", "MakeRequest: connected to URL... ");
 
             InputStream inputStream = httpURLConnection.getInputStream(); // считываем входящий поток
             bufferedReader = new BufferedReader(new InputStreamReader(inputStream)); // запускаем
@@ -56,8 +60,12 @@ public class MakeRequest extends AsyncTask<String, String, String> {
             }
             return stringBuffer.toString();
         } catch (MalformedURLException e) {
+            errorDescription = e.toString();
+            Log.i("bugfix", "MakeRequest: Error: " +errorDescription);
             e.printStackTrace();
         } catch (IOException e) {
+            errorDescription = e.toString();
+            Log.i("bugfix", "MakeRequest: Error: " +errorDescription);
             e.printStackTrace();
         } finally { // в конце работы
             if (httpURLConnection != null) httpURLConnection.disconnect(); // закрываем соединение
@@ -65,6 +73,8 @@ public class MakeRequest extends AsyncTask<String, String, String> {
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
+                    errorDescription = e.toString();
+                    Log.i("bugfix", "MakeRequest: Error: " +errorDescription);
                     e.printStackTrace();
                 }
             }
@@ -78,7 +88,12 @@ public class MakeRequest extends AsyncTask<String, String, String> {
         if (s != connectionError) {
             Log.i(PROJECT_LOG_TAG, " Thread: " + Thread.currentThread().getName() + " onPostExecute S = " + s);
             Message msg = handler.obtainMessage(1, s); // обертываем S в сообщение
+            Log.i("bugfix", "MakeRequest: sending handler message with no error ");
             handler.sendMessage(msg); //отправляем сообщение
+        } else {
+            Message msg = handler.obtainMessage(1, errorDescription);
+            Log.i("bugfix", "MakeRequest: sending handler message with ERROR ");
+            handler.sendMessage(msg);
         }
     }
 }

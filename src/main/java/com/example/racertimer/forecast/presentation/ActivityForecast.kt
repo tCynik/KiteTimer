@@ -8,15 +8,13 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.racertimer.R
 import com.example.racertimer.forecast.data.LastForecastLocationRepository
 import com.example.racertimer.forecast.data.LocationsListRepository
 import com.example.racertimer.forecast.domain.interfaces.ChooseNameFromListInterface
+import com.example.racertimer.forecast.domain.interfaces.UpdateDataErrorInterface
 import com.example.racertimer.forecast.domain.interfaces.UpdateForecastLinesInterface
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
@@ -45,6 +43,13 @@ class ActivityForecast : AppCompatActivity() {
     private val saveLocationsListUseCase by lazy {SaveLocationListUseCase(context = applicationContext, locationsListRepository)}
     private val chooseLocationByNameUseCase by lazy {ChooseLocationFromListUseCase()}
 
+    private val updateDataErrorInterface = object: UpdateDataErrorInterface {
+        override fun errorOccurs(errorDescription: String) {
+            fillNoData()
+            Toast.makeText(applicationContext, "Error: $errorDescription", Toast.LENGTH_LONG)
+        }
+    }
+    private val updateDataErrorUseCase = UpdateDataErrorUseCase(updateDataErrorInterface)
     private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
         override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
             Log.i("bugfix", "ActivityForecast: forecast queue is null = ${queueForecastLines == null}, size = ${queueForecastLines?.size} ")
@@ -56,7 +61,7 @@ class ActivityForecast : AppCompatActivity() {
             }
         }
     }
-    private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface)}
+    private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface, updateDataErrorUseCase)}
     private val forecastStatusManager by lazy {ForecastStatusManager(updateForecastUseCase)}
     private val chooseNameFromListInterface = object: ChooseNameFromListInterface {
         override fun choose(name: String) {
@@ -288,5 +293,10 @@ class ActivityForecast : AppCompatActivity() {
         windDirTV.text = windDir
 
         viewToBeFiled.addView(lineToFill)
+    }
+
+    private fun fillNoData() {
+        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
+        fillForecastLine(item, "", false, "NO", "DATA", "", "")
     }
 }

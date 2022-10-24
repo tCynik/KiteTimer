@@ -8,7 +8,8 @@ import com.example.racertimer.forecast.domain.interfaces.UpdateForecastLinesInte
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import org.json.JSONObject
 
-class UpdateForecastUseCase(val updateForecastLinesInterface: UpdateForecastLinesInterface) {
+class UpdateForecastUseCase(val updateForecastLinesInterface: UpdateForecastLinesInterface,
+                            val updateDataErrorUseCase: UpdateDataErrorUseCase ) {
 // TODO: put the . Then pass the lines into UI
     fun execute(forecastLocation: ForecastLocation) {
         val resultInterface = object : ResultJsonInterface{
@@ -17,6 +18,10 @@ class UpdateForecastUseCase(val updateForecastLinesInterface: UpdateForecastLine
                     val queueLines = ParserJsonToQueueLines().execute(jsonOnObject)
                     updateForecastLinesInterface.updateForecastLines(queueLines)
                 } else updateForecastLinesInterface.updateForecastLines(null)
+            }
+
+            override fun errorOccurs(error: String) {
+                updateDataErrorUseCase.execute(error)
             }
         }
     val requestString = UrlRequestBuilder().makeRequest(
