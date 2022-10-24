@@ -46,7 +46,7 @@ class ActivityForecast : AppCompatActivity() {
     private val updateDataErrorInterface = object: UpdateDataErrorInterface {
         override fun errorOccurs(errorDescription: String) {
             fillNoData()
-            Toast.makeText(applicationContext, "Error: $errorDescription", Toast.LENGTH_LONG)
+            Toast.makeText(applicationContext, "Error: $errorDescription", Toast.LENGTH_LONG).show()
         }
     }
     private val updateDataErrorUseCase = UpdateDataErrorUseCase(updateDataErrorInterface)

@@ -32,17 +32,17 @@ public class ForecastManager {
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", updating forecast starting" );
         this.latitude = latitude;
         this.longitude = longitude;
-
+        Log.i("bugfix", "ForecastManager1: updating forecast");
         String URLRequest = sintezateURL();
         MakeRequest makeRequest = new MakeRequest(handler);
         makeRequest.execute(URLRequest);
+        Log.i("bugfix", "ForecastManager1: ending updating forecast");
     }
 
     private String sintezateURL () {
         String URLRequest = WEBSITE_FORECAST + FORECAST_ACTION+ "lat=" + latitude + "&lon=" + longitude +
                 "&appid=" + WEBSITE_KEY + "&units=metric";
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ", making URL request: "+ URLRequest );
-
         return URLRequest;
     }
 }
@@ -72,7 +72,10 @@ class MakeRequest extends AsyncTask<String, String, String> {
         HttpURLConnection httpURLConnection = null; // соединение
         BufferedReader bufferedReader = null; // читатель буфера
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " preparing new URL reqest as: " + strings[0]);
+        Log.i("bugfix", "making URL request: "+ strings[0] );
         try{
+            Log.i("bugfix", "starting URL request: "+ strings[0] );
+
             URL url = new URL(strings[0]); // открываем ЮРЛ соединение
 
             httpURLConnection = (HttpURLConnection) url.openConnection(); // открываем HTTP соединение
@@ -86,12 +89,15 @@ class MakeRequest extends AsyncTask<String, String, String> {
 
             while ((line = bufferedReader.readLine()) != null ) { // считываем входящий поток
                 Log.i(PROJECT_LOG_TAG, " Thread: " + Thread.currentThread().getName() + " got new response line ");
+                Log.i("bugfix", " got new response line ");
                 stringBuffer.append(line).append("\n"); // добавляем новую строку из потка
             }
             return stringBuffer.toString();
         } catch (MalformedURLException e) {
+            Log.i("bugfix", "ForecastManager1: MalformedURLException: "+ e);
             e.printStackTrace();
         } catch (IOException e) {
+            Log.i("bugfix", "ForecastManager1: IOException: "+ e);
             e.printStackTrace();
         } finally { // в конце работы
             if (httpURLConnection != null ) httpURLConnection.disconnect(); // закрываем соединение
@@ -99,6 +105,7 @@ class MakeRequest extends AsyncTask<String, String, String> {
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
+                    Log.i("bugfix", "ForecastManager1: finally IOException: "+ e);
                     e.printStackTrace();
                 }
             }
@@ -111,6 +118,7 @@ class MakeRequest extends AsyncTask<String, String, String> {
         super.onPostExecute(s);
         if (s != connectionError) {
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() +" onPostExecute S = "+ s);
+            Log.i("bugfix", " onPostExecute message S = "+ s);
             Message msg = handler.obtainMessage(1, s); // обертываем S в сообщение
             handler.sendMessage(msg); //отправляем сообщение
         }

@@ -88,7 +88,7 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
         Location location = mainActivity.getCurrentLocation();
         double longitude = location.getLongitude();
         double latitude = location.getLatitude();
-        Intent intent = new Intent(getActivity(), ActivityForecast.class); //ActivityForecast.class);
+        Intent intent = new Intent(getActivity(), ActivityForecast.class);
         intent.putExtra("latitude", latitude);
         intent.putExtra("longitude", longitude);
         startActivity(intent);

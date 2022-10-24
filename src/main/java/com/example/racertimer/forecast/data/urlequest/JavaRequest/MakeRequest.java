@@ -39,12 +39,16 @@ public class MakeRequest extends AsyncTask<String, String, String> {
         HttpURLConnection httpURLConnection = null; // соединение
         BufferedReader bufferedReader = null; // читатель буфера
         Log.i(PROJECT_LOG_TAG, " Thread: " + Thread.currentThread().getName() + " preparing new URL reqest as: " + strings[0]);
-        Log.i("bugfix", "MakeRequest: making request: "+strings[0]);
+        //Log.i("bugfix", "MakeRequest: making request: "+strings[0]);
         try {
-            //URL url = new URL(strings[0]); // открываем ЮРЛ соединение
-            URL url = new URL("http://api.openweathermap.org/data/2.5/forecast?lat=55.91477&lon=92.27641999999999&appid=fc35b8ee90f4ee45109149cc13ee7a4f&units=metric"); // открываем ЮРЛ соединение
+            Log.i("bugfix", "MakeRequest: making request: rep1");
+
+            URL url = new URL(strings[0]); // открываем ЮРЛ соединение
+            Log.i("bugfix", "MakeRequest: making request: rep2");
 
             httpURLConnection = (HttpURLConnection) url.openConnection(); // открываем HTTP соединение
+            Log.i("bugfix", "MakeRequest: making request: rep3");
+
             httpURLConnection.connect(); // соединяемся
             Log.i("bugfix", "MakeRequest: connected to URL... ");
 

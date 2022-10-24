@@ -84,7 +84,12 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
             latitude = catchLocation.getDoubleExtra("latitude", 0);
             longitude = catchLocation.getDoubleExtra("longitude", 0);
             flagForecastIsAlreadyUpdated = true;
+            location = new Location("gps"); //temp
+            location.setLatitude(latitude); //temp
+            location.setLongitude(longitude); //temp
             forecastManager.updateForecast(latitude, longitude); // обновляем данные прогноза
+            Log.i("bugfix", "ActivityForecast1: get location from intent. latitude ="+latitude);
+            //Toast.makeText(context, "get location from intent. latitude ="+latitude, Toast.LENGTH_LONG).show();
         }
         // создаем слушатель для получения геоданных
         initBroadcastListener();
@@ -100,7 +105,23 @@ public class ActivityForecast extends AppCompatActivity implements PopupMenu.OnM
                     if (location != null) {
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
+                        Log.i("bugfix", "ActivityForecast1: updating forecast by click");
                         forecastManager.updateForecast(latitude, longitude);
+                        Toast.makeText(context, "Forecast updated", Toast.LENGTH_LONG).show();
+                    } else Toast.makeText(context, "No location info", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else { //temp
+            Log.i("bugfix", "ActivityForecast1: no location or forecastUpdated");
+            updateButton = findViewById(R.id.button_update_forecast);
+            updateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (location != null) {
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        forecastManager.updateForecast(latitude, longitude);
+                        Log.i("bugfix", "ActivityForecast1: updating forecast by click");
                         Toast.makeText(context, "Forecast updated", Toast.LENGTH_LONG).show();
                     } else Toast.makeText(context, "No location info", Toast.LENGTH_LONG).show();
                 }
