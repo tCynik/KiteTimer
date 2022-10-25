@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.activity_forecast2.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-private const val CURRENT_POSITION = "Current"
+private const val CURRENT_POSITION = "current position"//"DEFAULT"
 private const val BUTTON_NAME_CURRENT = "current_position"
 private const val EMPTY = ""
 const val BROADCAST_ACTION =
@@ -149,7 +149,10 @@ class ActivityForecast : AppCompatActivity() {
                 Log.i("bugfix", "ActivityForecast: current location is null ")
                 locationUpdateAwaiting = true
             }
-            else forecastLocation = currentUserLocation
+            else {
+                forecastLocation = currentUserLocation
+                Log.i("bugfix", "ActivityForecast: forecastLocation was switched to current location ")
+            }
         } else {
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null) {
@@ -157,7 +160,7 @@ class ActivityForecast : AppCompatActivity() {
                     chooseLocationByNameUseCase.execute(locationsList, lastLocationName)
             }
         }
-        Log.i("bugfix", "ActivityForecast: chosen last location name = ${forecastLocation?.name} ")
+        Log.i("bugfix", "ActivityForecast: last location - chosen name = ${forecastLocation?.name} ")
         return forecastLocation
     }
 
@@ -184,7 +187,7 @@ class ActivityForecast : AppCompatActivity() {
         if (catchLocation.hasExtra("latitude") and catchLocation.hasExtra("longitude")) {
             val latitude: Double = catchLocation.getDoubleExtra("latitude", 0.0)
             val longitude: Double = catchLocation.getDoubleExtra("longitude", 0.0)
-            lastUsersLocation = ForecastLocation("DEFAULT", latitude = latitude, longitude = longitude)
+            lastUsersLocation = ForecastLocation(CURRENT_POSITION, latitude = latitude, longitude = longitude)
         }
         return lastUsersLocation
     }
