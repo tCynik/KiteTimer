@@ -39,7 +39,7 @@ class ActivityForecast : AppCompatActivity() {
 
     private val toastMakingUseCase = ToastMakingUseCase(this) // todo: pass to viewModel
     private val lastLocationRepository by lazy {LastForecastLocationRepository(context = applicationContext)}
-    //private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
+    private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
     private val saveLastLocationUseCase by lazy {SaveLastUseCase(lastLocationRepository) }
 
     private val locationsListRepository by lazy {LocationsListRepository(context = applicationContext)}
@@ -53,12 +53,12 @@ class ActivityForecast : AppCompatActivity() {
             Toast.makeText(applicationContext, "Error: $errorDescription", Toast.LENGTH_LONG).show()
         }
     }
-//    private val updateDataErrorUseCase = UpdateDataErrorUseCase(updateDataErrorInterface)
-//    private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
-//        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
-//        }
-//    }
-//    private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface, updateDataErrorUseCase)}
+    private val updateDataErrorUseCase = UpdateDataErrorUseCase(updateDataErrorInterface)
+    private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
+        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
+        }
+    }
+    private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface, updateDataErrorUseCase)}
     private val forecastStatusManager by lazy { ForecastStatusManager(updateForecastUseCase) }
     private val chooseNameFromListInterface = object: ChooseNameFromListInterface {
         override fun choose(name: String) {  //todo: pass by DI

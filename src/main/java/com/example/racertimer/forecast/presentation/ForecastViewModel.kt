@@ -32,9 +32,9 @@ class ForecastViewModel(
             forecastLinesLive.value = queueForecastLines
         }
     }
-    private val updateForecastUseCase = UpdateForecastUseCase(updateForecastLinesInterface)
-
-    private val forecastStatusManager = ForecastStatusManager(updateForecastUseCase)
+//    private val updateForecastUseCase = UpdateForecastUseCase(updateForecastLinesInterface) // для тестирования инжектим
+//
+//    private val forecastStatusManager = ForecastStatusManager(updateForecastUseCase)
 
     var locationsListLive: MutableLiveData<LocationsList> = MutableLiveData()
     val forecastLinesLive: MutableLiveData<Queue<ForecastLine>> = MutableLiveData()
