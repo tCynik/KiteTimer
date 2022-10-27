@@ -10,9 +10,11 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
 import com.example.racertimer.forecast.data.LastForecastLocationRepository
 import com.example.racertimer.forecast.data.LocationsListRepository
+import com.example.racertimer.forecast.domain.ForecastStatusManager
 import com.example.racertimer.forecast.domain.interfaces.ChooseNameFromListInterface
 import com.example.racertimer.forecast.domain.interfaces.UpdateDataErrorInterface
 import com.example.racertimer.forecast.domain.interfaces.UpdateForecastLinesInterface
@@ -33,9 +35,11 @@ const val BROADCAST_ACTION =
 
 class ActivityForecast : AppCompatActivity() {
     //private val forecastViewModel by lazy{ViewModelProvider(this).get(ForecastViewModel::class.java)}
+    private lateinit var forecastViewModel: ForecastViewModel
 
+    private val toastMakingUseCase = ToastMakingUseCase(this) // todo: pass to viewModel
     private val lastLocationRepository by lazy {LastForecastLocationRepository(context = applicationContext)}
-    private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
+    //private val loadLastLocationUseCase by lazy {LoadLastUseCase(lastLocationRepository)}
     private val saveLastLocationUseCase by lazy {SaveLastUseCase(lastLocationRepository) }
 
     private val locationsListRepository by lazy {LocationsListRepository(context = applicationContext)}
@@ -45,26 +49,19 @@ class ActivityForecast : AppCompatActivity() {
 
     private val updateDataErrorInterface = object: UpdateDataErrorInterface {
         override fun errorOccurs(errorDescription: String) {
-            fillNoData()
+            fillNoData() //todo: i need toastMaker:String
             Toast.makeText(applicationContext, "Error: $errorDescription", Toast.LENGTH_LONG).show()
         }
     }
-    private val updateDataErrorUseCase = UpdateDataErrorUseCase(updateDataErrorInterface)
-    private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
-        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
-            Log.i("bugfix", "ActivityForecast: forecast queue is null = ${queueForecastLines == null}, size = ${queueForecastLines?.size} ")
-            if (queueForecastLines != null) {
-                fillForecast(queueForecastLines)
-                urlReceivedStatus(true)
-            } else {
-                urlReceivedStatus(false)
-            }
-        }
-    }
-    private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface, updateDataErrorUseCase)}
-    private val forecastStatusManager by lazy {ForecastStatusManager(updateForecastUseCase)}
+//    private val updateDataErrorUseCase = UpdateDataErrorUseCase(updateDataErrorInterface)
+//    private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
+//        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
+//        }
+//    }
+//    private val updateForecastUseCase by lazy {UpdateForecastUseCase(updateForecastLinesInterface, updateDataErrorUseCase)}
+    private val forecastStatusManager by lazy { ForecastStatusManager(updateForecastUseCase) }
     private val chooseNameFromListInterface = object: ChooseNameFromListInterface {
-        override fun choose(name: String) {
+        override fun choose(name: String) {  //todo: pass by DI
             val listLocations = openLocationsListUseCase.execute()
             var forecastLocation: ForecastLocation? = null
             if (name == "current") {
@@ -96,8 +93,17 @@ class ActivityForecast : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forecast2)
 
+        forecastViewModel = ViewModelProvider(this,
+            ForecastViewModelFactory(
+                context = this,
+                updateDataErrorInterface = updateDataErrorInterface,
+                updateForecastLinesInterface = updateForecastLinesInterface,
+                chooseNameFromListInterface = chooseNameFromListInterface
+            )).get(ForecastViewModel::class.java)
+
         val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
+            forecastViewModel.selectLocationClicked()
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null)
                 selectLocationPopupUseCase.execute(buttonSelectLocation, locationsList)
@@ -108,10 +114,8 @@ class ActivityForecast : AppCompatActivity() {
 
         currentUserLocation = updateLocationFromIntent()
 
-        // todo: нужно сделать обновление информации прогноза только если таблица не обновлена либо если с момента обновления прошло много времени
-        // в рамках MVVM
-
-        updateViewWhenForecastOpening()
+        forecastViewModel.updateForecastWhenActivityOpened()
+        //updateViewWhenForecastOpening() // todo: заменить метод
 
         // todo: in release remove fun firstTimeLaunch and locations coordinates hardcode below:
         /**
@@ -119,6 +123,22 @@ class ActivityForecast : AppCompatActivity() {
          * финального релиза этот участок программы не нужен (потребуется при изменении структуры ForecastLocation)
          * //firstTimeLaunch(saveLocationsListUseCase)
          */
+    }
+
+    override fun onResume() {
+        super.onResume()
+        initObservers()
+    }
+
+    private fun initObservers() {
+        forecastViewModel.forecastLinesLive.observe(this, androidx.lifecycle.Observer {
+            if (it != null) {
+                fillForecast(it)
+                urlReceivedStatus(true)
+            } else {
+                urlReceivedStatus(false)
+            }
+        })
     }
 
     override fun onBackPressed() {
