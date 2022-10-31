@@ -13,16 +13,22 @@ import com.example.racertimer.forecast.domain.useCases.UpdateForecastUseCase
  * короче, надо тупо создавать данный менеджер в VM
  */
 
-class ForecastStatusManager(private val updateForecastUseCase: UpdateForecastUseCase) {
+class ForecastShownManager(private val updateForecastUseCase: UpdateForecastUseCase) {
     // todo: как-то нужно будет сохранять этот обьект чтобы не перегружать каждый раз прогноз
-    private var currentLocation: ForecastLocation? = null
+    private var currentLocationToShow: ForecastLocation? = null
+    private var currentUserLocation: ForecastLocation? = null
     private var forecastShown = false
 
-    fun updateLocation(forecastLocation: ForecastLocation?) {
-        currentLocation = forecastLocation
+    fun updateUserLocation(forecastLocation: ForecastLocation) {
+        currentUserLocation = forecastLocation
+        // todo: если нужно было показать текущую локазию, выводим ее
+    }
+
+    fun updateLocationToShow(forecastLocation: ForecastLocation?) {
+        currentLocationToShow = forecastLocation
         if (forecastLocation != null) {
             updateForecastUseCase.execute(forecastLocation)
-        }
+        } else updateByUserPosition()
     }
 
     fun updateUrlResponseStatus(isForecastShown: Boolean) {
@@ -37,5 +43,12 @@ class ForecastStatusManager(private val updateForecastUseCase: UpdateForecastUse
     private fun runAutoUpdateTimeout() {
         // todo: запускаем в коурутине таймаут, после которого на локации обновлем прогноз.
         // если работает предыдущий таймаут, его отменяем и запускаем новый
+    }
+
+    private fun updateByUserPosition() {
+        if (currentUserLocation != null) updateForecastUseCase.execute(currentUserLocation!!)
+        else {
+            //todo: обработка не вывода текущей локации с тем, чтобы вывести когда получим точку
+        }
     }
 }

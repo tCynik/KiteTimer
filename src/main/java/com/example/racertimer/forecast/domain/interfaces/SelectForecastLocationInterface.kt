@@ -1,5 +1,5 @@
 package com.example.racertimer.forecast.domain.interfaces
 
-interface ChooseNameFromListInterface {
+interface SelectForecastLocationInterface {
     fun choose(name: String)
 }

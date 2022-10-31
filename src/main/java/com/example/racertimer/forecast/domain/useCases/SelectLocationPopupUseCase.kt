@@ -2,16 +2,17 @@ package com.example.racertimer.forecast.domain.useCases
 
 import android.content.Context
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.PopupMenu
-import android.widget.Toast
 import com.example.racertimer.R
-import com.example.racertimer.forecast.domain.interfaces.ChooseNameFromListInterface
+import com.example.racertimer.forecast.domain.ForecastShownManager
+import com.example.racertimer.forecast.domain.interfaces.SelectForecastLocationInterface
 import com.example.racertimer.forecast.domain.models.LocationsList
-import com.example.racertimer.forecast.presentation.ActivityForecast
 
-class SelectLocationPopupUseCase(private val context: Context, private val chooseInterface: ChooseNameFromListInterface) {
+class SelectLocationPopupUseCase(private val context: Context,
+                                 private val forecastShownManager: ForecastShownManager) {
+    private val locationSelector = SelectLocationFromListByName()
+
     fun execute(view: View, locationsList: LocationsList) {
         val popup = PopupMenu(context, view)
         popup.inflate(R.menu.choose_location_layout)
@@ -20,13 +21,14 @@ class SelectLocationPopupUseCase(private val context: Context, private val choos
 
             when (it.toString()) {
                 "current location by GPS" -> {
-                    chooseInterface.choose("current")// если выбрана текущая локация
+                    forecastShownManager.updateLocationToShow(null)
                     Log.i("bugfix", "ListOpen: chosen: current")
                     true
                 }
                 else -> {
                     val forecastLocation = locationsList[it.toString()]
-                    chooseInterface.choose(forecastLocation!!.name)
+                    //locationSelector.execute(locationsList, it.toString())
+                    forecastShownManager.updateLocationToShow(forecastLocation)
                     Log.i("bugfix", "ListOpen: chosen: ${forecastLocation!!.name}")
                     if (forecastLocation == null)
                         Log.i("racer_tomer", "popup item name exception occurred")

@@ -21,12 +21,9 @@ val dataModule = module {
     single<OpenLocationsListUseCase> {
         OpenLocationsListUseCase(locationsListInterface =  get())
     }
-    
+
     single<LocationsListInterface> {
         LocationsListRepository(context = get())
     }
 
 }
-
-private val lastLocationRepository by lazy { LastForecastLocationRepository(context = applicationContext) }
-private val locationsListRepository by lazy { LocationsListRepository(context = applicationContext) }

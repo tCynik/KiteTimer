@@ -1,24 +1,16 @@
 package com.example.racertimer.forecast.presentation
 
-import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.racertimer.forecast.data.LastForecastLocationRepository
-import com.example.racertimer.forecast.data.LocationsListRepository
-import com.example.racertimer.forecast.domain.ForecastStatusManager
-import com.example.racertimer.forecast.domain.interfaces.ChooseNameFromListInterface
-import com.example.racertimer.forecast.domain.interfaces.UpdateDataErrorInterface
-import com.example.racertimer.forecast.domain.interfaces.UpdateForecastLinesInterface
+import com.example.racertimer.forecast.presentation.interfaces.UpdateForecastLinesInterface
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList
 import com.example.racertimer.forecast.domain.useCases.*
-import kotlinx.android.synthetic.main.activity_forecast2.*
 import java.util.*
 
 class ForecastViewModel(
-    private val chooseLocationByNameUseCase: ChooseLocationFromListUseCase,
+    private val chooseLocationByNameUseCase: SelectLocationFromListByName,
     private val loadLastUseCase: LoadLastUseCase,
     private val openLocationsListUseCase: OpenLocationsListUseCase,
     private val saveLastUseCase: SaveLastUseCase,
