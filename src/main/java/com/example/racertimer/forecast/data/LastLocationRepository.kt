@@ -2,13 +2,13 @@ package com.example.racertimer.forecast.data
 
 import android.content.Context
 import android.util.Log
-import com.example.racertimer.forecast.domain.interfaces.LastLocationInterface
+import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 
 private val SHARED_PREFERENCES_NAME = "last_location_preferences"
 private val LOCATION_NAME_KEY = "location_name"
 
-class LastForecastLocationRepository(context: Context): LastLocationInterface  {
+class LastForecastLocationRepositoryNameRepository(context: Context): LastLocationNameRepositoryInterface  {
     val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     override fun save(forecastLocation: ForecastLocation): Boolean {

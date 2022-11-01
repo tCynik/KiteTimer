@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.domain.useCases
+package com.example.racertimer.forecast.domain.useCasesOld
 
 import android.content.Context
 import android.util.Log
@@ -6,8 +6,8 @@ import android.view.View
 import android.widget.PopupMenu
 import com.example.racertimer.R
 import com.example.racertimer.forecast.domain.ForecastShownManager
-import com.example.racertimer.forecast.domain.interfaces.SelectForecastLocationInterface
 import com.example.racertimer.forecast.domain.models.LocationsList
+import com.example.racertimer.forecast.domain.use_cases.SelectLocationFromListByName
 
 class SelectLocationPopupUseCase(private val context: Context,
                                  private val forecastShownManager: ForecastShownManager) {
@@ -21,7 +21,7 @@ class SelectLocationPopupUseCase(private val context: Context,
 
             when (it.toString()) {
                 "current location by GPS" -> {
-                    forecastShownManager.updateLocationToShow(null)
+                    forecastShownManager.updateLocationToShow(null)//todo: переделать - нужно передавать во VM
                     Log.i("bugfix", "ListOpen: chosen: current")
                     true
                 }

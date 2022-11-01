@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.domain.useCases
+package com.example.racertimer.forecast.domain.useCasesOld
 
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList

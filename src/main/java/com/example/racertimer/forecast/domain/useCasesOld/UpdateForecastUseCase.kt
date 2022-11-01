@@ -1,10 +1,9 @@
-package com.example.racertimer.forecast.domain.useCases
+package com.example.racertimer.forecast.domain.useCasesOld
 
 import com.example.racertimer.forecast.data.parsers.ParserJsonToQueueLines
 import com.example.racertimer.forecast.data.urlequest.ResultJsonInterface
 import com.example.racertimer.forecast.data.urlequest.URLRequestManager
 import com.example.racertimer.forecast.data.urlequest.UrlRequestBuilder
-import com.example.racertimer.forecast.presentation.interfaces.UpdateForecastLinesInterface
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import org.json.JSONObject

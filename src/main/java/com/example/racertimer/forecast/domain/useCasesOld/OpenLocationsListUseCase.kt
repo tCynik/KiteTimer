@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.domain.useCases
+package com.example.racertimer.forecast.domain.useCasesOld
 
 import android.util.Log
 import com.example.racertimer.forecast.domain.interfaces.LocationsListInterface

@@ -6,53 +6,74 @@ import com.example.racertimer.forecast.presentation.interfaces.UpdateForecastLin
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList
-import com.example.racertimer.forecast.domain.useCases.*
+import com.example.racertimer.forecast.domain.useCasesOld.*
+import com.example.racertimer.forecast.domain.use_cases.ForceUpdateForecastUseCase
+import com.example.racertimer.forecast.domain.use_cases.RunActivityUseCase
+import com.example.racertimer.forecast.domain.use_cases.SaveLocationListUseCase
+import com.example.racertimer.forecast.domain.use_cases.SelectLocationFromListByName
+import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
+import com.example.racertimer.forecast.presentation.interfaces.UpdatingUserLocationInterface
 import java.util.*
 
-class ForecastViewModel(
-    private val chooseLocationByNameUseCase: SelectLocationFromListByName,
-    private val loadLastUseCase: LoadLastUseCase,
-    private val openLocationsListUseCase: OpenLocationsListUseCase,
-    private val saveLastUseCase: SaveLastUseCase,
-    private val saveLocationListUseCase: SaveLocationListUseCase,
-    private val updateDataErrorUseCase: UpdateDataErrorUseCase,
-    //private val updateForecastUseCase: UpdateForecastUseCase
-    ): ViewModel() {
+class ForecastViewModel: ViewModel() {
 
-    private val updateForecastLinesInterface = object: UpdateForecastLinesInterface {
-        override fun updateForecastLines(queueForecastLines: Queue<ForecastLine>?) {
-            forecastLinesLive.value = queueForecastLines
-        }
-    }
-//    private val updateForecastUseCase = UpdateForecastUseCase(updateForecastLinesInterface) // для тестирования инжектим
-//
-//    private val forecastStatusManager = ForecastStatusManager(updateForecastUseCase)
-
-    var locationsListLive: MutableLiveData<LocationsList> = MutableLiveData()
     val forecastLinesLive: MutableLiveData<Queue<ForecastLine>> = MutableLiveData()
     val buttonLocationNameLive: MutableLiveData<String> = MutableLiveData()
-    var currentUserLocation: ForecastLocation? = null
+
+    private val userLocationUpdater = object: UpdatingUserLocationInterface{
+        override fun getUserLocation(): ForecastLocation? {
+            return currentUserLocation
+        }
+    }
+    private val toaster: Toaster // TODO: DI!!!
+    private val linesUpdater = LinesUpdater(forecastLinesLive)
+    private val updateForecastUseCase = UpdateForecastUseCase(
+        linesUpdater = linesUpdater,
+        toaster = toaster) // TODO: DI!!!
+    private val forceUpdateForecastUseCase = ForceUpdateForecastUseCase(updateForecastUseCase)
+    private var runActivityUseCase = RunActivityUseCase() // todo: DI!!!
+
+    private var currentUserLocation: ForecastLocation? = null
+    private var currentForecastLocation: ForecastLocation? = null
+    private var awaitingUserLocation = false
+    private var forecastShownStatus = false
 
     fun updateForecastWhenActivityOpened() {
+        currentForecastLocation = runActivityUseCase.execute()
+        checkIsAwaitingCurrentLocation()
         // todo: нужно сделать обновление информации прогноза только если таблица не обновлена либо если с момента обновления прошло много времени
-        // оригинальная сигнатура:
-//        val forecastLocation = lastForecastLocation()
-//        if (forecastLocation == null) {
-//            locationUpdateAwaiting = true
-//        }
-//        else {
-//            Log.i("bugfix", "ActivityForecast: current forecast location = ${forecastLocation.name}, lat = ${forecastLocation.latitude} ")
-//            forecastStatusManager.updateLocation(forecastLocation)
-//            btn_select_location.text = forecastLocation.name
-//        }
-
     }
 
-    fun setUserLocation(currentLocation: ForecastLocation) {
+    fun updateUserLocation(currentLocation: ForecastLocation) {
         currentUserLocation = currentLocation
+        if (awaitingUserLocation) {
+            updateForecastByLocation(currentLocation)
+            awaitingUserLocation = false
+        }
+    }
+
+    fun forceUpdateForecast() {
+        forceUpdateForecastUseCase.execute(currentForecastLocation!!)
+        checkIsAwaitingCurrentLocation()
+    }
+
+    fun updateForecastShownStatus(updateStatus: Boolean) {
+        forecastShownStatus = updateStatus
+    }
+
+    private fun checkIsAwaitingCurrentLocation() {
+        if (currentForecastLocation == null) awaitingUserLocation = true
+    }
+
+    private fun updateForecastByLocation(forecastLocation: ForecastLocation) {
+        currentForecastLocation = forecastLocation
+        updateForecastUseCase.execute(forecastLocation)
+        }
     }
 
     fun selectLocationClicked() {
+        val locationsList =
+            val selectorFromList.execute()
 //        val locationsList = openLocationsListUseCase.execute()
 //        if (locationsList != null)
 //            selectLocationPopupUseCase.execute(buttonSelectLocation, locationsList)
@@ -60,4 +81,22 @@ class ForecastViewModel(
     // todo: liveFields to be created:
     //
 //  next
+
+private fun runAutoUpdateTimeout() {
+    // todo: запускаем в коурутине таймаут, после которого на локации обновлем прогноз.
+    // если работает предыдущий таймаут, его отменяем и запускаем новый
+}
+
+fun updateUrlResponseStatus(isForecastShown: Boolean) {
+    forecastShown = isForecastShown
+    if (isForecastShown) {
+        runAutoUpdateTimeout()
+    } else {
+        // todo: значит, прогноз не отобразился (нет доступа к сети?) - тогда нужно через какое-то время пытаться снова
+    }
+}
+
+
+
+
 }
