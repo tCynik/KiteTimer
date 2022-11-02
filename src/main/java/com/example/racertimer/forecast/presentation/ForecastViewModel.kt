@@ -30,6 +30,7 @@ class ForecastViewModel: ViewModel() {
     private val updateForecastUseCase = UpdateForecastUseCase(
         linesUpdater = linesUpdater,
         toaster = toaster) // TODO: DI!!!
+    // todo: make lastLocationSaver (repository) by DI
     private val forceUpdateForecastUseCase = ForceUpdateForecastUseCase(updateForecastUseCase)
     private var runActivityUseCase = RunActivityUseCase() // todo: DI!!!
 
@@ -61,42 +62,30 @@ class ForecastViewModel: ViewModel() {
         forecastShownStatus = updateStatus
     }
 
+    fun updateForecastByLocation(forecastLocation: ForecastLocation) {
+        currentForecastLocation = forecastLocation
+        updateForecastUseCase.execute(forecastLocation)
+        buttonLocationNameLive.value = forecastLocation.name
+    }
+
+    fun updateForecastByUserLocation() {
+        if (currentUserLocation == null) awaitingUserLocation = true
+        else updateForecastByLocation(currentUserLocation!!)
+    }
+
     private fun checkIsAwaitingCurrentLocation() {
         if (currentForecastLocation == null) awaitingUserLocation = true
     }
 
-    private fun updateForecastByLocation(forecastLocation: ForecastLocation) {
-        currentForecastLocation = forecastLocation
-        updateForecastUseCase.execute(forecastLocation)
-        }
+    private fun runAutoUpdateTimeout() {
+        // todo: запускаем в коурутине таймаут, после которого на локации обновлем прогноз.
+        // если работает предыдущий таймаут, его отменяем и запускаем новый
     }
 
-    fun selectLocationClicked() {
-        val locationsList =
-            val selectorFromList.execute()
-//        val locationsList = openLocationsListUseCase.execute()
-//        if (locationsList != null)
-//            selectLocationPopupUseCase.execute(buttonSelectLocation, locationsList)
-    }
-    // todo: liveFields to be created:
-    //
-//  next
-
-private fun runAutoUpdateTimeout() {
-    // todo: запускаем в коурутине таймаут, после которого на локации обновлем прогноз.
-    // если работает предыдущий таймаут, его отменяем и запускаем новый
-}
-
-fun updateUrlResponseStatus(isForecastShown: Boolean) {
-    forecastShown = isForecastShown
-    if (isForecastShown) {
-        runAutoUpdateTimeout()
-    } else {
+//    fun updateUrlResponseStatus(isForecastShown: Boolean) {
+//        forecastShown = isForecastShown
+//        if (isForecastShown) {
+//            runAutoUpdateTimeout()
+//        } else {
         // todo: значит, прогноз не отобразился (нет доступа к сети?) - тогда нужно через какое-то время пытаться снова
-    }
-}
-
-
-
-
 }

@@ -9,7 +9,8 @@ import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import org.json.JSONObject
 
 class UpdateForecastUseCase(private val linesUpdater: LinesUpdater,
-                            private val toaster: Toaster ) {
+                            private val toaster: Toaster,
+                            private val lastLocationSaver: LastLocationSaver ) {
 // TODO: put the . Then pass the lines into UI
     fun execute(forecastLocation: ForecastLocation) {
         val resultInterface = object : ResultJsonInterface{

@@ -12,17 +12,16 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
-import com.example.racertimer.forecast.data.LastForecastLocationRepositoryNameRepository
 import com.example.racertimer.forecast.data.LocationsListRepository
-import com.example.racertimer.forecast.domain.ForecastShownManager
 import com.example.racertimer.forecast.domain.interfaces.SelectForecastLocationInterface
-import com.example.racertimer.forecast.presentation.interfaces.UpdateForecastLinesInterface
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.useCasesOld.*
 import com.example.racertimer.forecast.domain.use_cases.SaveLocationListUseCase
+import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationFromListByName
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
+import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
 import kotlinx.android.synthetic.main.activity_forecast2.*
 import java.text.SimpleDateFormat
@@ -49,32 +48,15 @@ class ActivityForecast : AppCompatActivity() {
 
     private val linesUpdater = LinesUpdater(forecastLinesLive = forecastViewModel.forecastLinesLive)
     //private val forecastShownManager = ForecastShownManager(updateForecastUseCase)
-    private val selectForecastLocationInterface = object: SelectForecastLocationInterface {
-        override fun choose(name: String) {  //todo: pass by DI
-            // 1. выбираем локацию из списка
-            // 2. если выбрана текущая локация, открываем ее
-            val listLocations = openLocationsListUseCase.execute()
-            var forecastLocation: ForecastLocation? = null
-            if (name == "current") {
-                forecastLocation = currentUserLocation
-                forecastShownManager.updateLocationToShow(forecastLocation)
-            } else {
-                if (listLocations != null)
-                    forecastLocation = selectLocationFromListByName.execute(listLocations, name)
-            }
 
-            if (forecastLocation != null) {
-                forecastShownManager.updateLocationToShow(forecastLocation)
-                Log.i("bugfix", "ActivityForecast: updating forecast by location named = ${forecastLocation.name}")
-                btn_select_location.text = forecastLocation.name
-                saveLastLocationUseCase.execute(forecastLocation)
-            }
+    private val locationSelector = object: SelectLocationInterface {
+        override fun onLocationSelected(forecastLocation: ForecastLocation?) {
+            if (forecastLocation == null) forecastViewModel.updateForecastByUserLocation()
         }
     }
-
-    private val selectLocationPopupUseCase = SelectLocationPopupUseCase(
+    private val selectLocationByPopupUseCase = SelectLocationByPopupUseCase(
         this,
-        forecastShownManager = forecastShownManager)
+        locationSelector = locationSelector)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +71,7 @@ class ActivityForecast : AppCompatActivity() {
             forecastViewModel.selectLocationClicked()
             val locationsList = openLocationsListUseCase.execute()
             if (locationsList != null)
-                selectLocationPopupUseCase.execute(buttonSelectLocation, locationsList)
+                selectLocationByPopupUseCase.execute(buttonSelectLocation, locationsList)
         })
 
         updateLocationFromIntent()
@@ -109,6 +91,11 @@ class ActivityForecast : AppCompatActivity() {
     private fun initObservers() {
         forecastViewModel.forecastLinesLive.observe(this, androidx.lifecycle.Observer {
             if (it != null) fillForecast(it)
+        })
+
+        forecastViewModel.buttonLocationNameLive.observe(this, androidx.lifecycle.Observer {
+            val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
+            buttonSelectLocation.text = it
         })
     }
 
