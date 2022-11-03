@@ -13,13 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
 import com.example.racertimer.forecast.data.LocationsListRepository
-import com.example.racertimer.forecast.domain.interfaces.SelectForecastLocationInterface
+import com.example.racertimer.forecast.domain.Toaster
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.useCasesOld.*
 import com.example.racertimer.forecast.domain.use_cases.SaveLocationListUseCase
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
-import com.example.racertimer.forecast.domain.use_cases.SelectLocationFromListByName
+import com.example.racertimer.forecast.domain.SelectLocationFromListByName
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
@@ -39,7 +39,6 @@ class ActivityForecast : AppCompatActivity() {
     private lateinit var forecastViewModel: ForecastViewModel
 
     private val toaster = Toaster(this) // todo: pass to viewModel
-    private val saveLastLocationUseCase by lazy {SaveLastUseCase(lastLocationRepository) }
 
     private val locationsListRepository by lazy {LocationsListRepository(context = applicationContext)}
     private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsListRepository)}

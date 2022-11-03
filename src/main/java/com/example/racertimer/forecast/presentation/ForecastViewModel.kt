@@ -2,15 +2,10 @@ package com.example.racertimer.forecast.presentation
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.racertimer.forecast.presentation.interfaces.UpdateForecastLinesInterface
+import com.example.racertimer.forecast.domain.Toaster
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
-import com.example.racertimer.forecast.domain.models.LocationsList
-import com.example.racertimer.forecast.domain.useCasesOld.*
-import com.example.racertimer.forecast.domain.use_cases.ForceUpdateForecastUseCase
-import com.example.racertimer.forecast.domain.use_cases.RunActivityUseCase
-import com.example.racertimer.forecast.domain.use_cases.SaveLocationListUseCase
-import com.example.racertimer.forecast.domain.use_cases.SelectLocationFromListByName
+import com.example.racertimer.forecast.domain.use_cases.*
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import com.example.racertimer.forecast.presentation.interfaces.UpdatingUserLocationInterface
 import java.util.*
@@ -25,14 +20,9 @@ class ForecastViewModel: ViewModel() {
             return currentUserLocation
         }
     }
-    private val toaster: Toaster // TODO: DI!!!
-    private val linesUpdater = LinesUpdater(forecastLinesLive)
-    private val updateForecastUseCase = UpdateForecastUseCase(
-        linesUpdater = linesUpdater,
-        toaster = toaster) // TODO: DI!!!
-    // todo: make lastLocationSaver (repository) by DI
-    private val forceUpdateForecastUseCase = ForceUpdateForecastUseCase(updateForecastUseCase)
-    private var runActivityUseCase = RunActivityUseCase() // todo: DI!!!
+    private val linesUpdater = LinesUpdater(forecastLinesLive) //todo: как это передать в DI?
+
+    private var runActivityUseCase = RunActivityUseCase(updaterUserLocation = userLocationUpdater) // todo: DI!!!
 
     private var currentUserLocation: ForecastLocation? = null
     private var currentForecastLocation: ForecastLocation? = null

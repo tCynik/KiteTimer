@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.domain.useCasesOld
+package com.example.racertimer.forecast.domain
 
 import android.content.Context
 import android.widget.Toast

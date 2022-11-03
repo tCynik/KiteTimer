@@ -5,9 +5,7 @@ import android.util.Log
 import android.view.View
 import android.widget.PopupMenu
 import com.example.racertimer.R
-import com.example.racertimer.forecast.domain.ForecastShownManager
 import com.example.racertimer.forecast.domain.models.LocationsList
-import com.example.racertimer.forecast.domain.use_cases.SelectLocationFromListByName
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 
 class SelectLocationByPopupUseCase(private val context: Context,

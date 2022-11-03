@@ -3,16 +3,15 @@ package com.example.racertimer.forecast.data
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.example.racertimer.forecast.domain.Toaster
 import com.example.racertimer.forecast.domain.interfaces.LocationsListInterface
 import com.example.racertimer.forecast.domain.models.LocationsList
 import java.io.*
 
 
-class LocationsListRepository(private val context: Context): LocationsListInterface {
-    //private val fileInputStream: FileInputStream = context.openFileInput("saved.locations_list.bin")
-//    private val fileOutputStream: FileOutputStream = context.openFileOutput("saved.locations_list.bin", Context.MODE_PRIVATE)
-
-    private val contextToast = context
+class LocationsListRepository(
+    private val context: Context,
+    private val toaster: Toaster): LocationsListInterface {
 
     override fun loadList(): LocationsList? {
         var locationsList: LocationsList? = null
@@ -26,13 +25,13 @@ class LocationsListRepository(private val context: Context): LocationsListInterf
             fileInputStream.close()
             Log.i("bugfix", "locationsRepository: locations list loaded successfully ")
         } catch (e: FileNotFoundException) {
-            Toast.makeText(contextToast, "No saved locations", Toast.LENGTH_LONG).show()
+            toaster.makeToast("No saved locations")
             Log.i("bugfix", "locationsRepository: No saved locations ")
         } catch (e: IOException) {
-            Toast.makeText(contextToast, "IO error while reading locations list", Toast.LENGTH_LONG).show()
+            toaster.makeToast("IO error while reading locations list")
             Log.i("bugfix", "locationsRepository: IO error while reading locations list ")
         } catch (e: ClassNotFoundException) {
-            Toast.makeText(contextToast, "repository class loading error", Toast.LENGTH_LONG).show()
+            toaster.makeToast("repository class loading error")
             Log.i("bugfix", "locationsRepository: repository class loading error ")
 
         }

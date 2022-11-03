@@ -1,7 +1,7 @@
 package com.example.racertimer.forecast.domain
 
 import com.example.racertimer.forecast.domain.models.ForecastLocation
-import com.example.racertimer.forecast.domain.useCasesOld.UpdateForecastUseCase
+import com.example.racertimer.forecast.domain.use_cases.UpdateForecastUseCase
 
 /**
  * Менеджер, который отслеживает состояние прогноза (обновлен или нет, отображен или нет),
