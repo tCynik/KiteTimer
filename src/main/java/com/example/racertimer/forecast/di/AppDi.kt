@@ -1,12 +1,15 @@
 package com.example.racertimer.forecast.di
 
-import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
-import com.example.racertimer.forecast.presentation.interfaces.UpdateForecastLinesInterface
+import com.example.racertimer.forecast.presentation.ForecastViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    factory<UpdateForecastLinesInterface> {
-        LinesUpdater(forecastLinesLive = )
-        //todo: где взять ливдата? Либо как сюда запихнуть обьект созданный динамически в рантайме?
+    viewModel<ForecastViewModel>{
+        ForecastViewModel(
+            lastLocationNameRepository = get(),
+            locationsListRepository = get(),
+            forceUpdateForecastUseCase = get()
+        )
     }
 }

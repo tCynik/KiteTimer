@@ -1,12 +1,12 @@
 package com.example.racertimer.forecast.di
 
 import com.example.racertimer.forecast.data.LastForecastLocationNameRepository
-import com.example.racertimer.forecast.data.LocationSelectorImpl
+import com.example.racertimer.forecast.data.LocationSelectorByNameImpl
 import com.example.racertimer.forecast.data.LocationsListRepository
 import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
-import com.example.racertimer.forecast.domain.interfaces.LocationsListInterface
-import com.example.racertimer.forecast.domain.Toaster
-import com.example.racertimer.forecast.presentation.interfaces.LocationSelectorFromListInterface
+import com.example.racertimer.forecast.domain.interfaces.LocationsListRepositoryInterface
+import com.example.racertimer.forecast.domain.instruments.Toaster
+import com.example.racertimer.forecast.presentation.interfaces.LocationSelectorByNameInterface
 import org.koin.dsl.module
 
 val dataModule = module {
@@ -18,12 +18,12 @@ val dataModule = module {
         LastForecastLocationNameRepository(context = get())
     }
 
-    single<LocationsListInterface> {
+    single<LocationsListRepositoryInterface> {
         LocationsListRepository(context = get(), toaster = get())
     }
 
-    single<LocationSelectorFromListInterface> {
-        LocationSelectorImpl(locationsListRepository = get())
+    single<LocationSelectorByNameInterface> {
+        LocationSelectorByNameImpl(locationsListRepository = get())
     }
 
 }

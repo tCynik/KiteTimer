@@ -2,16 +2,15 @@ package com.example.racertimer.forecast.data
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import com.example.racertimer.forecast.domain.Toaster
-import com.example.racertimer.forecast.domain.interfaces.LocationsListInterface
+import com.example.racertimer.forecast.domain.instruments.Toaster
+import com.example.racertimer.forecast.domain.interfaces.LocationsListRepositoryInterface
 import com.example.racertimer.forecast.domain.models.LocationsList
 import java.io.*
 
 
 class LocationsListRepository(
     private val context: Context,
-    private val toaster: Toaster): LocationsListInterface {
+    private val toaster: Toaster): LocationsListRepositoryInterface {
 
     override fun loadList(): LocationsList? {
         var locationsList: LocationsList? = null

@@ -14,7 +14,7 @@ import com.example.racertimer.forecast.domain.use_cases.UpdateForecastUseCase
  */
 
 class ForecastShownManager(private val updateForecastUseCase: UpdateForecastUseCase) {
-    // todo: как-то нужно будет сохранять этот обьект чтобы не перегружать каждый раз прогноз
+    // todo: удаляем, т.к. этот функционал есть во VM. Либо выделить из VM в отдельный (этот) класс
     private var currentLocationToShow: ForecastLocation? = null
     private var currentUserLocation: ForecastLocation? = null
     private var forecastShown = false

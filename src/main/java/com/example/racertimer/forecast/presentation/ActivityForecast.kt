@@ -10,20 +10,14 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.example.racertimer.R
-import com.example.racertimer.forecast.data.LocationsListRepository
-import com.example.racertimer.forecast.domain.Toaster
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
-import com.example.racertimer.forecast.domain.useCasesOld.*
-import com.example.racertimer.forecast.domain.use_cases.SaveLocationListUseCase
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
-import com.example.racertimer.forecast.domain.SelectLocationFromListByName
-import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 import com.example.racertimer.forecast.presentation.mappers.LocationMapper
 import kotlinx.android.synthetic.main.activity_forecast2.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,19 +27,15 @@ private const val EMPTY = ""
 const val BROADCAST_ACTION =
     "com.example.racertimer.action.new_location" // значение для фильтра приемника
 
-
+// old Manifest transcription in Activity:             android:name=".forecast.presentation.ActivityForecast"
 class ActivityForecast : AppCompatActivity() {
-    //private val forecastViewModel by lazy{ViewModelProvider(this).get(ForecastViewModel::class.java)}
-    private lateinit var forecastViewModel: ForecastViewModel
+    private val forecastViewModel by viewModel<ForecastViewModel>()
 
-    private val toaster = Toaster(this) // todo: pass to viewModel
+//    private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsListRepository)}
+//    private val saveLocationsListUseCase by lazy { SaveLocationListUseCase(context = applicationContext, locationsListRepository) }
+//    private val selectLocationFromListByName by lazy { SelectLocationFromListByName() }
 
-    private val locationsListRepository by lazy {LocationsListRepository(context = applicationContext)}
-    private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsListRepository)}
-    private val saveLocationsListUseCase by lazy { SaveLocationListUseCase(context = applicationContext, locationsListRepository) }
-    private val selectLocationFromListByName by lazy { SelectLocationFromListByName() }
-
-    private val linesUpdater = LinesUpdater(forecastLinesLive = forecastViewModel.forecastLinesLive)
+//    private val linesUpdater = LinesUpdater(forecastLinesLive = forecastViewModel.forecastLinesLive)
     //private val forecastShownManager = ForecastShownManager(updateForecastUseCase)
 
     private val locationSelector = object: SelectLocationInterface {
@@ -61,14 +51,9 @@ class ActivityForecast : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forecast2)
 
-        // todo: by di move the forecastLines livedata to linesUpdater -> updateForecastUseCase
-
-        forecastViewModel = ViewModelProvider(this).get(ForecastViewModel::class.java)
-
         val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
-            forecastViewModel.selectLocationClicked()
-            val locationsList = openLocationsListUseCase.execute()
+            val locationsList = forecastViewModel.getLocationsList()
             if (locationsList != null)
                 selectLocationByPopupUseCase.execute(buttonSelectLocation, locationsList)
         })
@@ -101,13 +86,6 @@ class ActivityForecast : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
         // todo: exit to main
-    }
-
-    private fun firstTimeLaunch(saveLocationListUseCase: SaveLocationListUseCase) {
-        val firstTimeMaker = FirstTimeListMakingUseCase()
-        val locationsList = firstTimeMaker.execute()
-        saveLocationListUseCase.setLocationsList(locationsList)
-        saveLocationListUseCase.save()
     }
 
     override fun onStart() {
