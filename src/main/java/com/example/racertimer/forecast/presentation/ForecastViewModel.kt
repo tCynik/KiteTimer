@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.presentation
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.racertimer.forecast.data.LocationSelectorByNameImpl
@@ -10,18 +11,20 @@ import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList
 import com.example.racertimer.forecast.domain.use_cases.*
-import com.example.racertimer.forecast.presentation.interfaces.LocationSelectorByNameInterface
+import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import com.example.racertimer.forecast.presentation.interfaces.UpdatingUserLocationInterface
 import java.util.*
 
-class ForecastViewModel(private val lastLocationNameRepository: LastLocationNameRepositoryInterface,
-                        private val locationsListRepository: LocationsListRepositoryInterface,
+class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryInterface,
+                        locationsListRepository: LocationsListRepositoryInterface,
+                        private val updateForecastUseCase: UpdateForecastUseCase,
                         private val forceUpdateForecastUseCase: ForceUpdateForecastUseCase): ViewModel() {
 
     private val locationsListOpener = LocationsListOpener(locationsListRepository)
     private val locationsSelectorByNameFromList = LocationSelectorByNameImpl(locationsListRepository)
 
     val forecastLinesLive: MutableLiveData<Queue<ForecastLine>> = MutableLiveData()
+    private val linesUpdater = LinesUpdater(forecastLinesLive)
     val buttonLocationNameLive: MutableLiveData<String> = MutableLiveData()
 
     private val userLocationUpdater = object: UpdatingUserLocationInterface{
@@ -42,12 +45,17 @@ class ForecastViewModel(private val lastLocationNameRepository: LastLocationName
     private var forecastShownStatus = false
 
     init {
+        Log.i("bugfix", "VM: starting initialization")
+        updateForecastUseCase.initLinesUpdater(linesUpdater)
         updateForecastWhenActivityOpened()
     }
 
     private fun updateForecastWhenActivityOpened() {
+
+        Log.i("bugfix", "VM: starting first updating the forecast")
         currentForecastLocation = restoreLastSessionLocationUseCase.execute()
-        checkIsAwaitingCurrentLocation()
+        Log.i("bugfix", "VM: currentFoercastLocation is null = ${currentForecastLocation == null}")
+        if (!checkIsAwaitingCurrentLocation()) updateForecastByLocation(currentForecastLocation!!)
         // todo: нужно сделать обновление информации прогноза только если таблица не обновлена либо если с момента обновления прошло много времени
     }
 
@@ -79,12 +87,14 @@ class ForecastViewModel(private val lastLocationNameRepository: LastLocationName
 
     private fun updateForecastByLocation(forecastLocation: ForecastLocation) {
         currentForecastLocation = forecastLocation
-        forceUpdateForecastUseCase.execute(forecastLocation)
+        Log.i("bugfix", "VM: running updateForecastUseCase")
+        updateForecastUseCase.execute(forecastLocation)
         buttonLocationNameLive.value = forecastLocation.name
     }
 
-    private fun checkIsAwaitingCurrentLocation() {
+    private fun checkIsAwaitingCurrentLocation(): Boolean {
         if (currentForecastLocation == null) awaitingUserLocation = true
+        return awaitingUserLocation
     }
 
     private fun runAutoUpdateTimeout() {

@@ -9,6 +9,7 @@ val appModule = module {
         ForecastViewModel(
             lastLocationNameRepository = get(),
             locationsListRepository = get(),
+            updateForecastUseCase = get(),
             forceUpdateForecastUseCase = get()
         )
     }

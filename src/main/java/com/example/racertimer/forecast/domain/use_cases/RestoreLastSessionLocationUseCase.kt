@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.domain.use_cases
 
+import android.util.Log
 import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.presentation.interfaces.LocationSelectorByNameInterface
@@ -15,15 +16,18 @@ class RestoreLastSessionLocationUseCase(
 ) {
 
     fun execute() : ForecastLocation? {
+        Log.i("bugfix", "Restore: starting restore")
         var forecastLocation: ForecastLocation?
         val lastLocationName: String? = lastLocationNameRepository.load()
+        Log.i("bugfix", "Restore: last name = $lastLocationName")
         forecastLocation = if (lastLocationName == null || lastLocationName == CURRENT_POSITION) {
+            Log.i("bugfix", "Restore: getting user location")
             updaterUserLocation.getUserLocation()
         } else {
             locationsSelectorByNameFromList.select(lastLocationName)
         }
         // TODO: добавить обработку налла с выводом во флаг awaiting
-        forceUpdateForecastUseCase.execute(forecastLocation!!)
+        //forceUpdateForecastUseCase.execute(forecastLocation!!)
         return forecastLocation
     }
 }
