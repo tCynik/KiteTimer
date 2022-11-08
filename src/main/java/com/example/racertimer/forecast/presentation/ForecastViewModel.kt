@@ -53,9 +53,9 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     private fun updateForecastWhenActivityOpened() {
 
         Log.i("bugfix", "VM: starting first updating the forecast")
-        currentForecastLocation = restoreLastSessionLocationUseCase.execute()
+        currentUserLocation = restoreLastSessionLocationUseCase.execute()
         Log.i("bugfix", "VM: currentFoercastLocation is null = ${currentForecastLocation == null}")
-        if (!checkIsAwaitingCurrentLocation()) updateForecastByLocation(currentForecastLocation!!)
+        if (!checkIsAwaitingCurrentLocation()) updateForecastByLocation(currentUserLocation!!)
         // todo: нужно сделать обновление информации прогноза только если таблица не обновлена либо если с момента обновления прошло много времени
     }
 
@@ -93,7 +93,7 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     }
 
     private fun checkIsAwaitingCurrentLocation(): Boolean {
-        if (currentForecastLocation == null) awaitingUserLocation = true
+        if (currentUserLocation == null) awaitingUserLocation = true
         return awaitingUserLocation
     }
 

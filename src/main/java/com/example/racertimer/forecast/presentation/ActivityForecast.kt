@@ -73,8 +73,12 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun initObservers() {
+        Log.i("bugfix", "ForecastActivity: initing observers")
+
         forecastViewModel.forecastLinesLive.observe(this, androidx.lifecycle.Observer {
-            if (it != null) fillForecast(it)
+            if (it != null) {
+                fillForecast(it)
+            }
         })
 
         forecastViewModel.buttonLocationNameLive.observe(this, androidx.lifecycle.Observer {
@@ -124,6 +128,7 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun fillForecast(forecastLines: Queue<ForecastLine>) {
+        Log.i("bugfix", "ForecastActivity: filling the forecast, queue size = ${forecastLines.size}")
         viewToBeFiled.removeAllViews()
         fillTitle()
         // todo: move to separate class when MVVM realization
