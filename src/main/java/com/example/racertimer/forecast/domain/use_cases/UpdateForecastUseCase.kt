@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.domain.use_cases
 
+import android.util.Log
 import com.example.racertimer.forecast.data.parsers.ParserJsonToQueueLines
 import com.example.racertimer.forecast.data.urlequest.ResultJsonInterface
 import com.example.racertimer.forecast.data.urlequest.URLRequestManager
@@ -10,8 +11,7 @@ import com.example.racertimer.forecast.domain.interfaces.LastLocationNameReposit
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import org.json.JSONObject
 
-class UpdateForecastUseCase(//private val linesUpdater: LinesUpdater,
-                            private val toaster: Toaster,
+class UpdateForecastUseCase(private val toaster: Toaster,
                             private val lastLocationRepository: LastLocationNameRepositoryInterface
 ) {
     var linesUpdater: LinesUpdater? = null
@@ -28,7 +28,9 @@ class UpdateForecastUseCase(//private val linesUpdater: LinesUpdater,
                     if (jsonOnObject != null) {
                         val queueLines = ParserJsonToQueueLines().execute(jsonOnObject)
                         linesUpdater!!.updateForecastLines(queueLines)
-                    } else linesUpdater!!.updateForecastLines(null)
+                    } else {
+                        linesUpdater!!.updateForecastLines(null)
+                    }
                 } else toaster.makeToast("Error table init")
             }
 

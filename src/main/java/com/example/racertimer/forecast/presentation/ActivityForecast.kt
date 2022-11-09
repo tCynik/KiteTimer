@@ -10,12 +10,13 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.example.racertimer.R
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
-import com.example.racertimer.forecast.presentation.mappers.LocationMapper
+import com.example.racertimer.forecast.presentation.models_mappers.LocationMapper
 import kotlinx.android.synthetic.main.activity_forecast2.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
@@ -69,15 +70,18 @@ class ActivityForecast : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        initObservers()
+        //initObservers()
     }
 
     private fun initObservers() {
         Log.i("bugfix", "ForecastActivity: initing observers")
 
-        forecastViewModel.forecastLinesLive.observe(this, androidx.lifecycle.Observer {
+        forecastViewModel.forecastLinesLive.observe(this, Observer {
             if (it != null) {
-                fillForecast(it)
+                val linesQueue = it.getData()// todo: сделать обертку ForecastLines, из которой доставать очередь?
+                fillForecast(linesQueue) // вот тут проблема! Обнуление происходит в этой строчке
+
+                forecastViewModel.showLines()
             }
         })
 
@@ -95,6 +99,8 @@ class ActivityForecast : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         initLocationBroadcastListener()
+        initObservers()
+        forecastViewModel.showLines()
     }
 
     private fun updateLocationFromIntent (){
@@ -128,10 +134,10 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun fillForecast(forecastLines: Queue<ForecastLine>) {
-        Log.i("bugfix", "ForecastActivity: filling the forecast, queue size = ${forecastLines.size}")
+        Log.i("bugfix", "ForecastActivity: filling the table, queue size = ${forecastLines.size}")
         viewToBeFiled.removeAllViews()
         fillTitle()
-        // todo: move to separate class when MVVM realization
+//        // todo: move to separate class when MVVM realization
         while (!forecastLines.isEmpty()) {
             val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
             val currentLine = forecastLines.poll()

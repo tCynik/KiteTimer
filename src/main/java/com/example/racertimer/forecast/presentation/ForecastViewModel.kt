@@ -13,17 +13,19 @@ import com.example.racertimer.forecast.domain.models.LocationsList
 import com.example.racertimer.forecast.domain.use_cases.*
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import com.example.racertimer.forecast.presentation.interfaces.UpdatingUserLocationInterface
+import com.example.racertimer.forecast.presentation.models_mappers.ForecastLinesData
 import java.util.*
 
 class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryInterface,
                         locationsListRepository: LocationsListRepositoryInterface,
                         private val updateForecastUseCase: UpdateForecastUseCase,
-                        private val forceUpdateForecastUseCase: ForceUpdateForecastUseCase): ViewModel() {
+                        private val forceUpdateForecastUseCase: ForceUpdateForecastUseCase)
+    : ViewModel() {
 
     private val locationsListOpener = LocationsListOpener(locationsListRepository)
     private val locationsSelectorByNameFromList = LocationSelectorByNameImpl(locationsListRepository)
 
-    val forecastLinesLive: MutableLiveData<Queue<ForecastLine>> = MutableLiveData()
+    val forecastLinesLive: MutableLiveData<ForecastLinesData> = MutableLiveData()
     private val linesUpdater = LinesUpdater(forecastLinesLive)
     val buttonLocationNameLive: MutableLiveData<String> = MutableLiveData()
 
@@ -48,6 +50,13 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
         Log.i("bugfix", "VM: starting initialization")
         updateForecastUseCase.initLinesUpdater(linesUpdater)
         updateForecastWhenActivityOpened()
+    }
+
+    fun showLines() {
+        //Log.i("bugfix", "VM: lines number = ${forecastLinesLiveOld.value?.size}")
+        if (forecastLinesLive.value != null)
+        { Log.i("bugfix", "VM: lines number = ${forecastLinesLive.value?.getData()!!.size}")}
+
     }
 
     private fun updateForecastWhenActivityOpened() {
