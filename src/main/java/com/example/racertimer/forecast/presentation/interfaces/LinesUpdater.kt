@@ -1,6 +1,5 @@
 package com.example.racertimer.forecast.presentation.interfaces
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.presentation.models_mappers.ForecastLinesData

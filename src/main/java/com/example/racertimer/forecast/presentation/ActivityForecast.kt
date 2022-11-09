@@ -32,13 +32,6 @@ const val BROADCAST_ACTION =
 class ActivityForecast : AppCompatActivity() {
     private val forecastViewModel by viewModel<ForecastViewModel>()
 
-//    private val openLocationsListUseCase by lazy {OpenLocationsListUseCase(locationsListRepository)}
-//    private val saveLocationsListUseCase by lazy { SaveLocationListUseCase(context = applicationContext, locationsListRepository) }
-//    private val selectLocationFromListByName by lazy { SelectLocationFromListByName() }
-
-//    private val linesUpdater = LinesUpdater(forecastLinesLive = forecastViewModel.forecastLinesLive)
-    //private val forecastShownManager = ForecastShownManager(updateForecastUseCase)
-
     private val locationSelector = object: SelectLocationInterface {
         override fun onLocationSelected(forecastLocation: ForecastLocation?) {
             if (forecastLocation == null) forecastViewModel.updateForecastByUserLocation()
@@ -80,8 +73,6 @@ class ActivityForecast : AppCompatActivity() {
             if (it != null) {
                 val linesQueue = it.getData()// todo: сделать обертку ForecastLines, из которой доставать очередь?
                 fillForecast(linesQueue) // вот тут проблема! Обнуление происходит в этой строчке
-
-                forecastViewModel.showLines()
             }
         })
 
@@ -100,7 +91,6 @@ class ActivityForecast : AppCompatActivity() {
         super.onStart()
         initLocationBroadcastListener()
         initObservers()
-        forecastViewModel.showLines()
     }
 
     private fun updateLocationFromIntent (){

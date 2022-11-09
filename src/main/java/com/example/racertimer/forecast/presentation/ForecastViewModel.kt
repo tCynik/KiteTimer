@@ -7,14 +7,12 @@ import com.example.racertimer.forecast.data.LocationSelectorByNameImpl
 import com.example.racertimer.forecast.domain.instruments.LocationsListOpener
 import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
 import com.example.racertimer.forecast.domain.interfaces.LocationsListRepositoryInterface
-import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList
 import com.example.racertimer.forecast.domain.use_cases.*
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import com.example.racertimer.forecast.presentation.interfaces.UpdatingUserLocationInterface
 import com.example.racertimer.forecast.presentation.models_mappers.ForecastLinesData
-import java.util.*
 
 class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryInterface,
                         locationsListRepository: LocationsListRepositoryInterface,
@@ -23,7 +21,6 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     : ViewModel() {
 
     private val locationsListOpener = LocationsListOpener(locationsListRepository)
-    private val locationsSelectorByNameFromList = LocationSelectorByNameImpl(locationsListRepository)
 
     val forecastLinesLive: MutableLiveData<ForecastLinesData> = MutableLiveData()
     private val linesUpdater = LinesUpdater(forecastLinesLive)
@@ -37,7 +34,7 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
 
     private val restoreLastSessionLocationUseCase = RestoreLastSessionLocationUseCase(
         lastLocationNameRepository = lastLocationNameRepository,
-        locationsSelectorByNameFromList = locationsSelectorByNameFromList,
+        locationsListRepository = locationsListRepository,
         updaterUserLocation = userLocationUpdater,
         forceUpdateForecastUseCase = forceUpdateForecastUseCase)
 
@@ -52,16 +49,7 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
         updateForecastWhenActivityOpened()
     }
 
-    fun showLines() {
-        //Log.i("bugfix", "VM: lines number = ${forecastLinesLiveOld.value?.size}")
-        if (forecastLinesLive.value != null)
-        { Log.i("bugfix", "VM: lines number = ${forecastLinesLive.value?.getData()!!.size}")}
-
-    }
-
     private fun updateForecastWhenActivityOpened() {
-
-        Log.i("bugfix", "VM: starting first updating the forecast")
         currentUserLocation = restoreLastSessionLocationUseCase.execute()
         Log.i("bugfix", "VM: currentFoercastLocation is null = ${currentForecastLocation == null}")
         if (!checkIsAwaitingCurrentLocation()) updateForecastByLocation(currentUserLocation!!)
