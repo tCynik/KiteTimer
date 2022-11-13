@@ -34,6 +34,10 @@ android {
         jvmTarget = '1.8' //
     } //
 
+    dataBinding{ // data binding options
+        enabled true
+    }
+
 }
 
 dependencies {

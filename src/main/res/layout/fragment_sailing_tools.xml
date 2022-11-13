@@ -129,7 +129,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/race_last_signs"
                 android:textSize="18sp"
-                android:text="downwind"
+                android:text="@string/downwind"
                 android:layout_marginTop="40dp"
                 app:layout_constraintTop_toTopOf="@id/best_downwind"
                 app:layout_constraintEnd_toEndOf="@id/best_downwind"/>

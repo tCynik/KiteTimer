@@ -12,9 +12,7 @@ class LastForecastLocationNameRepository(context: Context): LastLocationNameRepo
     private val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     override fun save(forecastLocation: ForecastLocation): Boolean {
-        val result = sharedPreferences.edit().putString(LOCATION_NAME_KEY, forecastLocation.name).commit()
-        Log.i("bugfix", "LastLocationsRepo: save last = $result ")
-        return result
+        return sharedPreferences.edit().putString(LOCATION_NAME_KEY, forecastLocation.name).commit()
     }
 
     override fun load(): String {

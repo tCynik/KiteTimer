@@ -20,15 +20,13 @@ class SelectLocationByPopupUseCase(private val context: Context,
             when (it.toString()) {
                 "current location by GPS" -> {
                     locationSelector.onLocationSelected(null)
-                    Log.i("bugfix", "ListOpen: chosen: current")
                     true
                 }
                 else -> {
                     val forecastLocation = locationsList[it.toString()]
                     locationSelector.onLocationSelected(forecastLocation)
-                    Log.i("bugfix", "ListOpen: chosen: ${forecastLocation!!.name}")
                     if (forecastLocation == null)
-                        Log.i("racer_tomer", "popup item name exception occurred")
+                        Log.i("racer_timer", "popup item name exception occurred")
                     true
                 }
             }

@@ -9,4 +9,6 @@
     <string name="forecast">FORECAST</string>
     <string name="for_next_location">For next location:</string>
     <string name="current_position">current</string>
+    <string name="downwind">downwind</string>
+    <string name="update">update</string>
 </resources>

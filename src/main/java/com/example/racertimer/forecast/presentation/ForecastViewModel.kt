@@ -24,7 +24,6 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
 
     val forecastLinesLive: MutableLiveData<ForecastLinesData> = MutableLiveData()
     private val linesUpdater = LinesUpdater(forecastLinesLive)
-    val buttonLocationNameLive: MutableLiveData<String> = MutableLiveData()
 
     private val userLocationUpdater = object: UpdatingUserLocationInterface{
         override fun getUserLocation(): ForecastLocation? {
@@ -42,16 +41,15 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     private var currentForecastLocation: ForecastLocation? = null
     private var awaitingUserLocation = false
     private var forecastShownStatus = false
+    var locationNameLive: MutableLiveData<String> = MutableLiveData()
 
     init {
-        Log.i("bugfix", "VM: starting initialization")
         updateForecastUseCase.initLinesUpdater(linesUpdater)
         updateForecastWhenActivityOpened()
     }
 
     private fun updateForecastWhenActivityOpened() {
         currentUserLocation = restoreLastSessionLocationUseCase.execute()
-        Log.i("bugfix", "VM: currentFoercastLocation is null = ${currentForecastLocation == null}")
         if (!checkIsAwaitingCurrentLocation()) updateForecastByLocation(currentUserLocation!!)
         // todo: нужно сделать обновление информации прогноза только если таблица не обновлена либо если с момента обновления прошло много времени
     }
@@ -82,11 +80,14 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
         else updateForecastByLocation(currentUserLocation!!)
     }
 
-    private fun updateForecastByLocation(forecastLocation: ForecastLocation) {
+    fun updateForecastByLocation(forecastLocation: ForecastLocation) {
+        setCurrentForecastLocation(forecastLocation)
+        updateForecastUseCase.execute(currentForecastLocation!!)
+    }
+
+    private fun setCurrentForecastLocation(forecastLocation: ForecastLocation) {
         currentForecastLocation = forecastLocation
-        Log.i("bugfix", "VM: running updateForecastUseCase")
-        updateForecastUseCase.execute(forecastLocation)
-        buttonLocationNameLive.value = forecastLocation.name
+        locationNameLive.value = forecastLocation.name
     }
 
     private fun checkIsAwaitingCurrentLocation(): Boolean {

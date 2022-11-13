@@ -10,8 +10,10 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.example.racertimer.R
+import com.example.racertimer.databinding.ActivityForecastBinding
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
@@ -35,6 +37,9 @@ class ActivityForecast : AppCompatActivity() {
     private val locationSelector = object: SelectLocationInterface {
         override fun onLocationSelected(forecastLocation: ForecastLocation?) {
             if (forecastLocation == null) forecastViewModel.updateForecastByUserLocation()
+            else {
+                forecastViewModel.updateForecastByLocation(forecastLocation)
+            }
         }
     }
     private val selectLocationByPopupUseCase = SelectLocationByPopupUseCase(
@@ -43,9 +48,12 @@ class ActivityForecast : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_forecast2)
+        //setContentView(R.layout.activity_forecast2)
+        val layoutDataBinding: ActivityForecastBinding = DataBindingUtil.setContentView(this, R.layout.activity_forecast)
+        layoutDataBinding.lifecycleOwner = this
+        layoutDataBinding.viewmodel = forecastViewModel
 
-        val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
+        val buttonSelectLocation = layoutDataBinding.btnSelectLocation
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
             val locationsList = forecastViewModel.getLocationsList()
             if (locationsList != null)
@@ -63,22 +71,14 @@ class ActivityForecast : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        //initObservers()
     }
 
     private fun initObservers() {
-        Log.i("bugfix", "ForecastActivity: initing observers")
-
         forecastViewModel.forecastLinesLive.observe(this, Observer {
             if (it != null) {
                 val linesQueue = it.getData()// todo: сделать обертку ForecastLines, из которой доставать очередь?
                 fillForecast(linesQueue) // вот тут проблема! Обнуление происходит в этой строчке
             }
-        })
-
-        forecastViewModel.buttonLocationNameLive.observe(this, androidx.lifecycle.Observer {
-            val buttonSelectLocation = findViewById<Button>(R.id.btn_select_location)
-            buttonSelectLocation.text = it
         })
     }
 
@@ -124,7 +124,6 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun fillForecast(forecastLines: Queue<ForecastLine>) {
-        Log.i("bugfix", "ForecastActivity: filling the table, queue size = ${forecastLines.size}")
         viewToBeFiled.removeAllViews()
         fillTitle()
 //        // todo: move to separate class when MVVM realization
