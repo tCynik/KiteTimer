@@ -19,19 +19,14 @@ class LocationsListRepository(
                 "repository.locations_list.bin")
             val objectInputStream = ObjectInputStream(fileInputStream)
             locationsList = objectInputStream.readObject() as LocationsList
-            //listLocationForecast = objectInputStream.readObject() as ListForecastLocations
             objectInputStream.close()
             fileInputStream.close()
-            Log.i("bugfix", "locationsRepository: locations list loaded successfully ")
         } catch (e: FileNotFoundException) {
             toaster.makeToast("No saved locations")
-            Log.i("bugfix", "locationsRepository: No saved locations ")
         } catch (e: IOException) {
             toaster.makeToast("IO error while reading locations list")
-            Log.i("bugfix", "locationsRepository: IO error while reading locations list ")
         } catch (e: ClassNotFoundException) {
             toaster.makeToast("repository class loading error")
-            Log.i("bugfix", "locationsRepository: repository class loading error ")
 
         }
         return locationsList

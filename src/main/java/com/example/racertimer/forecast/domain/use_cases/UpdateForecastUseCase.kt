@@ -21,6 +21,7 @@ class UpdateForecastUseCase(private val toaster: ToasterInterface,
 
 // TODO: инстанс LinesUpdater создается после появления VM (после появления liveData). Его нужно импортировать после создания VM
     fun execute(forecastLocation: ForecastLocation) {
+        toaster.makeToast("updating forecast for location ${forecastLocation.name}")
         val resultInterface = object : ResultJsonInterface{
             override fun gotResult(jsonOnObject: JSONObject?) {
                 if (linesUpdater != null) {

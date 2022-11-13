@@ -2,8 +2,6 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android' //
     id 'kotlin-android-extensions' // добавляем для отказа от findViewById
-
-
 }
 
 android {
@@ -38,6 +36,10 @@ android {
         enabled true
     }
 
+    buildFeatures{
+        viewBinding true
+    }
+
 }
 
 dependencies {
@@ -60,6 +62,7 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.1.0" // добавляем для отказа от findViewById
     testImplementation "android.arch.core:core-testing:1.1.0" // добавляем для отказа от findViewById
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0" // Для получения viewModel
+    implementation "androidx.recyclerview:recyclerview:1.2.1" // recycler view
 
     // for Koin:
     def koin_version= "3.2.2"

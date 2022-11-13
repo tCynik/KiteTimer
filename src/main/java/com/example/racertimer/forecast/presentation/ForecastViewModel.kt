@@ -1,9 +1,7 @@
 package com.example.racertimer.forecast.presentation
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.racertimer.forecast.data.LocationSelectorByNameImpl
 import com.example.racertimer.forecast.domain.instruments.LocationsListOpener
 import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
 import com.example.racertimer.forecast.domain.interfaces.LocationsListRepositoryInterface
@@ -34,8 +32,7 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     private val restoreLastSessionLocationUseCase = RestoreLastSessionLocationUseCase(
         lastLocationNameRepository = lastLocationNameRepository,
         locationsListRepository = locationsListRepository,
-        updaterUserLocation = userLocationUpdater,
-        forceUpdateForecastUseCase = forceUpdateForecastUseCase)
+        updaterUserLocation = userLocationUpdater)
 
     private var currentUserLocation: ForecastLocation? = null
     private var currentForecastLocation: ForecastLocation? = null

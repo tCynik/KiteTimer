@@ -12,6 +12,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.racertimer.R
 import com.example.racertimer.databinding.ActivityForecastBinding
 import com.example.racertimer.forecast.domain.models.ForecastLine
@@ -30,9 +31,9 @@ private const val EMPTY = ""
 const val BROADCAST_ACTION =
     "com.example.racertimer.action.new_location" // значение для фильтра приемника
 
-// old Manifest transcription in Activity:             android:name=".forecast.presentation.ActivityForecast"
 class ActivityForecast : AppCompatActivity() {
     private val forecastViewModel by viewModel<ForecastViewModel>()
+    private lateinit var recyclerAdapter: ForecastLinesAdapter
 
     private val locationSelector = object: SelectLocationInterface {
         override fun onLocationSelected(forecastLocation: ForecastLocation?) {
@@ -52,6 +53,12 @@ class ActivityForecast : AppCompatActivity() {
         val layoutDataBinding: ActivityForecastBinding = DataBindingUtil.setContentView(this, R.layout.activity_forecast)
         layoutDataBinding.lifecycleOwner = this
         layoutDataBinding.viewmodel = forecastViewModel
+
+        recyclerAdapter = ForecastLinesAdapter()
+        //val lineDataBinding: ViewDataBinding? = DataBindingUtil.setContentView(this, R.layout.forecast_line)
+        val layoutManager = LinearLayoutManager(this)
+        layoutDataBinding.viewToBeFiled.layoutManager = layoutManager
+        layoutDataBinding.viewToBeFiled.adapter = recyclerAdapter
 
         val buttonSelectLocation = layoutDataBinding.btnSelectLocation
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
