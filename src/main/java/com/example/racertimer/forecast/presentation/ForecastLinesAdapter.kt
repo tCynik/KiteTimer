@@ -64,7 +64,7 @@ class ForecastLinesAdapter:  RecyclerView.Adapter<ForecastLinesAdapter.LinesView
         else
             views.forEach { e ->
                 e.setTextColor(android.graphics.Color.GRAY)
-                e.setBackgroundColor(R.color.color_primary)
+                e.setBackgroundColor(R.color.night_background)
             }
     }
 }

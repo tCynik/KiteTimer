@@ -21,6 +21,7 @@ import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUse
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 import com.example.racertimer.forecast.presentation.models_mappers.LocationMapper
 import kotlinx.android.synthetic.main.activity_forecast2.*
+import kotlinx.android.synthetic.main.forecast_line.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -47,15 +48,14 @@ class ActivityForecast : AppCompatActivity() {
         this,
         locationSelector = locationSelector)
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_forecast2)
         val layoutDataBinding: ActivityForecastBinding = DataBindingUtil.setContentView(this, R.layout.activity_forecast)
         layoutDataBinding.lifecycleOwner = this
         layoutDataBinding.viewmodel = forecastViewModel
 
         recyclerAdapter = ForecastLinesAdapter()
-        //val lineDataBinding: ViewDataBinding? = DataBindingUtil.setContentView(this, R.layout.forecast_line)
         val layoutManager = LinearLayoutManager(this)
         layoutDataBinding.viewToBeFiled.layoutManager = layoutManager
         layoutDataBinding.viewToBeFiled.adapter = recyclerAdapter
@@ -67,6 +67,7 @@ class ActivityForecast : AppCompatActivity() {
                 selectLocationByPopupUseCase.execute(buttonSelectLocation, locationsList)
         })
 
+        fillTitle(layoutDataBinding.titleLayout)
         updateLocationFromIntent()
         // todo: in release remove fun firstTimeLaunch and locations coordinates hardcode below:
         /**
@@ -132,19 +133,16 @@ class ActivityForecast : AppCompatActivity() {
         registerReceiver(locationBroadcastReceiver, locationIntentFilter) // регистрируем слушатель
     }
 
-// todo: make the title, make screen rotation
-//    private fun fillTitle() {
-//        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
-//        fillForecastLine(
-//            lineToFill = item,
-//            dateAndTime = "date",
-//            isItDay = false,
-//            temperature = "temp",
-//            windSpeed = "wind",
-//            windGust = "gust",
-//            windDir = "dir"
-//        )
-//    }
+// todo: make screen rotation
+    private fun fillTitle(viewLayout: LinearLayout) {
+        //val viewForTitle = findViewById<LinearLayout>(R.layout.forecast_line)
+        val item = layoutInflater.inflate(R.layout.forecast_line, viewLayout, false)
+        item.findViewById<TextView>(R.id.forecast_string_time).text = "date"
+        item.findViewById<TextView>(R.id.forecast_string_temp).text = "temp"
+        item.findViewById<TextView>(R.id.forecast_string_wind).text = "wind"
+        item.findViewById<TextView>(R.id.forecast_string_gust).text = "gust"
+        item.findViewById<TextView>(R.id.forecast_string_dir).text = "dir"
+    }
 //
 //    private fun fillNoData() {
 //        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
