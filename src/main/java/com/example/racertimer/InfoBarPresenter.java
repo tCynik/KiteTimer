@@ -272,7 +272,6 @@ class InstantMessage extends BarStatement {
 class Status extends BarStatement {
     public Status(BarUpdater barUpdater, String statusName) {
         super(barUpdater, statusName);
-        //this.timeoutMilSec = 1000;
     }
 
     @Override
@@ -295,7 +294,6 @@ class EmptyMessage extends BarStatement {
 
     @Override
     public void print() {
-        Log.i(PROJECT_LOG_TAG, "the empty message get started");
         lockTheBar(1000);
     }
 }

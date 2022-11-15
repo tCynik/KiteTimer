@@ -83,8 +83,10 @@ class ActivityForecast : AppCompatActivity() {
     private fun initObservers() {
         forecastViewModel.forecastLinesLive.observe(this, Observer {
             if (it != null) {
-                val linesQueue = it.getData()// todo: сделать обертку ForecastLines, из которой доставать очередь?
-                fillForecast(linesQueue) // вот тут проблема! Обнуление происходит в этой строчке
+                val forecastLinesData = it
+                val forecastLines = forecastLinesData.getData() as List<ForecastLine>
+                recyclerAdapter.lines = forecastLines
+                // TODO: добавить заголовок таблицы
             }
         })
     }
@@ -130,93 +132,22 @@ class ActivityForecast : AppCompatActivity() {
         registerReceiver(locationBroadcastReceiver, locationIntentFilter) // регистрируем слушатель
     }
 
-    private fun fillForecast(forecastLines: Queue<ForecastLine>) {
-        viewToBeFiled.removeAllViews()
-        fillTitle()
-//        // todo: move to separate class when MVVM realization
-        while (!forecastLines.isEmpty()) {
-            val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
-            val currentLine = forecastLines.poll()
-
-            val timeFormat = SimpleDateFormat("d MMM HH:mm")
-            val time: Long = currentLine.time
-            val dateTimeString: String = timeFormat.format(time)
-            val isItDay = checkDaytime(time)
-
-            if (currentLine != null) {
-                fillForecastLine(
-                    lineToFill = item,
-                    dateAndTime = dateTimeString,
-                    isItDay = isItDay,
-                    temperature = currentLine.temperature,
-                    windSpeed = currentLine.windSpeed,
-                    windGust = currentLine.windGust,
-                    windDir = currentLine.windDir
-                )
-            }
-        }
-        forecastViewModel.updateForecastShownStatus(true)
-    }
-
-    private fun checkDaytime(time: Long): Boolean {
-        val timeFormat = SimpleDateFormat("HH")
-        val timeHour = timeFormat.format(time).toInt()
-
-        return timeHour in 9..19
-    }
-
-    private fun fillTitle() {
-        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
-        fillForecastLine(
-            lineToFill = item,
-            dateAndTime = "date",
-            isItDay = false,
-            temperature = "temp",
-            windSpeed = "wind",
-            windGust = "gust",
-            windDir = "dir"
-        )
-    }
-
-    private fun fillForecastLine(
-        lineToFill: View,
-        dateAndTime: String,
-        isItDay: Boolean,
-        temperature: String,
-        windSpeed: String,
-        windGust: String,
-        windDir: String) {
-        if (isItDay) {
-            lineToFill.setBackgroundColor(android.graphics.Color.GRAY)
-            val textColor = android.graphics.Color.BLACK
-            lineToFill.findViewById<TextView>(R.id.forecast_string_time).setTextColor(textColor)
-            lineToFill.findViewById<TextView>(R.id.forecast_string_temp).setTextColor(textColor)
-            lineToFill.findViewById<TextView>(R.id.forecast_string_wind).setTextColor(textColor)
-            lineToFill.findViewById<TextView>(R.id.forecast_string_gust).setTextColor(textColor)
-            lineToFill.findViewById<TextView>(R.id.forecast_string_dir).setTextColor(textColor)
-            lineToFill.findViewById<TextView>(R.id.wind_speed_gust_separator).setTextColor(textColor)
-        }
-
-        val timeTV = lineToFill.findViewById<TextView>(R.id.forecast_string_time)
-        timeTV.text = dateAndTime
-
-        val tempTV = lineToFill.findViewById<TextView>(R.id.forecast_string_temp)
-        tempTV.text = temperature
-
-        val windSpeedTV = lineToFill.findViewById<TextView>(R.id.forecast_string_wind)
-        windSpeedTV.text = windSpeed
-
-        val windGustTV = lineToFill.findViewById<TextView>(R.id.forecast_string_gust)
-        windGustTV.text = windGust
-
-        val windDirTV = lineToFill.findViewById<TextView>(R.id.forecast_string_dir)
-        windDirTV.text = windDir
-
-        viewToBeFiled.addView(lineToFill)
-    }
-
-    private fun fillNoData() {
-        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
-        fillForecastLine(item, "", false, "NO", "DATA", "", "")
-    }
+// todo: make the title, make screen rotation
+//    private fun fillTitle() {
+//        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
+//        fillForecastLine(
+//            lineToFill = item,
+//            dateAndTime = "date",
+//            isItDay = false,
+//            temperature = "temp",
+//            windSpeed = "wind",
+//            windGust = "gust",
+//            windDir = "dir"
+//        )
+//    }
+//
+//    private fun fillNoData() {
+//        val item = layoutInflater.inflate(R.layout.forecast_line, viewToBeFiled, false)
+//        fillForecastLine(item, "", false, "NO", "DATA", "", "")
+//    }
 }

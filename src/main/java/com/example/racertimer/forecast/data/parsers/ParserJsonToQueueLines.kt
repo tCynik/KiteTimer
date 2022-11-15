@@ -20,7 +20,7 @@ class ParserJsonToQueueLines {
             val windJson = currentJson.getJSONObject("wind")
             val windSpeed = windJson.getInt("speed")
             val windDir = windJson.getInt("deg")
-            val windGust = windJson.getDouble("gust")
+            val windGust = windJson.getInt("gust")
 
             val currentLine = ForecastLine(
                 time = time,

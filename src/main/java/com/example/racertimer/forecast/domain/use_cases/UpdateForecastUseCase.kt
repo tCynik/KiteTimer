@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.domain.use_cases
 
+import android.util.Log
 import com.example.racertimer.forecast.data.parsers.ParserJsonToQueueLines
 import com.example.racertimer.forecast.data.urlequest.ResultJsonInterface
 import com.example.racertimer.forecast.data.urlequest.URLRequestManager
@@ -19,7 +20,6 @@ class UpdateForecastUseCase(private val toaster: ToasterInterface,
         this.linesUpdater = linesUpdater
     }
 
-// TODO: инстанс LinesUpdater создается после появления VM (после появления liveData). Его нужно импортировать после создания VM
     fun execute(forecastLocation: ForecastLocation) {
         toaster.makeToast("updating forecast for location ${forecastLocation.name}")
         val resultInterface = object : ResultJsonInterface{
@@ -31,7 +31,7 @@ class UpdateForecastUseCase(private val toaster: ToasterInterface,
                     } else {
                         linesUpdater!!.updateForecastLines(null)
                     }
-                } else toaster.makeToast("Error table init")
+                } else toaster.makeToast("lines updater in null = ${linesUpdater == null}")
             }
 
             override fun errorOccurs(error: String) {

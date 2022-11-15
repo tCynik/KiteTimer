@@ -14,10 +14,10 @@ import com.example.racertimer.forecast.presentation.models_mappers.ForecastLines
 
 class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryInterface,
                         locationsListRepository: LocationsListRepositoryInterface,
-                        private val updateForecastUseCase: UpdateForecastUseCase,
-                        private val forceUpdateForecastUseCase: ForceUpdateForecastUseCase)
+                        private val updateForecastUseCase: UpdateForecastUseCase)
     : ViewModel() {
 
+    private val forceUpdateForecastUseCase = ForceUpdateForecastUseCase(updateForecastUseCase)
     private val locationsListOpener = LocationsListOpener(locationsListRepository)
 
     val forecastLinesLive: MutableLiveData<ForecastLinesData> = MutableLiveData()

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/line_linear"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="5dp"
@@ -24,13 +25,6 @@
         android:textSize="20sp"
         android:gravity="end"
         android:text="xx.x"/>
-    <TextView
-        android:id="@+id/wind_speed_gust_separator"
-        android:layout_width="10dp"
-        android:layout_height="match_parent"
-        android:gravity="end"
-        android:textSize="20sp"
-        android:text="/"/>
 
     <TextView
         android:id="@+id/forecast_string_gust"
