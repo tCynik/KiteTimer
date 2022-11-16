@@ -142,6 +142,7 @@ class ActivityForecast : AppCompatActivity() {
         item.findViewById<TextView>(R.id.forecast_string_wind).text = "wind"
         item.findViewById<TextView>(R.id.forecast_string_gust).text = "gust"
         item.findViewById<TextView>(R.id.forecast_string_dir).text = "dir"
+        viewLayout.addView(item)
     }
 //
 //    private fun fillNoData() {
