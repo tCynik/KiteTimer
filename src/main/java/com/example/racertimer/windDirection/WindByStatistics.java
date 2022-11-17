@@ -16,13 +16,11 @@ import java.util.TimerTask;
 public class WindByStatistics {
     private final static String PROJECT_LOG_TAG = "racer_timer_windStat";
 
-    private int windCalculateOption;
-
     private final static int MIN_KMH_TO_STATISTICS = 6; // минимальный порог скорости, который идет в
     // статистику - для фильтрации пешей хотьбы и случайных всплесков
 
-    private int sizeOfSectors; // размер каждого сектора диаграммы в градусах - определяем в конструкторе
-    private int numberOfSectors; // количество секторов - считаем из numberOfSectors
+    private final int sizeOfSectors; // размер каждого сектора диаграммы в градусах - определяем в конструкторе
+    private final int numberOfSectors; // количество секторов - считаем из numberOfSectors
     private int[] windDiagram; // массив, в котором храним диаграмму
     private int sensitivity; // чувствительность диаграммы к изменениям в %
 
@@ -43,12 +41,12 @@ public class WindByStatistics {
 
     private boolean windDiagramIsRepresentable = false; // флаг того, что статистика набрана достаточная
 
-    WindChangedHerald windChangedHerald; // интерфейс для вывода нового значения ветра
+    WindChangedHeraldInterface windChangedHerald; // интерфейс для вывода нового значения ветра
     private CountDownTimer countDownTimer; // таймер для причесывания диаграммы когда не приходят новые данные
     private Timer timer; // таймер для причесывания диаграммы когда какое-то время не приходят новые данные
     private TimerTask timerTask; // тело задачи, которая выполняется по команде таймера
 
-    public WindByStatistics(int sizeOfSectors, WindChangedHerald windChangedHerald) {
+    public WindByStatistics(int sizeOfSectors, WindChangedHeraldInterface windChangedHeraldInterface) {
         this.sizeOfSectors = sizeOfSectors;
         numberOfSectors = 360 / sizeOfSectors;
         windDiagram = new int[numberOfSectors];
@@ -62,7 +60,7 @@ public class WindByStatistics {
             sin[i] = (float) Math.sin(Math.toRadians(currentAngle));
             cos[i] = (float) Math.cos(Math.toRadians(currentAngle));
         }
-        this.windChangedHerald = windChangedHerald;
+        this.windChangedHerald = windChangedHeraldInterface;
         sensitivity = 50; // параметр чувствистельности для настройки
 
     }

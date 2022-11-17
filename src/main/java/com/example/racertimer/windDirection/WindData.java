@@ -52,7 +52,7 @@ public class WindData {
         }
     }
 
-    public void returnWindData (WindChangedHerald windChangedHerald) {
+    public void returnWindData (WindChangedHeraldInterface windChangedHeraldInterface) {
         int windDirection = DEFAULT_WIND_DIRECTION;
         WindProvider windProvider = WindProvider.DEFAULT;
         SavedWindState savedWindState = loadWindData();
@@ -60,7 +60,7 @@ public class WindData {
             windDirection = savedWindState.getWindDirection();
             windProvider = analyzeProviderActuality(savedWindState);
         }
-        windChangedHerald.onWindDirectionChanged(windDirection, windProvider);
+        windChangedHeraldInterface.onWindDirectionChanged(windDirection, windProvider);
     }
 
     private WindProvider analyzeProviderActuality(SavedWindState savedWindState) {

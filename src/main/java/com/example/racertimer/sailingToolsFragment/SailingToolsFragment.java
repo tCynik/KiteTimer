@@ -17,7 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.WindProvider;
-import com.example.racertimer.LocationHerald;
+import com.example.racertimer.LocationHeraldInterface;
 import com.example.racertimer.MainActivity;
 import com.example.racertimer.R;
 import com.example.racertimer.StatusUiUpdater;
@@ -48,7 +48,7 @@ public class SailingToolsFragment extends Fragment {
     private MainActivity mainActivity;
 
     private StatusUiUpdater statusUiUpdater;
-    private LocationHerald locationHerald;
+    private LocationHeraldInterface locationHerald;
 
     public SailingToolsFragment() {
         // Required empty public constructor
@@ -192,12 +192,12 @@ public class SailingToolsFragment extends Fragment {
         this.statusUiUpdater = statusUiUpdater;
     }
 
-    public LocationHerald getContentUpdater() {
+    public LocationHeraldInterface getContentUpdater() {
         return locationHerald;
     }
 
     private void initLocationHerald() {
-        locationHerald = new LocationHerald() {
+        locationHerald = new LocationHeraldInterface() {
             @Override
             public void onLocationChanged(Location location) {
                 int bearing = (int) location.getBearing();

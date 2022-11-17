@@ -21,15 +21,19 @@ public class WindByCompareCalculator {
 
     private int windDirection; // направление ветра, 10000 = нет данных
     private TackDirection lastTackDirection; // последний номер галса: 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
-    private WindChangedHerald windChangedHerald; // экземпляр интерфейса для отправки измененного направления
+    private WindChangedHeraldInterface windChangedHeraldInterface; // экземпляр интерфейса для отправки измененного направления
 
-    public WindByCompareCalculator(WindChangedHerald windChangedHerald, int windDirection) {
-        this.windChangedHerald = windChangedHerald;
+    public WindByCompareCalculator(WindChangedHeraldInterface windChangedHeraldInterface, int windDirection) {
+        this.windChangedHeraldInterface = windChangedHeraldInterface;
         this.windDirection = windDirection;
     }
 
     public void setWindDirection (int windDirection) {
         this.windDirection = windDirection;
+    }
+
+    public int getWindDirection() {
+        return windDirection;
     }
 
     public void setCalculatorStatus(boolean isItOn) {
@@ -157,7 +161,7 @@ public class WindByCompareCalculator {
 
         windDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingLeft, bearingRight);
         Log.i(PROJECT_LOG_TAG, " calculated wind direction is = "+ windDirection +", sending the broadcast ");
-        windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
+        windChangedHeraldInterface.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
 
         forceCalculating = false;
     }
@@ -166,7 +170,3 @@ public class WindByCompareCalculator {
 // TODO: - Как будет считаться ветер в случае если он не находится между двумя галсами? (запускаем force)
 //       - меню с вариантами выбора методов расчета ветра
 //       - запуск расчета ветра вручную либо во время гонки (после окончания таймера)
-
-interface CalculatedWindUpdater {
-    void windIsCalculated(int calculatedWind);
-}

@@ -17,10 +17,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import com.example.racertimer.LocationHerald;
 import com.example.racertimer.windDirection.WindByCompareCalculator;
 import com.example.racertimer.windDirection.WindByStatistics;
-import com.example.racertimer.windDirection.WindChangedHerald;
+import com.example.racertimer.windDirection.WindChangedHeraldInterface;
 
 import java.util.ArrayList;
 
@@ -42,14 +41,12 @@ public class LocationService extends Service {
     private boolean isAppResumed = true;
     private ArrayList<Location> tempLocationsData;
 
-    private LocationManager locationManager;
     private LocationListener locationListener;
-    private LocationHerald locationHerald;
 
     private int windDirection = 10000;
     // TODO: need to make channel to transfer the wind direction into location service
 
-    WindChangedHerald windChangedHerald; // интерфейс для передачи данных в класс хранения и расчета статистических данных
+    WindChangedHeraldInterface windChangedHerald; // интерфейс для передачи данных в класс хранения и расчета статистических данных
 
     private Intent intent; // интент для отправки сообщений из данного сервиса
 
@@ -69,7 +66,6 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        initContentUpdater();
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " location service is created");
         makeWindChangeHerald(); // экземпляр интерфейса для формировани бродкаста с новым ветром
         selectWindCalculator(selectedWindCalculationWay);
@@ -78,26 +74,8 @@ public class LocationService extends Service {
         requestLocationUpdates();
     }
 
-    public LocationHerald getContentUpdater() {
-        return locationHerald;
-    }
-
-    private void initContentUpdater() {
-        locationHerald = new LocationHerald() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-            }
-
-            @Override
-            public void onWindDirectionChanged(int windDirection, WindProvider provider) {
-                setWindDirection(windDirection);
-            }
-        };
-    }
-
     private void makeWindChangeHerald() {
-        windChangedHerald = new WindChangedHerald() {
+        windChangedHerald = new WindChangedHeraldInterface() {
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) { // если обновляется инфа по направлению ветра
                 intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
@@ -117,7 +95,6 @@ public class LocationService extends Service {
                 break;
             case CALCULATE_BY_VMG_COMPARE:
                 windByCompare = new WindByCompareCalculator(windChangedHerald, windDirection);
-                //windCalcByCompareManager.setWindDirection(202);
                 break;
         }
     }
@@ -133,12 +110,10 @@ public class LocationService extends Service {
             public void onLocationChanged(@NonNull Location location) {
                 Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " service is get new location ");
                 if (isAppResumed) {
-                    if (location != null) { // когда поступила ненулевая геолокация, отправляем сообщение
-                        intent = new Intent(BROADCAST_ACTION);
-                        intent.putExtra("location", location);
-                        sendBroadcast(intent);
-                        calculateAndSendWindDirection(location);
-                    }
+                    intent = new Intent(BROADCAST_ACTION);
+                    intent.putExtra("location", location);
+                    sendBroadcast(intent);
+                    calculateAndSendWindDirection(location);
                 } else { // app is paused
                     addLocationToTempData(location);
                 }
@@ -151,8 +126,6 @@ public class LocationService extends Service {
     }
 
     private void calculateAndSendWindDirection (Location location) {
-        // TODO: нужно допилить расчет сравнением и реализовать управление обработкой
-        //  геоданных и получения результата в зависимости от выбранного типа расчета
         switch (selectedWindCalculationWay) {
             case NO_WIND_CALCULATION:
                 break;
@@ -166,8 +139,7 @@ public class LocationService extends Service {
     }
 
     private void requestLocationUpdates() {
-        /** создаем менеджер, проверяем разрешение, и запускаем прием геолокации */
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (checkLocationPermission()) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locationListener);
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " request location updating ");
@@ -193,7 +165,6 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " the service was destroyed ");
-        //Log.i("bugfix", " the service was destroyed ");
         super.onDestroy();
     }
 
@@ -226,14 +197,14 @@ public class LocationService extends Service {
 
     public void updateWindDirection () {
         Log.i("racer_timer", "force sending actual wind direction " );
-        windChangedHerald.onWindDirectionChanged(windByStatistics.getWindDirection(), WindProvider.CALCULATED);
+        windChangedHerald.onWindDirectionChanged(windByCompare.getWindDirection(), WindProvider.CALCULATED);
+        //windChangedHerald.onWindDirectionChanged(windByStatistics.getWindDirection(), WindProvider.CALCULATED);
     }
 
     private void sendLocationData() {
         if (tempLocationsData != null & tempLocationsData.size() != 0) {
             intent = new Intent(BROADCAST_ACTION);
             intent.putExtra("locationsData", tempLocationsData);
-            //Log.i("bugfix", " sending the location data. tempDataSize = " + tempLocationsData.size());
 
             sendBroadcast(intent);
         }

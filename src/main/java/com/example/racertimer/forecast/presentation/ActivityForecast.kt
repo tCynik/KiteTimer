@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -20,11 +19,7 @@ import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 import com.example.racertimer.forecast.presentation.models_mappers.LocationMapper
-import kotlinx.android.synthetic.main.activity_forecast2.*
-import kotlinx.android.synthetic.main.forecast_line.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.text.SimpleDateFormat
-import java.util.*
 
 private const val CURRENT_POSITION = "current position"//"DEFAULT"
 private const val BUTTON_NAME_CURRENT = "current_position"
@@ -118,14 +113,12 @@ class ActivityForecast : AppCompatActivity() {
     private fun initLocationBroadcastListener() {
         val locationBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) { // обработка интента
-                if (intent.hasExtra("location")) { // если в сообщении есть геолокация            Log.i("bugfix", "ActivityForecast: LastLocation is empty ")
-                    Log.i("bugfix", "ActivityForecast: broadcast listener has new location ")
-
+                if (intent.hasExtra("location")) { // если в сообщении есть геолокация
                     val currentUserLocation = (intent.extras!!["location"] as Location?)?.let {
                         LocationMapper.androidLocationToForecastLocation(it)
                     }
                     currentUserLocation?.let { forecastViewModel.updateUserLocation(it) }
-                } else Log.i("bugfix", "ActivityForecast: receiver has broadcast but no location ")
+                }
             }
         }
         val locationIntentFilter =
@@ -135,7 +128,6 @@ class ActivityForecast : AppCompatActivity() {
 
 // todo: make screen rotation
     private fun fillTitle(viewLayout: LinearLayout) {
-        //val viewForTitle = findViewById<LinearLayout>(R.layout.forecast_line)
         val item = layoutInflater.inflate(R.layout.forecast_line, viewLayout, false)
         item.findViewById<TextView>(R.id.forecast_string_time).text = "date"
         item.findViewById<TextView>(R.id.forecast_string_temp).text = "temp"

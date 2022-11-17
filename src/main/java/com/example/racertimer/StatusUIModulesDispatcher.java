@@ -4,24 +4,24 @@ import android.location.Location;
 import android.util.Log;
 
 import com.example.racertimer.Instruments.WindProvider;
-import com.example.racertimer.windDirection.WindChangedHerald;
+import com.example.racertimer.windDirection.WindChangedHeraldInterface;
 
 public class StatusUIModulesDispatcher {
     private final static String PROJECT_LOG_TAG = "StatusUI";
 
     private LocationChanger locationChanger;
-    private WindChangedHerald windChangedHerald;
+    private WindChangedHeraldInterface windChangedHeraldInterface;
     private StatusUiUpdater statusUiUpdater;
 
     private String[] moduleNames;
     private boolean[] moduleStatus;
-    private LocationHerald[] locationHeralds;
+    private LocationHeraldInterface[] locationHeralds;
 
     private Location lastLocation = null;
     private int lastWindDirection = 10000;
     private WindProvider lastProvider = null;
 
-    public StatusUIModulesDispatcher (String[] moduleNames, LocationHerald[] locationHeralds) {
+    public StatusUIModulesDispatcher (String[] moduleNames, LocationHeraldInterface[] locationHeralds) {
         this.moduleNames = moduleNames;
         moduleStatus = new boolean[moduleNames.length];
         this.locationHeralds = locationHeralds;
@@ -29,7 +29,7 @@ public class StatusUIModulesDispatcher {
         initInterfaces();
     }
 
-    public void sendWindToContentUpdater(LocationHerald locationHerald) {
+    public void sendWindToContentUpdater(LocationHeraldInterface locationHerald) {
         locationHerald.onWindDirectionChanged(lastWindDirection, lastProvider);
     }
 
@@ -37,8 +37,8 @@ public class StatusUIModulesDispatcher {
         return locationChanger;
     }
 
-    public WindChangedHerald getWindChangedHerald() {
-        return windChangedHerald;
+    public WindChangedHeraldInterface getWindChangedHerald() {
+        return windChangedHeraldInterface;
     }
 
     public StatusUiUpdater getStatusUiUpdater() {
@@ -56,7 +56,7 @@ public class StatusUIModulesDispatcher {
             }
         };
 
-        windChangedHerald = new WindChangedHerald() {
+        windChangedHeraldInterface = new WindChangedHeraldInterface() {
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
                 lastWindDirection = windDirection;
@@ -111,7 +111,7 @@ public class StatusUIModulesDispatcher {
     }
 
     private void sendWindByIndex(int windDirection, WindProvider provider, int index) {
-        LocationHerald currentUpdater = locationHeralds[index];
+        LocationHeraldInterface currentUpdater = locationHeralds[index];
         currentUpdater.onWindDirectionChanged(windDirection, provider);
     }
 

@@ -47,7 +47,7 @@ import com.example.racertimer.map.MapUIToolsController;
 import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
-import com.example.racertimer.windDirection.WindChangedHerald;
+import com.example.racertimer.windDirection.WindChangedHeraldInterface;
 import com.example.racertimer.windDirection.WindData;
 
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private LocationService locationService;
     private Binder binder;
 
-    private WindChangedHerald windChangedHerald;
+    private WindChangedHeraldInterface windChangedHerald;
     private WindProvider windProvider;
 
     private WindData windData;
@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("bugfix", "main: onCreate");
         setContentView(R.layout.activity_main);
 
         findViews();
@@ -164,12 +165,16 @@ public class MainActivity extends AppCompatActivity {
             initBroadcastListener();
             bindToLocationService();
         }
-        if (locationService != null) locationService.appWasResumedOrStopped(true);
+        if (locationService != null) {
+            Log.i("bugfix", "main: onStart, locationService = null");
+            locationService.appWasResumedOrStopped(true);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i("bugfix", "main: onResume");
     }
 
     public void setMapFragment (MapFragment mapFragment) {
@@ -178,11 +183,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void runStatusUIDispatcher() {
         // TODO: need to add here mapManager to transfer new geolocation info into one
-        LocationHerald updaterMapTools = mapUITools.getContentUpdater();
-        LocationHerald updaterTools = sailingToolsFragment.getContentUpdater();
-        LocationHerald updaterMap = mapManager.getContentUpdater();
-        LocationHerald updaterDataManager = tracksDataManager.getContentUpdater();
-        LocationHerald[] locationHeralds = new LocationHerald[]{
+        LocationHeraldInterface updaterMapTools = mapUITools.getContentUpdater();
+        LocationHeraldInterface updaterTools = sailingToolsFragment.getContentUpdater();
+        LocationHeraldInterface updaterMap = mapManager.getContentUpdater();
+        LocationHeraldInterface updaterDataManager = tracksDataManager.getContentUpdater();
+        LocationHeraldInterface[] locationHeralds = new LocationHeraldInterface[]{
                 updaterTools,
                 updaterMapTools,
                 updaterMap,
@@ -203,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void serviceIsRan() {
-        LocationHerald updaterLocationService = new LocationHerald() {
+        LocationHeraldInterface updaterLocationService = new LocationHeraldInterface() {
             @Override
             public void onLocationChanged(Location location) {
             }
@@ -259,8 +264,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private WindChangedHerald initWindChangeHerald() {
-        return new WindChangedHerald() {
+    private WindChangedHeraldInterface initWindChangeHerald() {
+        return new WindChangedHeraldInterface() {
             @Override
             public void onWindDirectionChanged(int updatedWindDirection, WindProvider provider) {
                 windDirection = updatedWindDirection;
@@ -275,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadWindData() {
-        WindChangedHerald windChangedHerald = new WindChangedHerald() {
+        WindChangedHeraldInterface windChangedHerald = new WindChangedHeraldInterface() {
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
                 if (windDirection == 10000) {
@@ -601,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void manuallyWindManager () { // установка направления ветра вручную
         Log.i("racer_timer_activity_race", " starting manually setting wind  ");
-        windChangedHerald = new WindChangedHerald() {
+        windChangedHerald = new WindChangedHeraldInterface() {
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
                 MainActivity.this.onWindDirectionChanged(windDirection, provider);

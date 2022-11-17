@@ -51,7 +51,6 @@ class ForecastLinesAdapter:  RecyclerView.Adapter<ForecastLinesAdapter.LinesView
     private fun checkDaytime(time: Long): Boolean {
         val timeFormat = SimpleDateFormat("HH")
         val timeHour = timeFormat.format(time).toInt()
-        Log.i("bugfix", "ForecastLinesUpdater: time = $timeHour, is it day = ${timeHour in 8..19}")
         return timeHour in 8..19
     }
 

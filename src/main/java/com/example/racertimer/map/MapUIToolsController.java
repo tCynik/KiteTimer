@@ -7,7 +7,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import com.example.racertimer.LocationHerald;
+import com.example.racertimer.LocationHeraldInterface;
 import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.WindProvider;
 
@@ -19,7 +19,7 @@ public class MapUIToolsController {
 
     private MapManager mapManager;
 
-    private LocationHerald locationHerald;
+    private LocationHeraldInterface locationHerald;
     private float mapScale;
     private float minScale = 0.5f;
     private float maxScale = 10f;
@@ -61,7 +61,7 @@ public class MapUIToolsController {
     }
 
     private void initContentUpdater() {
-        locationHerald = new LocationHerald() {
+        locationHerald = new LocationHeraldInterface() {
             @Override
             public void onLocationChanged(Location location) {
                 int bearing = (int) location.getBearing();
@@ -76,7 +76,7 @@ public class MapUIToolsController {
         };
     }
 
-    public LocationHerald getContentUpdater() {
+    public LocationHeraldInterface getContentUpdater() {
         return locationHerald;
     }
 
