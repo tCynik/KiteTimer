@@ -77,13 +77,18 @@ public class LocationService extends Service {
     private void makeWindChangeHerald() {
         windChangedHerald = new WindChangedHeraldInterface() {
             @Override
-            public void onWindDirectionChanged(int windDirection, WindProvider provider) { // если обновляется инфа по направлению ветра
-                intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
-                intent.putExtra("windDirection", windDirection);
-                sendBroadcast(intent); // отправляем передачу
-                Log.i(PROJECT_LOG_TAG, " sending new wind direction into broadcastListener by herald. the win = " + windDirection);
+            public void onWindDirectionChanged(int windDir, WindProvider provider) { // если обновляется инфа по направлению ветра
+                onWindChanged(windDir, provider);
             }
         };
+    }
+
+    private void onWindChanged(int windDir, WindProvider provider) {
+        windDirection = windDir;
+        intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
+        intent.putExtra("windDirection", windDirection);
+        sendBroadcast(intent); // отправляем передачу
+        Log.i(PROJECT_LOG_TAG, " sending new wind direction into broadcastListener by herald. the win = " + windDir);
     }
 
     public void selectWindCalculator(int selectedWindCalculationWay) {
@@ -197,7 +202,7 @@ public class LocationService extends Service {
 
     public void updateWindDirection () {
         Log.i("racer_timer", "force sending actual wind direction " );
-        windChangedHerald.onWindDirectionChanged(windByCompare.getWindDirection(), WindProvider.CALCULATED);
+        windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED);
         //windChangedHerald.onWindDirectionChanged(windByStatistics.getWindDirection(), WindProvider.CALCULATED);
     }
 

@@ -19,21 +19,17 @@ public class WindByCompareCalculator {
 
     private TackMoving currentTack, upwindRightTack, upwindLeftTack;
 
-    private int windDirection; // направление ветра, 10000 = нет данных
+    private int windDirection = 10000; // направление ветра, 10000 = нет данных
     private TackDirection lastTackDirection; // последний номер галса: 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
-    private WindChangedHeraldInterface windChangedHeraldInterface; // экземпляр интерфейса для отправки измененного направления
+    private WindChangedHeraldInterface windChangedHerald; // экземпляр интерфейса для отправки измененного направления
 
-    public WindByCompareCalculator(WindChangedHeraldInterface windChangedHeraldInterface, int windDirection) {
-        this.windChangedHeraldInterface = windChangedHeraldInterface;
+    public WindByCompareCalculator(WindChangedHeraldInterface windChangedHerald, int windDirection) {
+        this.windChangedHerald = windChangedHerald;
         this.windDirection = windDirection;
     }
 
     public void setWindDirection (int windDirection) {
         this.windDirection = windDirection;
-    }
-
-    public int getWindDirection() {
-        return windDirection;
     }
 
     public void setCalculatorStatus(boolean isItOn) {
@@ -161,7 +157,7 @@ public class WindByCompareCalculator {
 
         windDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingLeft, bearingRight);
         Log.i(PROJECT_LOG_TAG, " calculated wind direction is = "+ windDirection +", sending the broadcast ");
-        windChangedHeraldInterface.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
+        windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
 
         forceCalculating = false;
     }
