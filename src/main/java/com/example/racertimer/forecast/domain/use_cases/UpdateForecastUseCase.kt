@@ -1,6 +1,5 @@
 package com.example.racertimer.forecast.domain.use_cases
 
-import android.util.Log
 import com.example.racertimer.forecast.data.parsers.ParserJsonToQueueLines
 import com.example.racertimer.forecast.data.urlequest.ResultJsonInterface
 import com.example.racertimer.forecast.data.urlequest.URLRequestManager

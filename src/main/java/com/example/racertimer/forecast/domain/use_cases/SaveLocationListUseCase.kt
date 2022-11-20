@@ -5,7 +5,7 @@ import com.example.racertimer.forecast.domain.interfaces.LocationsListRepository
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList
 
-class SaveLocationListUseCase(val context: Context, val locationsListRepositoryInterface: LocationsListRepositoryInterface) {
+class SaveLocationListUseCase(val context: Context, val locationsListRepository: LocationsListRepositoryInterface) {
     private var locationsList = LocationsList()
 
     fun setLocationsList (locationsList: LocationsList) {
@@ -27,6 +27,6 @@ class SaveLocationListUseCase(val context: Context, val locationsListRepositoryI
     }
 
     fun save(): Boolean {
-        return locationsListRepositoryInterface.saveList(locationsList = locationsList)
+        return locationsListRepository.saveList(locationsList = locationsList)
     }
 }

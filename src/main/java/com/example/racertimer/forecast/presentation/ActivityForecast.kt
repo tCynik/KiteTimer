@@ -66,7 +66,7 @@ class ActivityForecast : AppCompatActivity() {
         updateLocationFromIntent()
         // todo: in release remove fun firstTimeLaunch and locations coordinates hardcode below:
         /**
-         * для создания .bin файла запускаем метод с вбитыми координатами точек. В нормльном состоянии
+         * для создания .bin файла запускаем метод с вбитыми координатами точек. В нормальном состоянии
          * финального релиза этот участок программы не нужен (потребуется при изменении структуры ForecastLocation)
          * //firstTimeLaunch(saveLocationsListUseCase)
          */
