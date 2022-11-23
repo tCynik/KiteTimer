@@ -1,9 +1,9 @@
 package com.example.racertimer.forecast.domain.use_cases
 
 import com.example.racertimer.forecast.data.parsers.ParserJsonToQueueLines
-import com.example.racertimer.forecast.data.urlequest.ResultJsonInterface
-import com.example.racertimer.forecast.data.urlequest.URLRequestManager
-import com.example.racertimer.forecast.data.urlequest.UrlRequestBuilder
+import com.example.racertimer.forecast.data.network.urlequest.ResultJsonInterface
+import com.example.racertimer.forecast.data.network.urlequest.URLRequestManager
+import com.example.racertimer.forecast.data.network.urlequest.UrlRequestBuilder
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
@@ -21,7 +21,7 @@ class UpdateForecastUseCase(private val toaster: ToasterInterface,
 
     fun execute(forecastLocation: ForecastLocation) {
         toaster.makeToast("updating forecast for location ${forecastLocation.name}")
-        val resultInterface = object : ResultJsonInterface{
+        val resultInterface = object : ResultJsonInterface {
             override fun gotResult(jsonOnObject: JSONObject?) {
                 if (linesUpdater != null) {
                     if (jsonOnObject != null) {

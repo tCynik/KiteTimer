@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.data.urlequest.JavaRequest;
+package com.example.racertimer.forecast.data.network.urlequest.JavaRequest;
 
 import android.os.AsyncTask;
 import android.os.Handler;

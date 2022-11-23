@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.data.urlequest
+package com.example.racertimer.forecast.data.network.urlequest
 
 import org.json.JSONObject
 

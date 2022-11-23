@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.data.urlequest
+package com.example.racertimer.forecast.data.network.urlequest
 
 private const val WEBSITE_FORECAST = "http://api.openweathermap.org/data/2.5"
 private const val FORECAST_ACTION = "/forecast?"

@@ -1,6 +1,6 @@
-package com.example.racertimer.forecast.data.urlequest
+package com.example.racertimer.forecast.data.network.urlequest
 
-import com.example.racertimer.forecast.data.urlequest.JavaRequest.JavaForecastManager
+import com.example.racertimer.forecast.data.network.urlequest.JavaRequest.JavaForecastManager
 
 class URLRequestManager(private val resultJsonInterface: ResultJsonInterface) {
 

@@ -1,11 +1,11 @@
-package com.example.racertimer.forecast.data.urlequest.JavaRequest;
+package com.example.racertimer.forecast.data.network.urlequest.JavaRequest;
 
 import android.os.Handler;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
 
-import com.example.racertimer.forecast.data.urlequest.ResultJsonInterface;
+import com.example.racertimer.forecast.data.network.urlequest.ResultJsonInterface;
 
 import org.json.JSONException;
 import org.json.JSONObject;
