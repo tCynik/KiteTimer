@@ -79,7 +79,7 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
 
     fun updateForecastByLocation(forecastLocation: ForecastLocation) {
         setCurrentForecastLocation(forecastLocation)
-        updateForecastUseCase.execute(currentForecastLocation!!)
+        updateForecastUseCase.executeByURL(currentForecastLocation!!)
     }
 
     private fun setCurrentForecastLocation(forecastLocation: ForecastLocation) {

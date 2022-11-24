@@ -1,46 +1,52 @@
 package com.example.racertimer.forecast.domain.use_cases
 
+import com.example.racertimer.forecast.data.network.ResponseResultInterface
+import com.example.racertimer.forecast.data.network.retrofit.RetrofitManager
 import com.example.racertimer.forecast.data.parsers.ParserJsonToQueueLines
 import com.example.racertimer.forecast.data.network.urlequest.ResultJsonInterface
 import com.example.racertimer.forecast.data.network.urlequest.URLRequestManager
-import com.example.racertimer.forecast.data.network.urlequest.UrlRequestBuilder
+import com.example.racertimer.forecast.data.network.urlequest.UrlRequestBuilderMaker
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
+import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.presentation.interfaces.LinesUpdater
 import com.example.racertimer.forecast.presentation.interfaces.ToasterInterface
 import org.json.JSONObject
+import java.util.*
 
+// этот класс тупо определяет способ запроса - ЮРЛ или ретрофит
+// под каждый тип запроса - отдельный манагер, который уже работает с внутренними класами
 class UpdateForecastUseCase(private val toaster: ToasterInterface,
                             private val lastLocationRepository: LastLocationNameRepositoryInterface
 ) {
     var linesUpdater: LinesUpdater? = null
+    private val responseResult = object: ResponseResultInterface {
+        override fun gotResult(queueForecastLines: Queue<ForecastLine>) {
+            if (linesUpdater != null) linesUpdater!!.updateForecastLines(queueForecastLines)
+        }
 
-    fun initLinesUpdater(linesUpdater: LinesUpdater) {
+        override fun gotError(error: String) {
+            linesUpdater!!.updateForecastLines(null)
+            toaster.makeToast(error)
+        }
+    }
+
+    fun initLinesUpdater(linesUpdater: LinesUpdater) { // queueForecastLines: Queue<ForecastLine>?
         this.linesUpdater = linesUpdater
     }
 
-    fun execute(forecastLocation: ForecastLocation) {
+    fun executeByURL(forecastLocation: ForecastLocation) {
         toaster.makeToast("updating forecast for location ${forecastLocation.name}")
-        val resultInterface = object : ResultJsonInterface {
-            override fun gotResult(jsonOnObject: JSONObject?) {
-                if (linesUpdater != null) {
-                    if (jsonOnObject != null) {
-                        val queueLines = ParserJsonToQueueLines().execute(jsonOnObject)
-                        linesUpdater!!.updateForecastLines(queueLines)
-                    } else {
-                        linesUpdater!!.updateForecastLines(null)
-                    }
-                } else toaster.makeToast("lines updater in null = ${linesUpdater == null}")
-            }
 
-            override fun errorOccurs(error: String) {
-                toaster.makeToast(error)
-            }
-        }
-    val requestString = UrlRequestBuilder().makeRequest(
-        latitude = forecastLocation.latitude,
-        longitude = forecastLocation.longitude)
-    URLRequestManager(resultInterface).makeRequest(requestString)
-    lastLocationRepository.save(forecastLocation)
+        val requestString = UrlRequestBuilderMaker().makeRequest(
+            latitude = forecastLocation.latitude,
+            longitude = forecastLocation.longitude)
+        URLRequestManager(responseResult).makeRequest(requestString)
+        lastLocationRepository.save(forecastLocation)
+    }
+
+    fun executeByRetrofit(forecastLocation: ForecastLocation) {
+//        RetrofitManager(responseResult).makeRequest(forecastLocation)
+//        lastLocationRepository.save(forecastLocation)
     }
 }
