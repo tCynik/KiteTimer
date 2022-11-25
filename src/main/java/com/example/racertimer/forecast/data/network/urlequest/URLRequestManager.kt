@@ -3,7 +3,6 @@ package com.example.racertimer.forecast.data.network.urlequest
 import com.example.racertimer.forecast.data.network.ResponseResultInterface
 import com.example.racertimer.forecast.data.network.urlequest.JavaRequest.JavaForecastManager
 import com.example.racertimer.forecast.data.parsers.ParserJsonToQueueLines
-import com.example.racertimer.forecast.domain.models.ForecastLocation
 import org.json.JSONObject
 
 class URLRequestManager(private val responseResult: ResponseResultInterface) {

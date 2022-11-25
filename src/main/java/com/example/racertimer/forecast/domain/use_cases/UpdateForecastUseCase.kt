@@ -46,7 +46,7 @@ class UpdateForecastUseCase(private val toaster: ToasterInterface,
     }
 
     fun executeByRetrofit(forecastLocation: ForecastLocation) {
-//        RetrofitManager(responseResult).makeRequest(forecastLocation)
-//        lastLocationRepository.save(forecastLocation)
+        RetrofitManager(responseResult).makeRequest(forecastLocation)
+        lastLocationRepository.save(forecastLocation)
     }
 }
