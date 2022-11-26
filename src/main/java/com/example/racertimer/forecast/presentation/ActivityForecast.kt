@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.racertimer.R
 import com.example.racertimer.databinding.ActivityForecastBinding
+import com.example.racertimer.forecast.app.App
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
@@ -22,8 +23,6 @@ import com.example.racertimer.forecast.presentation.models_mappers.LocationMappe
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 private const val CURRENT_POSITION = "current position"//"DEFAULT"
-private const val BUTTON_NAME_CURRENT = "current_position"
-private const val EMPTY = ""
 const val BROADCAST_ACTION =
     "com.example.racertimer.action.new_location" // значение для фильтра приемника
 
@@ -51,8 +50,7 @@ class ActivityForecast : AppCompatActivity() {
         layoutDataBinding.viewmodel = forecastViewModel
 
         recyclerAdapter = ForecastLinesAdapter()
-        val layoutManager = LinearLayoutManager(this)
-        layoutDataBinding.viewToBeFiled.layoutManager = layoutManager
+        layoutDataBinding.viewToBeFiled.layoutManager = LinearLayoutManager(this)
         layoutDataBinding.viewToBeFiled.adapter = recyclerAdapter
 
         val buttonSelectLocation = layoutDataBinding.btnSelectLocation
@@ -82,7 +80,6 @@ class ActivityForecast : AppCompatActivity() {
                 val forecastLinesData = it
                 val forecastLines = forecastLinesData.getData() as List<ForecastLine>
                 recyclerAdapter.lines = forecastLines
-                // TODO: добавить заголовок таблицы
             }
         })
     }

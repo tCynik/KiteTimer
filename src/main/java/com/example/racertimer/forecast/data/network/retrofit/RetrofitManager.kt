@@ -7,7 +7,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class RetrofitManager(val responseResultInterface: ResponseResultInterface) {
+class RetrofitManager(val responseResultInterface: ResponseResultInterface, private val key: String) {
     private val callback = object: Callback<ResponseForecastModel> {
         override fun onResponse(
             call: Call<ResponseForecastModel>,
@@ -16,15 +16,7 @@ class RetrofitManager(val responseResultInterface: ResponseResultInterface) {
             val responseBody: ResponseForecastModel? = response.body()
             val linesList: List<TimeHourForecast>? = responseBody?.items
             if (linesList == null) responseResultInterface.gotError("response is empty")
-            else responseResultInterface.gotResult(ResponseMapper.transferToLines(linesList))
-
-//            if (linesList != null) {
-//                for (line in linesList) {
-//                    Log.i("retrofit", "the next forecastLine: " +
-//                            "temp = ${line.forecastMain.temp}, " +
-//                            "wind = ${line.forecastWind.windSpeed}")
-//                }
-//            }
+            else responseResultInterface.gotResult(ResponseMapper().transferToLines(linesList))
         }
 
         override fun onFailure(call: Call<ResponseForecastModel>, t: Throwable) {
@@ -33,7 +25,7 @@ class RetrofitManager(val responseResultInterface: ResponseResultInterface) {
         }
     }
 
-    fun makeRequest(forecastLocation: ForecastLocation) {
+    fun makeRequest(forecastApi: ForecastApiInterface, forecastLocation: ForecastLocation) {
         val lat = forecastLocation.latitude
         val long = forecastLocation.longitude
 

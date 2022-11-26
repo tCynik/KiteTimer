@@ -5,7 +5,9 @@ import org.koin.dsl.module
 
 val domainModule = module {
     factory<UpdateForecastUseCase> {
-        UpdateForecastUseCase(toaster = get(), lastLocationRepository = get())
+        UpdateForecastUseCase(
+            toaster = get(),
+            lastLocationRepository = get())
     }
 
 }

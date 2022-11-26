@@ -13,7 +13,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class App: Application() {
-    private val baseUrl = "https://api.openweathermap.org"
     lateinit var forecastApi: ForecastApiInterface
 
     override fun onCreate() {
@@ -23,23 +22,5 @@ class App: Application() {
             modules(listOf(appModule, dataModule, domainModule))
         }
 
-        forecastApi = configRetrofit()
-    }
-
-    private fun configRetrofit(): ForecastApiInterface {
-        val httpLoggingInterceptor = HttpLoggingInterceptor() // логгер отправки-получения
-        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-
-        val okHttpClient = OkHttpClient.Builder() // клиент с интерцептором
-            .addInterceptor(httpLoggingInterceptor)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        return retrofit.create(ForecastApiInterface::class.java) // экземплаяр интерфейса
     }
 }

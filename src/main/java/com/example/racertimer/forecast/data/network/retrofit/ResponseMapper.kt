@@ -16,11 +16,11 @@ class ResponseMapper {
 
     private fun gsonToForecastLine(gsonLine: TimeHourForecast): ForecastLine {
         return ForecastLine(
-            time = gsonLine.daytime,
-            temperature = gsonLine.forecastMain.temp.toString(),
-            windSpeed = gsonLine.forecastWind.windSpeed.toString(),
+            time = gsonLine.daytime*1000,
+            temperature = gsonLine.forecastMain.temp.toInt().toString(),
+            windSpeed = gsonLine.forecastWind.windSpeed.toInt().toString(),
             windDir = gsonLine.forecastWind.windDir.toString(),
-            windGust = gsonLine.forecastWind.windGust.toString()
+            windGust = gsonLine.forecastWind.windGust.toInt().toString()
         )
     }
 }

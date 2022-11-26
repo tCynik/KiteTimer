@@ -27,5 +27,4 @@ val dataModule = module {
     single<LocationSelectorByNameInterface> {
         LocationSelectorByNameImpl(locationsListRepository = get())
     }
-
 }
