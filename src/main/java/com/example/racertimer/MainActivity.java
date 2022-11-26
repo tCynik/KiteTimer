@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
 
-    private int defaultMapScale = 1;
+    private double defaultMapScale = 0.1;
 
     private InfoBarStatusUpdater infoBarStatusUpdater;
     private InfoBarPresenter infoBarPresenter;
@@ -360,8 +360,11 @@ public class MainActivity extends AppCompatActivity {
         this.sailingToolsFragment = sailingToolsFragment;
     }
 
-    public void uploadMapUIIntoTools (ImageView arrowDirection, ImageView arrowWind,
-                                      Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition,
+    public void uploadMapUIIntoTools (ImageView arrowDirection,
+                                      ImageView arrowWind,
+                                      Button btnIncScale,
+                                      Button btnDecScale,
+                                      ImageButton btnFixPosition,
                                       Button menuTracks) {
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
         mapUITools.setMapManager(mapManager);

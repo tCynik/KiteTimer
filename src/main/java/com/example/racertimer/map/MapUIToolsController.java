@@ -21,19 +21,22 @@ public class MapUIToolsController {
 
     private LocationHeraldInterface locationHerald;
     private float mapScale;
-    private float minScale = 0.5f;
-    private float maxScale = 10f;
+    private float minScale = 0.2f;
+    private float maxScale = 1f;
     private final float stepScaleChanging = 0.5f;
 
     private boolean screenCenterPinnedOnPosition = true;
 
-    public MapUIToolsController(float defaultMapScale) {
-        this.mapScale = defaultMapScale;
+    public MapUIToolsController(double defaultMapScale) {
+        this.mapScale = (float) defaultMapScale;
         initContentUpdater();
     }
 
-    public void setUIViews (ImageView directionArrow, ImageView windArrow,
-                            Button btnIncScale, Button btnDecScale, ImageButton btnFixPosition) {
+    public void setUIViews (ImageView directionArrow,
+                            ImageView windArrow,
+                            Button btnIncScale,
+                            Button btnDecScale,
+                            ImageButton btnFixPosition) {
         this.directionArrow = directionArrow;
         this.windArrow = windArrow;
         this.btnFixPosition = btnFixPosition;
@@ -81,7 +84,6 @@ public class MapUIToolsController {
     }
 
     private void onBearingChanged (int bearing) {
-        Log.i(PROJECT_LOG_TAG, "bearing on map was changed to "+bearing);
         if (directionArrow != null) directionArrow.setRotation(bearing);
     }
 
@@ -97,17 +99,18 @@ public class MapUIToolsController {
     /** Scale management block */
     private void onScaleIncreased () {
         if (mapScale < maxScale) {
-            mapScale = mapScale + stepScaleChanging;
+            mapScale = mapScale + (mapScale * stepScaleChanging);
             mapManager.onScaleChanged(mapScale);
-            Log.i(PROJECT_LOG_TAG, "map scale was increased to "+mapScale);
         }
+        else mapScale = maxScale;
+        Log.i(PROJECT_LOG_TAG, "map scale was increased to "+mapScale);
     }
 
     private void onScaleDecreased () {
         if (mapScale > minScale) {
-            mapScale = mapScale - stepScaleChanging;
+            mapScale = mapScale - (mapScale * (stepScaleChanging/2));
             mapManager.onScaleChanged(mapScale);
-            Log.i(PROJECT_LOG_TAG, "map scale was decreased to "+mapScale);
-        }
+        } else mapScale = minScale;
+        Log.i(PROJECT_LOG_TAG, "map scale was decreased to "+mapScale);
     }
 }

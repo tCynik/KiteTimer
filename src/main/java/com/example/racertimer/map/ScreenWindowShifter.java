@@ -23,8 +23,11 @@ public class ScreenWindowShifter {
 
     private Location lastLocation;
 
-    public ScreenWindowShifter(MapManager mapManager, TrackGridCalculator trackGridCalculator,
-                               ConstraintLayout tracksLayout, ScrollView verticalMapScroll, HorizontalScrollView horizontalMapScroll,
+    public ScreenWindowShifter(MapManager mapManager,
+                               TrackGridCalculator trackGridCalculator,
+                               ConstraintLayout tracksLayout,
+                               ScrollView verticalMapScroll,
+                               HorizontalScrollView horizontalMapScroll,
                                double scale) {
         this.mapManager = mapManager;
         setLayout(tracksLayout, verticalMapScroll, horizontalMapScroll);

@@ -35,7 +35,7 @@ public class MapManager {
     private ScreenWindowShifter screenWindowShifter;
     private ArrowMover arrowMover;
 
-    private double scale = 1;
+    private double scale = 0.15;
     private boolean screenCenterPinnedOnPosition = true;
     private boolean scrollingIsManual = true;
 
@@ -176,7 +176,13 @@ public class MapManager {
             if (trackGridCalculator == null) {
                 Log.i(PROJECT_LOG_TAG+"/MapManager", " trackGirdCalculator is null, making new one ");
                 makeTrackGirdCalculator(location);
-                screenWindowShifter = new ScreenWindowShifter(this, trackGridCalculator, tracksLayout,  windowMap, horizontalMapScroll, scale);
+                screenWindowShifter = new ScreenWindowShifter(
+                        this,
+                        trackGridCalculator,
+                        tracksLayout,
+                        windowMap,
+                        horizontalMapScroll,
+                        scale);
             }
         }
 
