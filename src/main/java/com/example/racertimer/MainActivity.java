@@ -33,17 +33,18 @@ import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.racertimer.Instruments.CoursesCalculator;
 import com.example.racertimer.Instruments.InfoBarStatusUpdater;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
 import com.example.racertimer.Instruments.WindProvider;
-import com.example.racertimer.sailingToolsFragment.SailingToolsFragment;
+import com.example.racertimer.location.LocationAccessDispatcher;
+import com.example.racertimer.location.LocationManagerInterface;
 import com.example.racertimer.map.MapHorizontalScrollView;
 import com.example.racertimer.map.MapManager;
 import com.example.racertimer.map.MapScrollView;
 import com.example.racertimer.map.MapUIToolsController;
+import com.example.racertimer.sailingToolsFragment.SailingToolsFragment;
 import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
@@ -116,7 +117,30 @@ public class MainActivity extends AppCompatActivity {
         findViews();
         setClickListeners();
 
-        createLocationService();
+
+        LocationAccessDispatcher locationAccessDispatcher = new LocationAccessDispatcher(
+                this,
+                new LocationManagerInterface() {
+                    @Override
+                    public void accessGranted() {
+                        bindToLocationService();
+                    }
+
+                    @Override
+            public void askPermissionGPS() {
+                requestPermissions(new String[]{
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.ACCESS_FINE_LOCATION},
+                        100); // ключ 100, такой же как ниже
+            }
+
+            @Override
+            public void finishApp() {
+                finish();
+            }
+        });
+        locationAccessDispatcher.execute();
+        //createLocationService();
 
         windChangedHerald = initWindChangeHerald();
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
@@ -163,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         if (location == null) {
             initBroadcastListener();
-            bindToLocationService();
         }
         if (locationService != null) {
             Log.i("bugfix", "main: onStart, locationService = null");
@@ -367,7 +390,8 @@ public class MainActivity extends AppCompatActivity {
                                       ImageButton btnFixPosition,
                                       Button menuTracks) {
         mapUITools.setUIViews(arrowDirection, arrowWind, btnIncScale, btnDecScale, btnFixPosition);
-        mapUITools.setMapManager(mapManager);
+        if (mapManager != null) mapUITools.setMapManager(mapManager);
+        else Log.i(PROJECT_LOG_TAG, "map manager is null! Passing to Tools is false");
 
         menuTracks.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -446,7 +470,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.i("racer_timer", "app is closing by user... ");
+                        Log.i(PROJECT_LOG_TAG, "app is closing by user... ");
                         stopRace();
                         locationService.stopService(intentLocationService);
                         finish(); // закрываем эту активити
@@ -471,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
     //TODO: все что ниже - к прежнему меню. Сейчас перешел на кастомное, надо все будет убрать
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i("racer_timer", "starting menu1... ");
+        Log.i(PROJECT_LOG_TAG, "starting menu1... ");
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
@@ -485,30 +509,48 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    /** усреднитель курса и обработчик перехода через нулевой азимут */
-    private int courseAverage (int newCourse) {
-        int deltaCourse = (newCourse - bearing); // разница курсов: "курс новый (newCourse) - курс старый (course)"
-        if (deltaCourse > 180) deltaCourse = deltaCourse - 360; //newCourse - (360  - course);
-        if (deltaCourse < -180) deltaCourse = 360 + deltaCourse;
-
-        bearing = (int) (bearing + (deltaCourse * 0.75)) ; // усреднение - приращиваем на 75% от разницы
-        bearing = CoursesCalculator.convertAngleFrom0To360(bearing);
-        Log.i("ActivityRace", "averageCourse = " + bearing);
-        return bearing;
-    }
-
     /** Настраиваем и запускаем сервис для приема и трансляции данных геолокации */
     private void createLocationService() {
-        if (! checkLocationPermission()) askLocationPermission();
+        if (! checkLocationPermission()) permissionGPSAlert();
+
+        // проверка разрешения -> если разрешения нет, вызываем диалог -> если нажато да, вызываем запрос
+        // запускаем короутину, которая проверяет наличие разрешения, если разрешение есть - запуск сервиса
+
+
+        askLocationPermission();
 
         if (checkLocationPermission()) {
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " permission good, starting service ");
             intentLocationService = new Intent(this, LocationService.class);
             intentLocationService.setPackage("com.example.racertimer.Instruments");
             this.startService(intentLocationService);
-        } else { // если разрешения нет, выводим тост
+        } else {
+            permissionGPSAlert();
             Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG);
         }
+    }
+
+    private void permissionGPSAlert() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this); // строитель диалога
+        dialogBuilder
+                .setMessage("App necessary GPS to work! Do you want to continue?")
+                .setCancelable(false)
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        askLocationPermission();
+                        createLocationService();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                });
+        AlertDialog alertDialog = dialogBuilder.create(); // создание диалога
+        alertDialog.setTitle("No GPS permission"); // заголовок
+        alertDialog.show(); // отображение диалога
     }
 
     /** Методы для работы с разрешениями на геолокацию */
@@ -520,20 +562,24 @@ public class MainActivity extends AppCompatActivity {
         else
             return true; //
     }
+
     private void askLocationPermission() {
-        requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION}, 100); // ключ 100, такой же как ниже
+        requestPermissions(new String[]{
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION},
+                100); // ключ 100, такой же как ниже
     }
 
     /** биндимся к сервису для управления им */
     private void bindToLocationService() {
-        Log.i("racer_timer", "Making service connection... " );
+        Log.i(PROJECT_LOG_TAG, "Making service connection... " );
+        Log.i("bugfix: main", "Making service connection... " );
         // приводим биндер к кастомному биндеру с методом связи
         // получаем экземпляр нашего сервиса через биндер
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                Log.i("racer_timer", "Location service binded ");
+                Log.i(PROJECT_LOG_TAG, "Location service binded ");
                 binder = (LocationService.MyBinder) iBinder; // приводим биндер к кастомному биндеру с методом связи
                 locationService = ((LocationService.MyBinder) binder).getService(); // получаем экземпляр нашего сервиса через биндер
                 serviceIsRan();
@@ -541,11 +587,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onServiceDisconnected(ComponentName componentName) {
-                Log.i("racer_timer", "location service disconnected ");
+                Log.i(PROJECT_LOG_TAG, "location service disconnected ");
             }
         };
-
-        bindService(intentLocationService, serviceConnection, BIND_EXTERNAL_SERVICE);
+        try{
+            bindService(intentLocationService, serviceConnection, BIND_EXTERNAL_SERVICE);
+        } catch (Exception e) {
+            Log.i(PROJECT_LOG_TAG, "location service disconnected ");
+            Toast.makeText(this, "Error corrupted: " + e, Toast.LENGTH_LONG).show();
+        }
     }
 
     /** блок работы со слушателем геолокации  */
@@ -557,7 +607,7 @@ public class MainActivity extends AppCompatActivity {
                     if (intent.hasExtra("location")) { // если в сообщении есть геолокация
                         Location location = (Location) intent.getExtras().get("location");
                         processorChangedLocation(location); // отдаем точку на обработку в процессор
-                        Log.i("racer_timer", "getted location broadcast from locationService, " +
+                        Log.i(PROJECT_LOG_TAG, "getted location broadcast from locationService, " +
                                 "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
                     }
                     if (intent.hasExtra("windDirection")) {
@@ -565,17 +615,17 @@ public class MainActivity extends AppCompatActivity {
                         if (windDirectionFromExtra != 10000) {
                             int windDirection = (int) intent.getExtras().get("windDirection");
                             onWindDirectionChanged(windDirection, WindProvider.CALCULATED);
-                            Log.i("racer_timer", "got wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
+                            Log.i(PROJECT_LOG_TAG, "got wind broadcast from locationService, new windDir = " + intent.getExtras().get("windDirection"));
                         }
                     }
 
                     if (intent.hasExtra("locationsData")) {
                         ArrayList<Location> missedLocations = (ArrayList<Location>) intent.getExtras().get("locationsData");
                         if (missedLocations.size() == 0) {
-                            Log.i("racer_timer", "activity got an empty missed locations");
+                            Log.i(PROJECT_LOG_TAG, "activity got an empty missed locations");
                         }
                         else {
-                            Log.i("racer_timer", "activity got missed locations with "+missedLocations.size()+ " points");
+                            Log.i(PROJECT_LOG_TAG, "activity got missed locations with "+missedLocations.size()+ " points");
                             mapManager.hasMissedLocations(missedLocations);
                             tracksDataManager.hasMissedLocations(missedLocations);
                         }
@@ -608,7 +658,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void manuallyWindManager () { // установка направления ветра вручную
-        Log.i("racer_timer_activity_race", " starting manually setting wind  ");
+        Log.i(PROJECT_LOG_TAG, " starting manually setting wind  ");
         windChangedHerald = new WindChangedHeraldInterface() {
             @Override
             public void onWindDirectionChanged(int windDirection, WindProvider provider) {
@@ -650,7 +700,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void resetAllMaximums() {
         sailingToolsFragment.resetPressed();
-        Log.i("racer_timer", "reset VMG maximums");
+        Log.i(PROJECT_LOG_TAG, "reset VMG maximums");
     }
 
     public void endRace() {
@@ -689,12 +739,3 @@ public class MainActivity extends AppCompatActivity {
 
 // TODO: make the track player to simulate riding recorded tracks on map, tools, and wind calculater.
 //  Implement one with the UI testing
-
-// TODO: сделать главное меню, где назначаем варианты определения ветра:
-//       установка только вручную; установка по сравнению; установка по статистике
-
-// TODO: организовать управление нахождения ветра:
-//       если началась гонка, включаем запуск сравнения, если нет данных по ручному ветру -
-// исходим из того, что у нас правый бейдевинд
-//       либо запускаем если выбран чек поле "запуск сравнения"
-

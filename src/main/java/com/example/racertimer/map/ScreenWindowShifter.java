@@ -56,6 +56,7 @@ public class ScreenWindowShifter {
     }
 
     public void onScaleChanged (double currentScale) {
+        Log.i("bugfix:", "windowShifter: scale changed");
         scale = currentScale;
         moveWindowCenterToPosition(lastLocation);
     }

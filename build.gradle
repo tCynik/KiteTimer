@@ -64,6 +64,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0" // Для получения viewModel
     implementation "androidx.recyclerview:recyclerview:1.2.1" // recycler view
 
+    // for coroutines:
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
+
     // for Koin:
     def koin_version= "3.2.2"
     implementation "io.insert-koin:koin-core:$koin_version"
