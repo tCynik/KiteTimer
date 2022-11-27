@@ -9,10 +9,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -28,7 +26,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -140,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         locationAccessDispatcher.execute();
-        //createLocationService();
 
         windChangedHerald = initWindChangeHerald();
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
@@ -507,67 +503,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopRace() { // остановка гонки
         super.onBackPressed();
-    }
-
-    /** Настраиваем и запускаем сервис для приема и трансляции данных геолокации */
-    private void createLocationService() {
-        if (! checkLocationPermission()) permissionGPSAlert();
-
-        // проверка разрешения -> если разрешения нет, вызываем диалог -> если нажато да, вызываем запрос
-        // запускаем короутину, которая проверяет наличие разрешения, если разрешение есть - запуск сервиса
-
-
-        askLocationPermission();
-
-        if (checkLocationPermission()) {
-            Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " permission good, starting service ");
-            intentLocationService = new Intent(this, LocationService.class);
-            intentLocationService.setPackage("com.example.racertimer.Instruments");
-            this.startService(intentLocationService);
-        } else {
-            permissionGPSAlert();
-            Toast.makeText(this, "No GPS permission", Toast.LENGTH_LONG);
-        }
-    }
-
-    private void permissionGPSAlert() {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this); // строитель диалога
-        dialogBuilder
-                .setMessage("App necessary GPS to work! Do you want to continue?")
-                .setCancelable(false)
-                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        askLocationPermission();
-                        createLocationService();
-                    }
-                })
-                .setNegativeButton("no", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        finish();
-                    }
-                });
-        AlertDialog alertDialog = dialogBuilder.create(); // создание диалога
-        alertDialog.setTitle("No GPS permission"); // заголовок
-        alertDialog.show(); // отображение диалога
-    }
-
-    /** Методы для работы с разрешениями на геолокацию */
-    public boolean checkLocationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) // если разрешения нет, то запускаем запрос разрешения, код ответа 100
-            return false; // если разрешения нет, возвращаем false
-        else
-            return true; //
-    }
-
-    private void askLocationPermission() {
-        requestPermissions(new String[]{
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION},
-                100); // ключ 100, такой же как ниже
     }
 
     /** биндимся к сервису для управления им */
