@@ -127,6 +127,19 @@ public class LocationService extends Service {
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) { // на случай ошибки
             }
+
+            @Override
+            public void onProviderDisabled(@NonNull String provider) {
+                intent = new Intent(BROADCAST_ACTION); // готовим передачу с новыми данными
+                intent.putExtra("provider GPS", 0);
+                sendBroadcast(intent); // отправляем передачу
+                //LocationListener.super.onProviderDisabled(provider);
+            }
+
+            @Override
+            public void onProviderEnabled(@NonNull String provider) {
+                LocationListener.super.onProviderEnabled(provider);
+            }
         };
     }
 
@@ -146,9 +159,14 @@ public class LocationService extends Service {
     private void requestLocationUpdates() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (checkLocationPermission()) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, locationListener);
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    1000,
+                    10,
+                    locationListener);
             Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " request location updating ");
         }
+
     }
     private boolean checkLocationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&  // если версия СДК выше версии M (API 23)

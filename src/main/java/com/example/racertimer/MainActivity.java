@@ -513,7 +513,6 @@ public class MainActivity extends AppCompatActivity {
     /** биндимся к сервису для управления им */
     private void bindToLocationService() {
         Log.i(PROJECT_LOG_TAG, "Making service connection... " );
-        Log.i("bugfix: main", "Making service connection... " );
         // приводим биндер к кастомному биндеру с методом связи
         // получаем экземпляр нашего сервиса через биндер
         ServiceConnection serviceConnection = new ServiceConnection() {
@@ -568,6 +567,14 @@ public class MainActivity extends AppCompatActivity {
                             Log.i(PROJECT_LOG_TAG, "activity got missed locations with "+missedLocations.size()+ " points");
                             mapManager.hasMissedLocations(missedLocations);
                             tracksDataManager.hasMissedLocations(missedLocations);
+                        }
+                    }
+                    if (intent.hasExtra("provider GPS")) {
+                        int providerValue = (int) intent.getExtras().get("provider GPS");
+                        if (providerValue == 0) {
+                            Log.i("bugfix", "MainActivity: provider is disabled");
+                            Toast.makeText(context, "Device's GPS location is OFF! Turn it on!", Toast.LENGTH_LONG).show();
+                            //todo: make dialog to turn gps location on
                         }
                     }
                 }
