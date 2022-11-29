@@ -114,12 +114,12 @@ public class MainActivity extends AppCompatActivity {
         findViews();
         setClickListeners();
 
-
         LocationAccessDispatcher locationAccessDispatcher = new LocationAccessDispatcher(
                 this,
                 new LocationManagerInterface() {
                     @Override
                     public void accessGranted() {
+                        startLocationService();
                         bindToLocationService();
                     }
 
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        locationService.appWasResumedOrStopped(false);
+        if (locationService != null) locationService.appWasResumedOrStopped(false);
         super.onStop();
     }
 
@@ -449,7 +449,6 @@ public class MainActivity extends AppCompatActivity {
         btnStopStartTimerAndStopRace.setText("NEW RACE");
         timerFragment.stopTheTimer();
         timerFragment = null;
-        //infoBarPresenter.updateTheBar("cancel race");
         findViewById(R.id.timer_container).setVisibility(View.INVISIBLE);
     }
 
@@ -468,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Log.i(PROJECT_LOG_TAG, "app is closing by user... ");
                         stopRace();
-                        locationService.stopService(intentLocationService);
+                        if (locationService != null) locationService.stopService(intentLocationService);
                         finish(); // закрываем эту активити
                     }
                 })
@@ -503,6 +502,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopRace() { // остановка гонки
         super.onBackPressed();
+    }
+
+    private void startLocationService() {
+        intentLocationService = new Intent(this, LocationService.class);
+        intentLocationService.setPackage("com.example.racertimer.Instruments");
+        startService(intentLocationService);
     }
 
     /** биндимся к сервису для управления им */
