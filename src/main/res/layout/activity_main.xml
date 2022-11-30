@@ -36,7 +36,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/fr_sailing_tools"
+        app:layout_constraintEnd_toStartOf="@+id/stopwatch"
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="horizontal">
         <ImageButton
@@ -64,14 +64,17 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/stopwatch"
-            android:layout_width="130sp"
-            android:layout_height="match_parent"
-            android:textSize="20sp"
-            android:text="@string/new_race"/>
-
     </LinearLayout>
+
+    <Button
+        android:id="@+id/stopwatch"
+        android:layout_width="150dp"
+        android:layout_height="60dp"
+        android:textSize="20sp"
+        android:text="@string/new_race"
+        app:layout_constraintEnd_toEndOf="@id/timer_container"
+        app:layout_constraintStart_toEndOf="@id/timer_container"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/timer_container"

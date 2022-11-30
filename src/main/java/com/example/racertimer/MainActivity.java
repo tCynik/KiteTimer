@@ -572,8 +572,8 @@ public class MainActivity extends AppCompatActivity {
                     if (intent.hasExtra("provider GPS")) {
                         int providerValue = (int) intent.getExtras().get("provider GPS");
                         if (providerValue == 0) {
-                            Log.i("bugfix", "MainActivity: provider is disabled");
                             Toast.makeText(context, "Device's GPS location is OFF! Turn it on!", Toast.LENGTH_LONG).show();
+                            //todo: кнопка управлением гонки по центру экрана
                             //todo: make dialog to turn gps location on
                         }
                     }

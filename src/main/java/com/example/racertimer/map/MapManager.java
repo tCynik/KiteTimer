@@ -252,7 +252,7 @@ public class MapManager {
         this.btnFixPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                screenWindowShifter.moveWindowCenterToPosition(currentLocation);
+                if (screenWindowShifter != null) screenWindowShifter.moveWindowCenterToPosition(currentLocation);
                 screenCenterPinnedOnPosition = true;
                 btnFixPosition.setVisibility(View.INVISIBLE);
             }
