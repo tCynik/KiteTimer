@@ -24,6 +24,7 @@ import java.util.LinkedList;
 
 public class MapManager {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_manager";
+    private final static int MINIMAL_DIST_MOVE = 30;
 
     private Context context;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
@@ -228,7 +229,14 @@ public class MapManager {
 
     public void hasMissedLocations (ArrayList<Location> missedLocations) {
         int i = 0;
+        boolean hasIMoved = false;
         for (Location nextLocation: missedLocations) {
+            if (currentLocation.distanceTo(nextLocation) > MINIMAL_DIST_MOVE) {
+                hasIMoved = true;
+                break;
+            }
+        }
+        if (hasIMoved) for (Location nextLocation: missedLocations) { // todo: when i'm not moving it must be not painted!
             i++;
             Log.i("bugfix", "mapManager: loaded the missed location #"+i);
             if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
