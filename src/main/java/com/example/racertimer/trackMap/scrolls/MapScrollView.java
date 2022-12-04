@@ -1,4 +1,4 @@
-package com.example.racertimer.map;
+package com.example.racertimer.trackMap.scrolls;
 
 import android.content.Context;
 import android.util.AttributeSet;

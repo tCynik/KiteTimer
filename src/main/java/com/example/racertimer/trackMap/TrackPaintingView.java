@@ -1,4 +1,4 @@
-package com.example.racertimer.map;
+package com.example.racertimer.trackMap;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -26,7 +26,12 @@ public class TrackPaintingView extends View {
     private float currentCoordinateX, currentCoordinateY;
     private float coordinateXToDraw, coordinateYToDraw;
 
-    public TrackPaintingView(Context context, MapManager mapManager, TrackGridCalculator trackGridCalculator, Location location) {
+    public TrackPaintingView(
+            Context context,
+            MapManager mapManager,
+            TrackGridCalculator trackGridCalculator,
+            Location location
+    ) {
         super (context);
         Log.i(PROJECT_LOG_TAG, "draw view instance was created");
         this.trackGridCalculator = trackGridCalculator;

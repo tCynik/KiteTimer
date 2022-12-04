@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.MainActivity;
 import com.example.racertimer.R;
-import com.example.racertimer.map.MapManager;
+import com.example.racertimer.trackMap.MapManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -15,7 +15,7 @@
         android:text="Tracks"/>
 
 
-<com.example.racertimer.map.MapScrollView
+<com.example.racertimer.trackMap.scrolls.MapScrollView
     android:id="@+id/window_map"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent">
-    <com.example.racertimer.map.MapHorizontalScrollView
+    <com.example.racertimer.trackMap.scrolls.MapHorizontalScrollView
         android:id="@+id/horizontal_map_scroll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -49,8 +49,8 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
-    </com.example.racertimer.map.MapHorizontalScrollView>
-</com.example.racertimer.map.MapScrollView>
+    </com.example.racertimer.trackMap.scrolls.MapHorizontalScrollView>
+</com.example.racertimer.trackMap.scrolls.MapScrollView>
 
     <ImageView
         android:id="@+id/wind_direction_arrow_on_map"

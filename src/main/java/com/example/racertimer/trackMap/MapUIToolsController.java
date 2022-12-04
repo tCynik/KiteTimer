@@ -1,4 +1,4 @@
-package com.example.racertimer.map;
+package com.example.racertimer.trackMap;
 
 import android.location.Location;
 import android.util.Log;

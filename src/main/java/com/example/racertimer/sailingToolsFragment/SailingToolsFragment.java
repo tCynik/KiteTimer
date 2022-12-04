@@ -290,7 +290,8 @@ public class SailingToolsFragment extends Fragment {
         fullSpeedSize = radiusArrowMax - radiusArrowMin; // диапазон, в котором ходит стрелка
 
         int heightOfArrow = arrowDirectionIV.getHeight(); // высота стрелки направления
-        float scaleOfArrow = (float) (fullSpeedSize * 100 / heightOfArrow) / 100; // определем масштаб отображения стрелки
+        float scaleOfArrow = 1; // todo: to prevent DevideByZeroException. value 1 can be in correct!
+        if (heightOfArrow!=0) scaleOfArrow = (float) (fullSpeedSize * 100 / heightOfArrow) / 100; // определем масштаб отображения стрелки
         arrowDirectionIV.setScaleY(scaleOfArrow); // выставляем масштаб
         int shift = (int) ((heightOfArrow * scaleOfArrow) - heightOfArrow); // смещение для компенсации изменения масштаба
         arrowDirectionIV.setY((shift / 2) + 6); // устанавливаем на позицию смещения + 6 для устранения разрыва между вьюшками
