@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import com.example.racertimer.MainActivity;
+import com.example.racertimer.mainActivity.MainActivity;
 import com.example.racertimer.R;
 import com.example.racertimer.trackMap.MapManager;
 

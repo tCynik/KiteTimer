@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.Instruments.StartingProcedureTimer;
 import com.example.racertimer.Instruments.InfoBarStatusUpdater;
+import com.example.racertimer.mainActivity.MainActivity;
 
 public class TimerFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer";

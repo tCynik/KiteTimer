@@ -10,6 +10,8 @@ import android.widget.SeekBar;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.racertimer.mainActivity.MainActivity;
+
 public class DeveloperFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
 
     private final static String PROJECT_LOG_TAG = "racer_timer";

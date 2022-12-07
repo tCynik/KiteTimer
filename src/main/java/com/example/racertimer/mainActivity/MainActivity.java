@@ -1,4 +1,4 @@
-package com.example.racertimer;
+package com.example.racertimer.mainActivity;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -30,18 +30,28 @@ import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.racertimer.DeveloperFragment;
+import com.example.racertimer.InfoBarPresenter;
 import com.example.racertimer.Instruments.InfoBarStatusUpdater;
 import com.example.racertimer.Instruments.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
 import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.LocationHeraldInterface;
+import com.example.racertimer.MapFragment;
+import com.example.racertimer.MenuFragment;
+import com.example.racertimer.R;
+import com.example.racertimer.StatusUIModulesDispatcher;
+import com.example.racertimer.StatusUiUpdater;
+import com.example.racertimer.TextViewController;
+import com.example.racertimer.TimerFragment;
 import com.example.racertimer.location.LocationAccessDispatcher;
 import com.example.racertimer.location.LocationManagerInterface;
-import com.example.racertimer.trackMap.scrolls.MapHorizontalScrollView;
-import com.example.racertimer.trackMap.MapManager;
-import com.example.racertimer.trackMap.scrolls.MapScrollView;
-import com.example.racertimer.trackMap.MapUIToolsController;
 import com.example.racertimer.sailingToolsFragment.SailingToolsFragment;
+import com.example.racertimer.trackMap.MapManager;
+import com.example.racertimer.trackMap.MapUIToolsController;
+import com.example.racertimer.trackMap.scrolls.MapHorizontalScrollView;
+import com.example.racertimer.trackMap.scrolls.MapScrollView;
 import com.example.racertimer.tracks.GeoTrack;
 import com.example.racertimer.tracks.TracksDataManager;
 import com.example.racertimer.tracks.TracksMenuFragment;
@@ -110,6 +120,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i("bugfix", "main: onCreate");
         setContentView(R.layout.activity_main);
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        //todo: на устройстве пчмт навигационная панель (кнопки внизу) получается с белым фоном (в эмуляторе с черным). пытаюсь вообще убрать бар:
+        //new ManagerVisibilityUI(this); // модуль для скрытия-появления панели. Работает, но после исчезновения, перехватывает ВСЕ нажатия на экран и появляется
 
         findViews();
         setClickListeners();

@@ -2,7 +2,7 @@ package com.example.racertimer.Instruments;
 
 import android.os.SystemClock;
 
-import com.example.racertimer.MainActivity;
+import com.example.racertimer.mainActivity.MainActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

@@ -236,7 +236,7 @@ public class MapManager {
                 break;
             }
         }
-        if (hasIMoved) for (Location nextLocation: missedLocations) { // todo: when i'm not moving it must be not painted!
+        if (hasIMoved) for (Location nextLocation: missedLocations) {
             i++;
             Log.i("bugfix", "mapManager: loaded the missed location #"+i);
             if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);

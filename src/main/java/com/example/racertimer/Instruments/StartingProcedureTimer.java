@@ -21,7 +21,7 @@ import static com.example.racertimer.multimedia.TimerVoiceover.SOUND_ASSET_TWO;
 import static com.example.racertimer.multimedia.TimerVoiceover.SOUND_ASSET_TWO_MINUTE;
 import static com.example.racertimer.multimedia.TimerVoiceover.SOUND_ASSET_TWO_MINUTE_READY;
 
-import com.example.racertimer.MainActivity;
+import com.example.racertimer.mainActivity.MainActivity;
 import com.example.racertimer.multimedia.TimerVoiceover;
 
 import java.text.SimpleDateFormat;

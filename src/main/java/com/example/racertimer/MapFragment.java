@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import com.example.racertimer.mainActivity.MainActivity;
 import com.example.racertimer.trackMap.scrolls.MapHorizontalScrollView;
 import com.example.racertimer.trackMap.scrolls.MapScrollView;
 

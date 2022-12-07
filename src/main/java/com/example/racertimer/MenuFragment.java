@@ -14,6 +14,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.forecast.presentation.ActivityForecast;
+import com.example.racertimer.mainActivity.MainActivity;
 
 public class MenuFragment extends Fragment implements CompoundButton.OnCheckedChangeListener {
 

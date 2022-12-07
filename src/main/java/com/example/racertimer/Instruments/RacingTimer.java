@@ -1,6 +1,6 @@
 package com.example.racertimer.Instruments;
 
-import com.example.racertimer.MainActivity;
+import com.example.racertimer.mainActivity.MainActivity;
 
 import java.util.Date;
 

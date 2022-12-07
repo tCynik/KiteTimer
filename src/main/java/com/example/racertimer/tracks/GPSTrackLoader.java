@@ -2,7 +2,7 @@ package com.example.racertimer.tracks;
 
 import android.util.Log;
 
-import com.example.racertimer.MainActivity;
+import com.example.racertimer.mainActivity.MainActivity;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

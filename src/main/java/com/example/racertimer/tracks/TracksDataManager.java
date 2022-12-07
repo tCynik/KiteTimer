@@ -4,7 +4,7 @@ import android.location.Location;
 
 import com.example.racertimer.LocationHeraldInterface;
 import com.example.racertimer.Instruments.WindProvider;
-import com.example.racertimer.MainActivity;
+import com.example.racertimer.mainActivity.MainActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
