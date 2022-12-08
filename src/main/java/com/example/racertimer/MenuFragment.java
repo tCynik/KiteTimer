@@ -87,12 +87,18 @@ public class MenuFragment extends Fragment implements CompoundButton.OnCheckedCh
         mainActivity.closeMenu();
 
         Location location = mainActivity.getCurrentLocation();
-        double longitude = location.getLongitude();
-        double latitude = location.getLatitude();
-        Intent intent = new Intent(getActivity(), ActivityForecast.class);
-        intent.putExtra("latitude", latitude);
-        intent.putExtra("longitude", longitude);
-        startActivity(intent);
+        if (location == null) {
+            Intent intent = new Intent(getActivity(), ActivityForecast.class);
+            intent.putExtra("no location", 0);
+            startActivity(intent);
+        } else {
+            double longitude = location.getLongitude();
+            double latitude = location.getLatitude();
+            Intent intent = new Intent(getActivity(), ActivityForecast.class);
+            intent.putExtra("latitude", latitude);
+            intent.putExtra("longitude", longitude);
+            startActivity(intent);
+        }
     }
 
     @Override

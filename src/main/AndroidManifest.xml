@@ -31,7 +31,7 @@
         </activity>
 
         <service
-            android:name=".Instruments.LocationService"
+            android:name=".location.LocationService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

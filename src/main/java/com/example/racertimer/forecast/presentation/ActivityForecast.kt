@@ -6,15 +6,16 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.racertimer.Instruments.WindProvider
 import com.example.racertimer.R
 import com.example.racertimer.databinding.ActivityForecastBinding
-import com.example.racertimer.forecast.app.App
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
@@ -27,6 +28,8 @@ const val BROADCAST_ACTION =
     "com.example.racertimer.action.new_location" // значение для фильтра приемника
 
 class ActivityForecast : AppCompatActivity() {
+    private var locationBroadcastReceiver: BroadcastReceiver? = null
+
     private val forecastViewModel by viewModel<ForecastViewModel>()
     private lateinit var recyclerAdapter: ForecastLinesAdapter
 
@@ -104,13 +107,20 @@ class ActivityForecast : AppCompatActivity() {
             val longitude: Double = catchLocation.getDoubleExtra("longitude", 0.0)
             lastUsersLocation = ForecastLocation(CURRENT_POSITION, latitude = latitude, longitude = longitude)
             forecastViewModel.updateUserLocation(lastUsersLocation)
-        }
+        } else
+            if (catchLocation.hasExtra("no location")) {
+                Toast.makeText(this, "No GPS location!", Toast.LENGTH_LONG).show()
+                // todo: open last location?
+                }
     }
 
     private fun initLocationBroadcastListener() {
-        val locationBroadcastReceiver = object : BroadcastReceiver() {
+        Log.i("bugfix: ActivityForecast", "init the broadcast listener")
+        val locationBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) { // обработка интента
+                Log.i("bugfix: ActivityForecast", "broadcast listener received some intent")
                 if (intent.hasExtra("location")) { // если в сообщении есть геолокация
+                    Log.i("bugfix: ActivityForecast", "broadcast listener has a new location")
                     val currentUserLocation = (intent.extras!!["location"] as Location?)?.let {
                         LocationMapper.androidLocationToForecastLocation(it)
                     }
@@ -120,7 +130,8 @@ class ActivityForecast : AppCompatActivity() {
         }
         val locationIntentFilter =
             IntentFilter(BROADCAST_ACTION) // прописываем интент фильтр для слушателя
-        registerReceiver(locationBroadcastReceiver, locationIntentFilter) // регистрируем слушатель
+        val a = registerReceiver(locationBroadcastReceiver, locationIntentFilter) // регистрируем слушатель
+        Log.i("bugfix: ActivityForecast", "registration of the broadcast receiver = $a")
     }
 
 // todo: make screen rotation

@@ -33,7 +33,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.racertimer.DeveloperFragment;
 import com.example.racertimer.InfoBarPresenter;
 import com.example.racertimer.Instruments.InfoBarStatusUpdater;
-import com.example.racertimer.Instruments.LocationService;
+import com.example.racertimer.location.LocationService;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
 import com.example.racertimer.Instruments.WindProvider;
@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i("bugfix", "main: onCreate");
         setContentView(R.layout.activity_main);
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
@@ -467,6 +466,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Location getCurrentLocation () {
+        Log.i("bugfix: main, getCurrentLocation", "currentLocation is null = " +(location == null));
         return location;
     }
 

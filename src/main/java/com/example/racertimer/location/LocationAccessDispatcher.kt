@@ -41,7 +41,8 @@ class LocationAccessDispatcher(val context: Context, private val managerInterfac
     }
 
     private fun runServiceStartingTimeout() {
-        GlobalScope.launch {
+        val timerScope = CoroutineScope(Job())
+        timerScope.launch {
             if (checkLocationPermission()) {
                 managerInterface.accessGranted()
             }

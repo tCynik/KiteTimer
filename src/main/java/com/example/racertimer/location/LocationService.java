@@ -1,4 +1,4 @@
-package com.example.racertimer.Instruments;
+package com.example.racertimer.location;
 
 import android.Manifest;
 import android.app.Service;
@@ -17,6 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
+import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.windDirection.WindByCompareCalculator;
 import com.example.racertimer.windDirection.WindByStatistics;
 import com.example.racertimer.windDirection.WindChangedHeraldInterface;
@@ -114,12 +115,13 @@ public class LocationService extends Service {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 Log.i(PROJECT_LOG_TAG, " Thread: "+Thread.currentThread().getName() + " service is get new location ");
-                if (isAppResumed) {
-                    intent = new Intent(BROADCAST_ACTION);
-                    intent.putExtra("location", location);
-                    sendBroadcast(intent);
-                    calculateAndSendWindDirection(location);
-                } else { // app is paused
+
+                intent = new Intent(BROADCAST_ACTION);
+                intent.putExtra("location", location);
+                sendBroadcast(intent);
+                calculateAndSendWindDirection(location);
+
+                if (!isAppResumed) { // main activity of the app is paused. recording location history.
                     addLocationToTempData(location);
                 }
             }
