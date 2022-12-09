@@ -1,11 +1,10 @@
 package com.example.racertimer.forecast.domain.use_cases
 
-import android.content.Context
 import com.example.racertimer.forecast.domain.interfaces.LocationsListRepositoryInterface
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import com.example.racertimer.forecast.domain.models.LocationsList
 
-class SaveLocationListUseCase(val context: Context, val locationsListRepository: LocationsListRepositoryInterface) {
+class SaveLocationListUseCase(private val locationsListRepository: LocationsListRepositoryInterface) {
     private var locationsList = LocationsList()
 
     fun setLocationsList (locationsList: LocationsList) {

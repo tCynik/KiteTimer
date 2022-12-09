@@ -34,6 +34,8 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
         locationsListRepository = locationsListRepository,
         updaterUserLocation = userLocationUpdater)
 
+    private val saveLocationListUseCase = SaveLocationListUseCase(locationsListRepository)
+
     private var currentUserLocation: ForecastLocation? = null
     private var currentForecastLocation: ForecastLocation? = null
     private var awaitingUserLocation = false
@@ -71,6 +73,12 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     fun getLocationsList(): LocationsList? {
         return locationsListOpener.execute()
     }
+
+//    fun openEmptyLocationList(): LocationsList {
+//
+//
+//
+//    }
 
     fun updateForecastByUserLocation() {
         if (currentUserLocation == null) awaitingUserLocation = true

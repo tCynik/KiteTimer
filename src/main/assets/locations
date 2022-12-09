@@ -1,0 +1,8 @@
+{
+    "list":[
+        {"name": "Krasnoyarsk", "latitude" = 56.1336, "longitude" = 92.8185},
+        {"name": "Shumiha", "latitude" = 55.129, "longitude" = 92.2767},
+        {"name": "Mayak NSK", "latitude" = 54.8333, "longitude" = 83.0384}
+    ]
+}
+

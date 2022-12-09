@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.racertimer.Instruments.WindProvider
 import com.example.racertimer.R
 import com.example.racertimer.databinding.ActivityForecastBinding
 import com.example.racertimer.forecast.domain.models.ForecastLine
@@ -22,14 +21,13 @@ import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUse
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 import com.example.racertimer.forecast.presentation.models_mappers.LocationMapper
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.io.InputStream
 
 private const val CURRENT_POSITION = "current position"//"DEFAULT"
 const val BROADCAST_ACTION =
     "com.example.racertimer.action.new_location" // значение для фильтра приемника
 
 class ActivityForecast : AppCompatActivity() {
-    private var locationBroadcastReceiver: BroadcastReceiver? = null
-
     private val forecastViewModel by viewModel<ForecastViewModel>()
     private lateinit var recyclerAdapter: ForecastLinesAdapter
 
@@ -59,8 +57,14 @@ class ActivityForecast : AppCompatActivity() {
         val buttonSelectLocation = layoutDataBinding.btnSelectLocation
         buttonSelectLocation.setOnClickListener(View.OnClickListener {
             val locationsList = forecastViewModel.getLocationsList()
-            if (locationsList != null)
+            if (locationsList != null) {
+                if (locationsList.size == 0) {
+                    Log.i("bugfix: activityForecast", "location list is empty!")
+//                    locationsList = forecastViewModel.openEmptyLocationList()
+//                    firstTimeLaunch(saveLocationsListUseCase)
+                }
                 selectLocationByPopupUseCase.execute(buttonSelectLocation, locationsList)
+            }
         })
 
         fillTitle(layoutDataBinding.titleLayout)
