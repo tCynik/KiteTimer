@@ -12,8 +12,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.racertimer.mainActivity.MainActivity;
-import com.example.racertimer.trackMap.scrolls.MapHorizontalScrollView;
-import com.example.racertimer.trackMap.scrolls.MapScrollView;
+import com.example.racertimer.tracks_map.scrolls.MapHorizontalScrollView;
+import com.example.racertimer.tracks_map.scrolls.MapScrollView;
 
 public class MapFragment extends Fragment {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_fragment";

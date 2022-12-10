@@ -1,10 +1,11 @@
-package com.example.racertimer.trackMap.movers;
+package com.example.racertimer.tracks_map.movers;
 
 import android.location.Location;
+import android.util.Log;
 import android.widget.ImageView;
 
-import com.example.racertimer.trackMap.MapManager;
-import com.example.racertimer.trackMap.TrackGridCalculator;
+import com.example.racertimer.tracks_map.MapManager;
+import com.example.racertimer.tracks_map.TrackGridCalculator;
 
 public class ArrowMover {
     private ImageView arrowPosition;

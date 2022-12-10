@@ -18,12 +18,12 @@ class LocationsAssetLoader(val context: Context) {
         } catch (e: IOException) {
             Log.i("racer_timer: listAssertLoader", "IOException in asset loading = $e")
         }
-        if (inputString == null) return LocationsList()
-        else return parseStringToLocationsList(inputString)
+        return if (inputString == null) LocationsList()
+        else parseStringToLocationsList(inputString)
     }
 
     private fun parseStringToLocationsList (inputString: String ): LocationsList {
-        var locationsList = LocationsList()
+        val locationsList = LocationsList()
         val resultJson = JSONObject(inputString)
 
         val jsonArray = resultJson.getJSONArray("list")

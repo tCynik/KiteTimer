@@ -1,4 +1,4 @@
-package com.example.racertimer.trackMap;
+package com.example.racertimer.tracks_map;
 
 import android.content.Context;
 import android.graphics.Canvas;

@@ -1,4 +1,4 @@
-package com.example.racertimer.trackMap;
+package com.example.racertimer.tracks_map;
 
 import android.content.Context;
 import android.location.Location;
@@ -13,18 +13,21 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.racertimer.LocationHeraldInterface;
 import com.example.racertimer.Instruments.WindProvider;
-import com.example.racertimer.trackMap.movers.ArrowMover;
-import com.example.racertimer.trackMap.movers.ScreenWindowShifter;
-import com.example.racertimer.trackMap.scrolls.MapHorizontalScrollView;
-import com.example.racertimer.trackMap.scrolls.MapScrollView;
+import com.example.racertimer.tracks_map.movers.ArrowMover;
+import com.example.racertimer.tracks_map.movers.ScreenWindowShifter;
+import com.example.racertimer.tracks_map.scrolls.MapHorizontalScrollView;
+import com.example.racertimer.tracks_map.scrolls.MapScrollView;
 import com.example.racertimer.tracks.GeoTrack;
+import com.example.racertimer.tracks_map.statuses.MapStatus;
+import com.example.racertimer.tracks_map.statuses.MapStatusInterface;
+import com.example.racertimer.tracks_map.statuses.MapStatusManager;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class MapManager {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_manager";
-    private final static int MINIMAL_DIST_MOVE = 30;
+    private final static int MINIMAL_DIST_MOVE = 100;
 
     private Context context;
     private final int trackAccuracy = 5; // точность прорисовки трека = 5й знак после запятой в координатах
@@ -53,8 +56,19 @@ public class MapManager {
 
     private Location currentLocation;
 
+    private MapStatus currentMapStatus;
+    private MapStatusManager mapStatusManager = new MapStatusManager(new MapStatusInterface() {
+        @Override
+        public void onStatusChanged(@NonNull MapStatus nextStatus) {
+            if (currentMapStatus != MapStatus.READY && nextStatus == MapStatus.READY ) statusBecomeReady();
+            currentMapStatus = nextStatus;
+        }
+    });
+
+
     public MapManager(Context context) {
         this.context = context;
+        currentMapStatus = MapStatus.NO_SIZES_NO_LANDMARK;
         loadedAndDisplayedTracks = new LinkedList<>();
         tracksWindowModel = new TracksWindowModel();
         initContentUpdater();
@@ -79,6 +93,10 @@ public class MapManager {
 
     public LocationHeraldInterface getContentUpdater() {
         return locationHerald;
+    }
+
+    private void statusBecomeReady() {
+        tracksWindowModel.setSizesByView(tracksLayout);
     }
 
     private void makeTrackGirdCalculator (Location location) {
@@ -187,13 +205,13 @@ public class MapManager {
 
     public void onLocationChanged(Location location) {
         Log.i(PROJECT_LOG_TAG+"/MapManager", "new location in Track Painter, speed is: " +location.getSpeed());
-        Log.i("bugfix: MainManager onLocationChanged", "trackGirdCalculator is null = " +(trackGridCalculator ==null));
-        Log.i("bugfix: MainManager onLocationChanged", "screenWindowShifter is null = " +(screenWindowShifter ==null));
 
         int speed = (int) (location.getSpeed()*3.6);
         //if (speed > 5) { // todo: зачем создание калькулятора и шифтера при таком условии? Карта не работает!
         if (true) {
-            if (trackGridCalculator == null) {
+            if (currentMapStatus == MapStatus.HAS_SIZES_NO_LANDMARK) {
+            //if (trackGridCalculator == null) {
+                mapStatusManager.gotLandmark();
                 Log.i(PROJECT_LOG_TAG, " trackGirdCalculator is null, making new one ");
                 makeTrackGirdCalculator(location);
                 screenWindowShifter = new ScreenWindowShifter(
@@ -206,7 +224,8 @@ public class MapManager {
             }
         }
 
-        if (trackGridCalculator != null) {
+        if (currentMapStatus == MapStatus.READY) {
+        //if (trackGridCalculator != null) {
             arrowMover.moveArrowToPosition(location);
             if (screenCenterPinnedOnPosition) {
                 scrollingIsManual = false;
@@ -228,28 +247,33 @@ public class MapManager {
     }
 
     public void hasMissedLocations (ArrayList<Location> missedLocations) {
-        int i = 0;
-        boolean hasIMoved = false;
-        for (Location nextLocation: missedLocations) {
-            if (currentLocation.distanceTo(nextLocation) > MINIMAL_DIST_MOVE) {
-                hasIMoved = true;
-                break;
+        if (currentMapStatus == MapStatus.READY) {
+            int i = 0;
+            boolean hasIMoved = false;
+            for (Location nextLocation: missedLocations) {
+                if (currentLocation.distanceTo(nextLocation) > MINIMAL_DIST_MOVE) {
+                    Log.i("bugfix", "mapManager: missed location's distance = "+currentLocation.distanceTo(nextLocation));
+                    hasIMoved = true;
+                    break;
+                }
             }
-        }
-        if (hasIMoved) for (Location nextLocation: missedLocations) {
-            i++;
-            Log.i("bugfix", "mapManager: loaded the missed location #"+i);
-            if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
-            else dutyTrackLine.drawNextSegmentByLocation(nextLocation);
+            if (hasIMoved) for (Location nextLocation: missedLocations) {
+                i++;
+                Log.i("bugfix", "mapManager: loaded the missed location #"+i);
+                if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
+                else dutyTrackLine.drawNextSegmentByLocation(nextLocation);
+            }
         }
     }
 
-    public void setTracksLayout(
+    public void setTracksLayout( // приходят свеже созданные вьюшки из содержащего их фрагмента
             MapScrollView windowMap,
             MapHorizontalScrollView horizontalMapScroll,
             ConstraintLayout tracksLayout,
             ImageButton btnFixPosition,
             ImageView arrowPosition) {
+        mapStatusManager.gotSizes();
+
         this.tracksLayout = tracksLayout;
         tracksWindowModel.setSizesByView(tracksLayout);
         this.arrowPosition = arrowPosition;
@@ -293,21 +317,20 @@ public class MapManager {
     }
 
     public void onScaleChanged (double scale) {
-        Log.i("bugfix: mapManager onScaleChanged", "current location is null = "+(currentLocation==null));
+        if (currentMapStatus == MapStatus.READY) {
+            if (currentLocation != null) {
+                scrollingIsManual = false;
+                if (screenCenterPinnedOnPosition) {
+                    screenWindowShifter.onScaleChanged(scale); //todo: bug: shifter is null!
+                }
 
-        if (currentLocation != null) {
-            scrollingIsManual = false;
-            if (screenCenterPinnedOnPosition) {
-                Log.i("bugfix: mapManager onScaleChanged", "shifter is null ="+(screenWindowShifter==null));
-                screenWindowShifter.onScaleChanged(scale); //todo: bug: shifter is null!
+                tracksLayout.setScaleX((float)scale);
+                tracksLayout.setScaleY((float)scale);
+                scrollingIsManual = true;
+            } else {
             }
-
-            tracksLayout.setScaleX((float)scale);
-            tracksLayout.setScaleY((float)scale);
-            scrollingIsManual = true;
-        } else {
-            Log.i("bugfix: mapManager:", "current location is null");
         }
+
     }
 
     public void setWindowSizesToShifter() {

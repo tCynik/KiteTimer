@@ -1,4 +1,4 @@
-package com.example.racertimer.trackMap.movers;
+package com.example.racertimer.tracks_map.movers;
 
 import android.location.Location;
 import android.util.Log;
@@ -7,9 +7,9 @@ import android.widget.ScrollView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.example.racertimer.trackMap.MapManager;
-import com.example.racertimer.trackMap.TrackGridCalculator;
-import com.example.racertimer.trackMap.TracksWindowModel;
+import com.example.racertimer.tracks_map.MapManager;
+import com.example.racertimer.tracks_map.TrackGridCalculator;
+import com.example.racertimer.tracks_map.TracksWindowModel;
 
 public class ScreenWindowShifter {
     private final static String PROJECT_LOG_TAG = "racer_timer_draw";
@@ -52,7 +52,9 @@ public class ScreenWindowShifter {
     }
 
     private void calculateLayoutShifts(Location location) {
-        if (trackGridCalculator == null) trackGridCalculator = mapManager.trackGridCalculator;
+        if (trackGridCalculator == null) {
+            trackGridCalculator = mapManager.trackGridCalculator;
+        }
         int localX = mapManager.trackGridCalculator.calculateLocalX(location);
         int localY = mapManager.trackGridCalculator.calculateLocalY(location);
 

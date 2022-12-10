@@ -1,5 +1,6 @@
-package com.example.racertimer.trackMap
+package com.example.racertimer.tracks_map
 
+import android.util.Log
 import android.view.View
 
 class TracksWindowModel {
@@ -16,6 +17,7 @@ class TracksWindowModel {
     fun setSizesByView(view: View) {
         this.height = view.height
         this.width = view.width
+        Log.i("bugfix: tracksWindowModel", "sizes setted: height = $height, width = $width")
         isWindowFormed = true
     }
 
