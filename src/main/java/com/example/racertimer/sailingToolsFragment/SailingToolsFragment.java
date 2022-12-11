@@ -34,7 +34,7 @@ public class SailingToolsFragment extends Fragment {
     VmgBeeper beeperVMG;
     //BeepSounds voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
-    ImageView arrowVelocityIV, arrowDirectionIV;
+    ImageView arrowVelocityIV, arrowDirectionIV2, arrowDirectionIV;
     TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
 
     private int fullSpeedSize = 0; // максимальный ход стрелки
@@ -92,7 +92,7 @@ public class SailingToolsFragment extends Fragment {
         centralParametersCL = view.findViewById(R.id.central_params_cl); // вьюшка для ограничения движения стрелок
         windLayoutCL = view.findViewById(R.id.wind_layout);
         arrowVelocityIV = view.findViewById(R.id.arrow); // стрелка скорости
-        arrowDirectionIV = view.findViewById(R.id.arrow_direction); // стрелка направления
+        arrowDirectionIV = view.findViewById(R.id.arrow_direction); // стрелка направления НОРМАЛЬНАЯ
         velocityTV = view.findViewById(R.id.velocity);
         bearingTV = view.findViewById(R.id.bearing);
         windTV = view.findViewById(R.id.wind);
@@ -170,7 +170,6 @@ public class SailingToolsFragment extends Fragment {
         viewModel.getPercentVelocityLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer value) {
-                Log.i("bugfix: sailingToolsFragment", " percent velocity observer has new value");
                 updateArrowPositionByPercent(value);
             }
         });
@@ -290,7 +289,6 @@ public class SailingToolsFragment extends Fragment {
 
     private void updateArrowPositionByPercent (int percent) { // обновление позиции стрелки скорости
         if (fullSpeedSize == 0) {
-            Log.i("bugfix: sailingToolsFragment", " calculating arrow sizes ");
             calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
         }
         float position = (float) ( ( percent * fullSpeedSize )/100); //+ centralParametersCL.getHeight());
@@ -298,46 +296,19 @@ public class SailingToolsFragment extends Fragment {
     }
 
     private void calculateArrowHeometricFromViewses() { // готовимся к отображению динамических вьюшек
-        Log.i("bugfix: sailingToolsFragment", " starting calculate, high = "+ centralParametersCL.getHeight()+", arrow visibility = "+arrowDirectionIV.getVisibility());
-        Log.i("bugfix: sailingToolsFragment", " height of arrow = "+arrowDirectionIV.getHeight()+", width = "+ arrowDirectionIV.getWidth());
-        Log.i("bugfix: sailingToolsFragment", " position of arrow: X = "+arrowDirectionIV.getX()+", Y = "+ arrowDirectionIV.getY());
-        arrowDirectionIV.setVisibility(View.VISIBLE);
         RetryTimer retryTimer = new RetryTimer(new RetryTimer.EndingTimerInterface() {
             @Override
-            public void onTimerEnded() {
+            public void onTimerEnded() { // todo: переделать Scope (цикличная работа только в рамках Ж.Ц. Activity)
                 calculateArrowHeometricFromViewses();
-                Log.i("bugfix: sailingToolsFragment", " timeIsEnded, re-trying to calculate ");
             }
         });
 
         if (centralParametersCL.getHeight() != 0 && arrowDirectionIV.getHeight()!=0) {
-            Log.i("bugfix: sailingToolsFragment", " going to perform calculate ");
-            performCalculate();
+            fullSpeedSize = arrowDirectionIV.getHeight(); // диапазон, в котором ходит стрелка
+
         } else {
             retryTimer.execute();
-            Log.i("bugfix: sailingToolsFragment", " view sizes = 0, calculation dropped ");
         }
-    }
-
-    private void performCalculate() {
-        Log.i("bugfix: sailingToolsFragment", " performing calculate parameter = "+centralParametersCL.getHeight());
-        int radiusArrowMin = centralParametersCL.getHeight()/2; // максимальный радиус
-        int radiusArrowMax = arrowsLayoutCL.getHeight()/2; // минимальный радиус
-        fullSpeedSize = radiusArrowMax - radiusArrowMin; // диапазон, в котором ходит стрелка
-
-        int heightOfArrow = arrowDirectionIV.getHeight(); // высота стрелки направления
-        Log.i("bugfix: sailingToolsFragment", " height of arrow = "+arrowDirectionIV.getHeight()+", width = "+ arrowDirectionIV.getWidth());
-        float scaleOfArrow = 1; // todo: to prevent DevideByZeroException. value 1 can be in correct!
-        if (heightOfArrow!=0) scaleOfArrow = (float) (fullSpeedSize * 100 / heightOfArrow) / 100; // определем масштаб отображения стрелки
-        arrowDirectionIV.setScaleY(scaleOfArrow); // выставляем масштаб
-        int shift = (int) ((heightOfArrow * scaleOfArrow) - heightOfArrow); // смещение для компенсации изменения масштаба
-        arrowDirectionIV.setY((shift / 2) + 6); // устанавливаем на позицию смещения + 6 для устранения разрыва между вьюшками
-        Log.i(PROJECT_LOG_TAG, " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow+", y="+(shift / 2) + 6);
-        Log.i("bugfix: sailingToolsFragment", " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow+", y="+(shift / 2) + 6);
-
-        Log.i("bugfix: sailingToolsFragment", " arrow visibility1 = "+arrowDirectionIV.getVisibility());
-        arrowDirectionIV.setVisibility(View.VISIBLE);
-        Log.i("bugfix: sailingToolsFragment", " arrow visibility2 = "+arrowDirectionIV.getVisibility());
     }
 
     public void startTheRace() {

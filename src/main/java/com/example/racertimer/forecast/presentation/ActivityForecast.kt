@@ -119,12 +119,9 @@ class ActivityForecast : AppCompatActivity() {
     }
 
     private fun initLocationBroadcastListener() {
-        Log.i("bugfix: ActivityForecast", "init the broadcast listener")
         val locationBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) { // обработка интента
-                Log.i("bugfix: ActivityForecast", "broadcast listener received some intent")
                 if (intent.hasExtra("location")) { // если в сообщении есть геолокация
-                    Log.i("bugfix: ActivityForecast", "broadcast listener has a new location")
                     val currentUserLocation = (intent.extras!!["location"] as Location?)?.let {
                         LocationMapper.androidLocationToForecastLocation(it)
                     }
@@ -135,7 +132,6 @@ class ActivityForecast : AppCompatActivity() {
         val locationIntentFilter =
             IntentFilter(BROADCAST_ACTION) // прописываем интент фильтр для слушателя
         val a = registerReceiver(locationBroadcastReceiver, locationIntentFilter) // регистрируем слушатель
-        Log.i("bugfix: ActivityForecast", "registration of the broadcast receiver = $a")
     }
 
 // todo: make screen rotation
