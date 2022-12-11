@@ -75,7 +75,16 @@ public class SailingToolsFragment extends Fragment {
         arrowsLayoutCL.setRotation(135);// поворачиваем вьюшку
 
         initLocationHerald();
+
+
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        calculateArrowHeometricFromViewses(); // добавил еще один вызов при создании
+
     }
 
     private void findViews(View view) {
@@ -161,6 +170,7 @@ public class SailingToolsFragment extends Fragment {
         viewModel.getPercentVelocityLive().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer value) {
+                Log.i("bugfix: sailingToolsFragment", " percent velocity observer has new value");
                 updateArrowPositionByPercent(value);
             }
         });
@@ -279,25 +289,55 @@ public class SailingToolsFragment extends Fragment {
      */
 
     private void updateArrowPositionByPercent (int percent) { // обновление позиции стрелки скорости
-        if (fullSpeedSize == 0) calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
+        if (fullSpeedSize == 0) {
+            Log.i("bugfix: sailingToolsFragment", " calculating arrow sizes ");
+            calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
+        }
         float position = (float) ( ( percent * fullSpeedSize )/100); //+ centralParametersCL.getHeight());
         arrowVelocityIV.setY(fullSpeedSize - position);
     }
 
     private void calculateArrowHeometricFromViewses() { // готовимся к отображению динамических вьюшек
+        Log.i("bugfix: sailingToolsFragment", " starting calculate, high = "+ centralParametersCL.getHeight()+", arrow visibility = "+arrowDirectionIV.getVisibility());
+        Log.i("bugfix: sailingToolsFragment", " height of arrow = "+arrowDirectionIV.getHeight()+", width = "+ arrowDirectionIV.getWidth());
+        Log.i("bugfix: sailingToolsFragment", " position of arrow: X = "+arrowDirectionIV.getX()+", Y = "+ arrowDirectionIV.getY());
+        arrowDirectionIV.setVisibility(View.VISIBLE);
+        RetryTimer retryTimer = new RetryTimer(new RetryTimer.EndingTimerInterface() {
+            @Override
+            public void onTimerEnded() {
+                calculateArrowHeometricFromViewses();
+                Log.i("bugfix: sailingToolsFragment", " timeIsEnded, re-trying to calculate ");
+            }
+        });
+
+        if (centralParametersCL.getHeight() != 0 && arrowDirectionIV.getHeight()!=0) {
+            Log.i("bugfix: sailingToolsFragment", " going to perform calculate ");
+            performCalculate();
+        } else {
+            retryTimer.execute();
+            Log.i("bugfix: sailingToolsFragment", " view sizes = 0, calculation dropped ");
+        }
+    }
+
+    private void performCalculate() {
+        Log.i("bugfix: sailingToolsFragment", " performing calculate parameter = "+centralParametersCL.getHeight());
         int radiusArrowMin = centralParametersCL.getHeight()/2; // максимальный радиус
         int radiusArrowMax = arrowsLayoutCL.getHeight()/2; // минимальный радиус
         fullSpeedSize = radiusArrowMax - radiusArrowMin; // диапазон, в котором ходит стрелка
 
         int heightOfArrow = arrowDirectionIV.getHeight(); // высота стрелки направления
+        Log.i("bugfix: sailingToolsFragment", " height of arrow = "+arrowDirectionIV.getHeight()+", width = "+ arrowDirectionIV.getWidth());
         float scaleOfArrow = 1; // todo: to prevent DevideByZeroException. value 1 can be in correct!
         if (heightOfArrow!=0) scaleOfArrow = (float) (fullSpeedSize * 100 / heightOfArrow) / 100; // определем масштаб отображения стрелки
         arrowDirectionIV.setScaleY(scaleOfArrow); // выставляем масштаб
         int shift = (int) ((heightOfArrow * scaleOfArrow) - heightOfArrow); // смещение для компенсации изменения масштаба
         arrowDirectionIV.setY((shift / 2) + 6); // устанавливаем на позицию смещения + 6 для устранения разрыва между вьюшками
-        Log.i(PROJECT_LOG_TAG, " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow);
+        Log.i(PROJECT_LOG_TAG, " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow+", y="+(shift / 2) + 6);
+        Log.i("bugfix: sailingToolsFragment", " fullspeed size = "+fullSpeedSize+", scale = "+ scaleOfArrow+", y="+(shift / 2) + 6);
 
+        Log.i("bugfix: sailingToolsFragment", " arrow visibility1 = "+arrowDirectionIV.getVisibility());
         arrowDirectionIV.setVisibility(View.VISIBLE);
+        Log.i("bugfix: sailingToolsFragment", " arrow visibility2 = "+arrowDirectionIV.getVisibility());
     }
 
     public void startTheRace() {

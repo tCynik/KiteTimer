@@ -206,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("bugfix", "main: onResume");
     }
 
     public void setMapFragment (MapFragment mapFragment) {
@@ -697,6 +696,3 @@ public class MainActivity extends AppCompatActivity {
         return tracksFolderAddress;
     }
 }
-
-// TODO: make the track player to simulate riding recorded tracks on map, tools, and wind calculater.
-//  Implement one with the UI testing

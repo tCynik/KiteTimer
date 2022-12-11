@@ -22,7 +22,6 @@ class MapStatusManager(private val statusChanger: MapStatusInterface) {
             currentStatus = if (hasLandmark) MapStatus.READY
             else MapStatus.HAS_SIZES_NO_LANDMARK
         }
-        Log.i("bugfix: mapStatusManager", "current status is: $currentStatus")
         statusChanger.onStatusChanged(currentStatus)
     }
 }
