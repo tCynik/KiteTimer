@@ -44,7 +44,7 @@ public class MapManager {
     private ScreenWindowShifter screenWindowShifter;
     private ArrowMover arrowMover;
 
-    private double scale = 0.15;
+    private double scale;
     private boolean screenCenterPinnedOnPosition = true;
     private boolean scrollingIsManual = true;
 
@@ -66,12 +66,13 @@ public class MapManager {
     });
 
 
-    public MapManager(Context context) {
+    public MapManager(Context context, double scale) {
         this.context = context;
         currentMapStatus = MapStatus.NO_SIZES_NO_LANDMARK;
         loadedAndDisplayedTracks = new LinkedList<>();
         tracksWindowModel = new TracksWindowModel();
         initContentUpdater();
+        this.scale = scale;
     }
 
     public boolean isRecordingInProgress() {

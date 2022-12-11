@@ -38,7 +38,7 @@ public class ScreenWindowShifter {
         setLayout(tracksLayout, verticalMapScroll, horizontalMapScroll);
         this.trackGridCalculator = trackGridCalculator;
 
-        this.scale = scale;
+        this.scale = scale; // приходит из map manager
     }
 
     public void moveWindowCenterToPosition (Location location) {
@@ -63,7 +63,6 @@ public class ScreenWindowShifter {
     }
 
     public void onScaleChanged (double currentScale) {
-        Log.i("bugfix:", "windowShifter: scale changed");
         scale = currentScale;
         moveWindowCenterToPosition(lastLocation);
     }

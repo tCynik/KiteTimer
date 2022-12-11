@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
 
-    private double defaultMapScale = 0.1;
+    private double defaultMapScale = 1.0;
 
     private InfoBarStatusUpdater infoBarStatusUpdater;
     private InfoBarPresenter infoBarPresenter;
@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
         windChangedHerald = initWindChangeHerald();
         tracksDataManager = new TracksDataManager(this, tracksFolderAddress);
-        mapManager = new MapManager(this);
+        mapManager = new MapManager(this, defaultMapScale);
 
         infoBarStatusUpdater = new InfoBarStatusUpdater() {
             @Override

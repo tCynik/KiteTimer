@@ -28,7 +28,7 @@ public class MapUIToolsController {
     private boolean screenCenterPinnedOnPosition = true;
 
     public MapUIToolsController(double defaultMapScale) {
-        this.mapScale = (float) defaultMapScale;
+        this.mapScale = (float) defaultMapScale; // приходит из MainActivity но влияет на MapManager
         initContentUpdater();
     }
 
@@ -98,11 +98,18 @@ public class MapUIToolsController {
 
     /** Scale management block */
     private void onScaleIncreased () {
+        Log.i("bugfix: MapUiTools", "mapScale = "+mapScale);
+
         if (mapScale < maxScale) {
+            Log.i("bugfix: MapUiTools", "mapScale "+mapScale+" < maxScale "+maxScale);
             mapScale = mapScale + (mapScale * stepScaleChanging);
             mapManager.onScaleChanged(mapScale);
         }
-        else mapScale = maxScale;
+        else {
+            Log.i("bugfix: MapUiTools", "mapScale "+mapScale+" >= maxScale "+maxScale);
+            mapScale = maxScale;
+        }
+        Log.i("bugfix: MapUiTools", "map scale was increased to "+mapScale);
         Log.i(PROJECT_LOG_TAG, "map scale was increased to "+mapScale);
     }
 
@@ -111,6 +118,7 @@ public class MapUIToolsController {
             mapScale = mapScale - (mapScale * (stepScaleChanging/2));
             mapManager.onScaleChanged(mapScale);
         } else mapScale = minScale;
+        Log.i("bugfix: MapUiTools", "map scale was decreased to "+mapScale);
         Log.i(PROJECT_LOG_TAG, "map scale was decreased to "+mapScale);
     }
 }
