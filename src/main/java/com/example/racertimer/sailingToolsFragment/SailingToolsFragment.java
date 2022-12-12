@@ -16,7 +16,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
-import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.windDirection.WindProvider;
 import com.example.racertimer.LocationHeraldInterface;
 import com.example.racertimer.mainActivity.MainActivity;
 import com.example.racertimer.R;

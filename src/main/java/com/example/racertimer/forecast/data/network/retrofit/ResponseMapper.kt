@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.data.network.retrofit
 
+import com.example.racertimer.forecast.data.network.retrofit.response.TimeHourForecast
 import com.example.racertimer.forecast.domain.models.ForecastLine
 import java.util.*
 

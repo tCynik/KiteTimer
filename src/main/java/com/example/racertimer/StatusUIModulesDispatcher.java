@@ -3,7 +3,7 @@ package com.example.racertimer;
 import android.location.Location;
 import android.util.Log;
 
-import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.windDirection.WindProvider;
 import com.example.racertimer.windDirection.WindChangedHeraldInterface;
 
 public class StatusUIModulesDispatcher {

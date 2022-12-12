@@ -1,11 +1,12 @@
 package com.example.racertimer.forecast.data.network.retrofit
 
+import com.example.racertimer.forecast.data.network.retrofit.request.ForecastApiInterface
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RetrofitCreator {
+class ForecastRetrofitCreator {
     fun createRetrofit(baseUrl: String): ForecastApiInterface {
         val httpLoggingInterceptor = HttpLoggingInterceptor() // логгер отправки-получения
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY

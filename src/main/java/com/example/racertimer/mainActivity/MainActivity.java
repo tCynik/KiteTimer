@@ -35,7 +35,6 @@ import com.example.racertimer.InfoBarPresenter;
 import com.example.racertimer.Instruments.InfoBarStatusUpdater;
 import com.example.racertimer.Instruments.ManuallyWind;
 import com.example.racertimer.Instruments.RacingTimer;
-import com.example.racertimer.Instruments.WindProvider;
 import com.example.racertimer.LocationHeraldInterface;
 import com.example.racertimer.MapFragment;
 import com.example.racertimer.MenuFragment;
@@ -47,16 +46,19 @@ import com.example.racertimer.TimerFragment;
 import com.example.racertimer.location.LocationAccessDispatcher;
 import com.example.racertimer.location.LocationManagerInterface;
 import com.example.racertimer.location.LocationService;
+import com.example.racertimer.mainActivity.data.network.WeatherResultInterface;
+import com.example.racertimer.mainActivity.data.network.WindDirRequestUseCase;
 import com.example.racertimer.sailingToolsFragment.SailingToolsFragment;
+import com.example.racertimer.tracks.GeoTrack;
+import com.example.racertimer.tracks.TracksDataManager;
+import com.example.racertimer.tracks.TracksMenuFragment;
 import com.example.racertimer.tracks_map.MapManager;
 import com.example.racertimer.tracks_map.MapUIToolsController;
 import com.example.racertimer.tracks_map.scrolls.MapHorizontalScrollView;
 import com.example.racertimer.tracks_map.scrolls.MapScrollView;
-import com.example.racertimer.tracks.GeoTrack;
-import com.example.racertimer.tracks.TracksDataManager;
-import com.example.racertimer.tracks.TracksMenuFragment;
 import com.example.racertimer.windDirection.WindChangedHeraldInterface;
 import com.example.racertimer.windDirection.WindData;
+import com.example.racertimer.windDirection.WindProvider;
 
 import java.util.ArrayList;
 
@@ -106,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WindChangedHeraldInterface windChangedHerald;
     private WindProvider windProvider;
+    private WindDirRequestUseCase networkWindGetter;
 
     private WindData windData;
 
@@ -166,6 +169,18 @@ public class MainActivity extends AppCompatActivity {
         mapUITools = new MapUIToolsController(defaultMapScale);
         runStatusUIDispatcher();
         loadWindData();
+
+        networkWindGetter = new WindDirRequestUseCase(new WeatherResultInterface() {
+            @Override
+            public void gotResult(int windDir) {
+                onWindDirectionChanged(windDirection, WindProvider.FORECAST);
+            }
+
+            @Override
+            public void gorError(@NonNull String error) {
+
+            }
+        });
     }
 
     private void initInfoBar() {
@@ -318,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
                     windDirection = DEFAULT_WIND_DIRECTION;
                     provider = WindProvider.DEFAULT;
                 }
-                proceedWindChanging(windDirection, provider);
+                makeWindChanging(windDirection, provider);
             }
         };
 
@@ -601,10 +616,10 @@ public class MainActivity extends AppCompatActivity {
     private void onWindDirectionChanged (int updatedWindDirection, WindProvider provider) { // смена направления ветра
         if (windData == null) windData = new WindData(this);
         windData.saveWindData(updatedWindDirection, provider);
-        proceedWindChanging(updatedWindDirection, provider);
+        makeWindChanging(updatedWindDirection, provider);
     }
 
-    private void proceedWindChanging(int updatedWindDirection, WindProvider provider) {
+    private void makeWindChanging(int updatedWindDirection, WindProvider provider) {
         Log.i(PROJECT_LOG_TAG, "wind direction changed by provider: "+provider);
         Toast.makeText(this, "Wind direction was updated", Toast.LENGTH_LONG);
         windProvider = provider;
@@ -640,6 +655,7 @@ public class MainActivity extends AppCompatActivity {
         if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
             Toast.makeText(this, "GPS is online", Toast.LENGTH_LONG);
             this.location = location;
+            //networkWindGetter.execute(location);
             latitude = location.getLatitude();
 
             longitude = location.getLongitude();

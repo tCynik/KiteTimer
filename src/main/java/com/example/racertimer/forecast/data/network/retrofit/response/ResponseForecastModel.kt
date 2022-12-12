@@ -1,4 +1,4 @@
-package com.example.racertimer.forecast.data.network.retrofit
+package com.example.racertimer.forecast.data.network.retrofit.response
 
 import com.google.gson.annotations.SerializedName
 

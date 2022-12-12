@@ -4,7 +4,6 @@ import android.location.Location;
 import android.util.Log;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
-import com.example.racertimer.Instruments.WindProvider;
 
 /** в этом классе рассчитываем истинное направление ветра исходя из расчета разности ВМГ
  * для корректной работы требуется исходное значение ветра

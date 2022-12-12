@@ -3,7 +3,7 @@ package com.example.racertimer.tracks;
 import android.location.Location;
 
 import com.example.racertimer.LocationHeraldInterface;
-import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.windDirection.WindProvider;
 import com.example.racertimer.mainActivity.MainActivity;
 
 import java.text.SimpleDateFormat;

@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.example.racertimer.R;
 import com.example.racertimer.windDirection.WindChangedHeraldInterface;
+import com.example.racertimer.windDirection.WindProvider;
 
 /** класс ручного ввода направления ветра через диалоговое окно */
 public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {

@@ -2,13 +2,16 @@ package com.example.racertimer.forecast.data.network.retrofit
 
 import android.util.Log
 import com.example.racertimer.forecast.data.network.ResponseResultInterface
+import com.example.racertimer.forecast.data.network.retrofit.request.ForecastApiInterface
+import com.example.racertimer.forecast.data.network.retrofit.response.ResponseForecastModel
+import com.example.racertimer.forecast.data.network.retrofit.response.TimeHourForecast
 import com.example.racertimer.forecast.domain.models.ForecastLocation
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class RetrofitManager(val responseResultInterface: ResponseResultInterface, private val key: String) {
-    private val callback = object: Callback<ResponseForecastModel> {
+class RetrofitForecastManager(val responseResultInterface: ResponseResultInterface, private val key: String) {
+    private val forecastCallback = object: Callback<ResponseForecastModel> {
         override fun onResponse(
             call: Call<ResponseForecastModel>,
             response: Response<ResponseForecastModel>
@@ -25,10 +28,9 @@ class RetrofitManager(val responseResultInterface: ResponseResultInterface, priv
         }
     }
 
-    fun makeRequest(forecastApi: ForecastApiInterface, forecastLocation: ForecastLocation) {
+    fun makeForecastRequest(forecastApi: ForecastApiInterface, forecastLocation: ForecastLocation) {
         val lat = forecastLocation.latitude
         val long = forecastLocation.longitude
-
-        forecastApi.getDailyForecast(lat, long, key).enqueue(callback)
+        forecastApi.getDailyForecast(lat, long, key).enqueue(forecastCallback)
     }
 }

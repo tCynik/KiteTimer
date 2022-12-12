@@ -5,7 +5,6 @@ import android.os.CountDownTimer;
 import android.util.Log;
 
 import com.example.racertimer.Instruments.CoursesCalculator;
-import com.example.racertimer.Instruments.WindProvider;
 
 import java.util.Arrays;
 import java.util.Timer;

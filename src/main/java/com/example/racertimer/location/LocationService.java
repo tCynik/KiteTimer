@@ -17,7 +17,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.windDirection.WindProvider;
 import com.example.racertimer.windDirection.WindByCompareCalculator;
 import com.example.racertimer.windDirection.WindByStatistics;
 import com.example.racertimer.windDirection.WindChangedHeraldInterface;

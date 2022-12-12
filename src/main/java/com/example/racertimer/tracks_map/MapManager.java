@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.racertimer.LocationHeraldInterface;
-import com.example.racertimer.Instruments.WindProvider;
+import com.example.racertimer.windDirection.WindProvider;
 import com.example.racertimer.tracks_map.movers.ArrowMover;
 import com.example.racertimer.tracks_map.movers.ScreenWindowShifter;
 import com.example.racertimer.tracks_map.scrolls.MapHorizontalScrollView;

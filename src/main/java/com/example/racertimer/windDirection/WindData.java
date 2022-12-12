@@ -3,8 +3,6 @@ package com.example.racertimer.windDirection;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.racertimer.Instruments.WindProvider;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

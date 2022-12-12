@@ -1,10 +1,10 @@
 package com.example.racertimer.forecast.domain.use_cases
 
 import com.example.racertimer.forecast.data.network.ResponseResultInterface
-import com.example.racertimer.forecast.data.network.retrofit.ForecastApiInterface
+import com.example.racertimer.forecast.data.network.retrofit.request.ForecastApiInterface
 import com.example.racertimer.forecast.data.network.retrofit.RequestType
-import com.example.racertimer.forecast.data.network.retrofit.RetrofitCreator
-import com.example.racertimer.forecast.data.network.retrofit.RetrofitManager
+import com.example.racertimer.forecast.data.network.retrofit.ForecastRetrofitCreator
+import com.example.racertimer.forecast.data.network.retrofit.RetrofitForecastManager
 import com.example.racertimer.forecast.data.network.urlequest.URLRequestManager
 import com.example.racertimer.forecast.data.network.urlequest.UrlRequestMaker
 import com.example.racertimer.forecast.domain.models.ForecastLocation
@@ -23,7 +23,7 @@ private val requestType = RequestType.RETROFIT
 class UpdateForecastUseCase(private val toaster: ToasterInterface,
                             private val lastLocationRepository: LastLocationNameRepositoryInterface
 ) {
-    private var forecastApi: ForecastApiInterface = RetrofitCreator().createRetrofit(BASE_URL)
+    private var forecastApi: ForecastApiInterface = ForecastRetrofitCreator().createRetrofit(BASE_URL)
 
     var linesUpdater: LinesUpdater? = null
 
@@ -43,7 +43,7 @@ class UpdateForecastUseCase(private val toaster: ToasterInterface,
     }
 
     fun execute(forecastLocation: ForecastLocation) {
-        if (requestType == RequestType.URL) {
+        if (requestType == RequestType.URL) { // запрос через URL с ручным парсингом ответа
             toaster.makeToast("Updating forecast for location ${forecastLocation.name}")
 
             val requestString = UrlRequestMaker(WEBSITE_KEY).makeRequest(
@@ -51,8 +51,8 @@ class UpdateForecastUseCase(private val toaster: ToasterInterface,
                 longitude = forecastLocation.longitude)
             URLRequestManager(responseResult).makeRequest(requestString)
             lastLocationRepository.save(forecastLocation)
-        } else {
-            RetrofitManager(responseResult, WEBSITE_KEY).makeRequest(forecastApi, forecastLocation)
+        } else { // запрос через Retrofit
+            RetrofitForecastManager(responseResult, WEBSITE_KEY).makeForecastRequest(forecastApi, forecastLocation)
             lastLocationRepository.save(forecastLocation)
             toaster.makeToast("Updating forecast. Location is: ${forecastLocation.name}")
         }
