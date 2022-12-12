@@ -23,7 +23,7 @@ private val requestType = RequestType.RETROFIT
 class UpdateForecastUseCase(private val toaster: ToasterInterface,
                             private val lastLocationRepository: LastLocationNameRepositoryInterface
 ) {
-    private var forecastApi: ForecastApiInterface = ForecastRetrofitCreator().createRetrofit(BASE_URL)
+    private var forecastApi: ForecastApiInterface = ForecastRetrofitCreator().createForecastRetrofit(BASE_URL)
 
     var linesUpdater: LinesUpdater? = null
 

@@ -27,7 +27,9 @@ class RetrofitWeatherManager(resultCatcher: WeatherResultInterface, private val 
     }
 
     fun makeWeatherRequest(weatherApi: WeatherApiInterface, forecastLocation: ForecastLocation){
-
+        val lat = forecastLocation.latitude
+        val lon = forecastLocation.longitude
+        weatherApi.getWeather(lat = lat, lon = lon, key = key)
     }
 
 }
