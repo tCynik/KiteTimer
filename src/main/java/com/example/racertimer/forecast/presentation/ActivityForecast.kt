@@ -33,7 +33,11 @@ class ActivityForecast : AppCompatActivity() {
 
     private val locationSelector = object: SelectLocationInterface {
         override fun onLocationSelected(forecastLocation: ForecastLocation?) {
-            if (forecastLocation == null) forecastViewModel.updateForecastByUserLocation()
+            if (forecastLocation == null)
+            {
+                forecastViewModel.updateForecastByUserLocation()
+                Log.i("bugfix: ActivityForecast", "SelectLocationInterface selected null location")
+            }
             else {
                 forecastViewModel.updateForecastByLocation(forecastLocation)
             }

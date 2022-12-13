@@ -264,7 +264,7 @@ public class MapManager {
                 i++;
                 Log.i("bugfix", "mapManager: loaded the missed location #"+i);
                 if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
-                else dutyTrackLine.drawNextSegmentByLocation(nextLocation);
+                else if (dutyTrackLine != null) dutyTrackLine.drawNextSegmentByLocation(nextLocation);
             }
         }
     }

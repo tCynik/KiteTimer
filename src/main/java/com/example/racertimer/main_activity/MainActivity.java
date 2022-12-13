@@ -88,16 +88,13 @@ public class MainActivity extends AppCompatActivity {
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 
 
-    private int bearing, windDirection;// !!!ПРОВЕРИТЬ ПУСТЫШКИ
+    private int windDirection;
+    private Location location = null; // текущее положение
 
     private double defaultMapScale = 1.0;
 
     private InfoBarStatusUpdater infoBarStatusUpdater;
     private InfoBarPresenter infoBarPresenter;
-
-    private double latitude = 0;
-    private double longitude = 0; // координаты для получения прогноза
-    private Location location = null; // текущее положение
 
     private boolean isRaceStarted = false; // флаг того то, происходит сейчас гонка
 
@@ -482,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Location getCurrentLocation () {
-        Log.i("bugfix: main, getCurrentLocation", "currentLocation is null = " +(location == null));
+        Log.i(PROJECT_LOG_TAG, "currentLocation is null = " +(location == null));
         return location;
     }
 
@@ -575,7 +572,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onReceive(Context context, Intent intent) { // обработка интента
                     if (intent.hasExtra("location")) { // если в сообщении есть геолокация
                         Location location = (Location) intent.getExtras().get("location");
-                        processorChangedLocation(location); // отдаем точку на обработку в процессор
+                        processorChangedLocation(location); // отдаем геоданные на обработку
                         Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "getted location broadcast from locationService, " +
                                 "new velocity = " + (int)((Location) intent.getExtras().get("location")).getSpeed());
                     }
@@ -648,17 +645,12 @@ public class MainActivity extends AppCompatActivity {
     /** обработка вновь полученных геолокации */
     private void processorChangedLocation (Location location) { // обработчик новой измененной позиции
         Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, " Thread: "+Thread.currentThread().getName() + ". Activity race get new location ");
-        double tempVelocity;
 
-        if (latitude == 0 & longitude == 0) { // если это первое получение геолокации
-            Toast.makeText(this, "GPS is online", Toast.LENGTH_LONG);
+        if (this.location == null) { // если это первое получение геолокации
+            Toast.makeText(this, "GPS is online", Toast.LENGTH_LONG).show();
             this.location = location;
             networkWindGetter.execute(location);
-            latitude = location.getLatitude();
-
-            longitude = location.getLongitude();
             infoBarPresenter.updateTheBar("gps");
-            //TODO: for now the latitude/longitude are unuseful. think about to replace it on single boolean
         }
 
         statusUIModulesDispatcher.getLocationChanger().onLocationChanged(location);
@@ -674,7 +666,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void resetAllMaximums() {
         sailingToolsFragment.resetPressed();
-        Log.i(PROJECT_LOG_TAG, "reset VMG maximums");
     }
 
     public void endRace() {

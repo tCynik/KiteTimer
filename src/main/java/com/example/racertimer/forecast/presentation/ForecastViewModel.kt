@@ -57,6 +57,7 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
 
     fun updateUserLocation(currentLocation: ForecastLocation) {
         currentUserLocation = currentLocation
+
         if (awaitingUserLocation) {
             updateForecastByLocation(currentLocation)
             awaitingUserLocation = false
@@ -92,7 +93,9 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     }
 
     private fun checkIsAwaitingCurrentLocation(): Boolean {
-        if (currentUserLocation == null) awaitingUserLocation = true
+        if (currentUserLocation == null) {
+            awaitingUserLocation = true
+        }
         return awaitingUserLocation
     }
 

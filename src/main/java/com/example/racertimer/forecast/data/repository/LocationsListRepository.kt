@@ -8,7 +8,7 @@ import com.example.racertimer.forecast.presentation.interfaces.ToasterInterface
 import java.io.*
 
 private const val FILE_DIRECTORY = "repository.storage_files.locations_list.bin"
-private const val LOG_TAG = "racer_timer: LocationsListRepository"
+private const val LOG_TAG = "racer_timer_locations_list_repository"
 
 class LocationsListRepository(
     private val context: Context,
@@ -25,17 +25,17 @@ class LocationsListRepository(
         } catch (e: FileNotFoundException) {
             locationsList = LocationsAssetLoader(context).execute()
             saveList(locationsList)
-            Log.i("bugfix: listLocRepo", "fileNotFoundedException = $e")
+            Log.i(LOG_TAG, "fileNotFoundedException = $e")
         } catch (e: IOException) {
             toaster.makeToast("IO error while reading locations list")
-            Log.i("bugfix: listLocRepo", "IOException = $e")
+            Log.i(LOG_TAG, "IOException = $e")
 
         } catch (e: ClassNotFoundException) {
             toaster.makeToast("repository class loading error")
-            Log.i("bugfix: listLocRepo", "ClassNotFoundException = $e")
+            Log.i(LOG_TAG, "ClassNotFoundException = $e")
 
         }
-        Log.i("bugfix: listLocRepo", "loaded loc list in null = ${locationsList == null}")
+        Log.i(LOG_TAG, "loaded loc list in null = ${locationsList == null}")
         return locationsList
     }
 

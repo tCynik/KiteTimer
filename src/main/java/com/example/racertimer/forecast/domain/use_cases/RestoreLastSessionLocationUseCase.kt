@@ -19,7 +19,6 @@ class RestoreLastSessionLocationUseCase(
     fun execute() : ForecastLocation? {
         var forecastLocation: ForecastLocation?
         val lastLocationName: String? = lastLocationNameRepository.load()
-        Log.i("bugfix: RestoreLastSessionLocationUseCase", "restoring location for last session = ${lastLocationName}")
 
         forecastLocation = if (lastLocationName == null || lastLocationName == CURRENT_POSITION) {
             updaterUserLocation.getUserLocation()
