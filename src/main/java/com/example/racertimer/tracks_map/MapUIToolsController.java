@@ -7,9 +7,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import com.example.racertimer.LocationHeraldInterface;
-import com.example.racertimer.Instruments.CoursesCalculator;
-import com.example.racertimer.windDirection.WindProvider;
+import com.example.racertimer.main_activity.presentation.interfaces.LocationHeraldInterface;
+import com.example.racertimer.main_activity.domain.CoursesCalculator;
+import com.example.racertimer.main_activity.data.wind_direction.WindProvider;
 
 public class MapUIToolsController {
     private final static String PROJECT_LOG_TAG = "racer_timer_map_tools";

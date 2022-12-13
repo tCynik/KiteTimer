@@ -15,12 +15,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.racertimer.Instruments.CoursesCalculator;
-import com.example.racertimer.windDirection.WindProvider;
-import com.example.racertimer.LocationHeraldInterface;
-import com.example.racertimer.mainActivity.MainActivity;
+import com.example.racertimer.main_activity.domain.CoursesCalculator;
+import com.example.racertimer.main_activity.data.wind_direction.WindProvider;
+import com.example.racertimer.main_activity.presentation.interfaces.LocationHeraldInterface;
+import com.example.racertimer.main_activity.MainActivity;
 import com.example.racertimer.R;
-import com.example.racertimer.StatusUiUpdater;
+import com.example.racertimer.main_activity.presentation.interfaces.StatusUiUpdater;
 
 /**
  * фрагмент для отображения данных с текущими лавировочными параметрами

@@ -23,7 +23,7 @@ class RetrofitForecastManager(val responseResultInterface: ResponseResultInterfa
         }
 
         override fun onFailure(call: Call<ResponseForecastModel>, t: Throwable) {
-            Log.i("retrofit", "onfailure, error = $t")
+            Log.i("racer_timer_retrofit", "on Failure, error = $t")
             responseResultInterface.gotError(t.toString())
         }
     }

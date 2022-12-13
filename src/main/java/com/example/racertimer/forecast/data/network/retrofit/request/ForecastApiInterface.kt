@@ -12,11 +12,4 @@ interface ForecastApiInterface {
         @Query("lon") lon: Double,
         @Query("appid") key: String,
         @Query("units") units: String = "metric" ): Call<ResponseForecastModel>
-
-    @GET("./data/2.5/weather")
-    fun getWeather(
-        @Query("lat") lat: Double,
-        @Query("lon") lon: Double,
-        @Query("appid") key: String,
-        @Query("units") units: String = "metric" ): Call<ResponseForecastModel>
 }

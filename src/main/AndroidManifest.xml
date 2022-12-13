@@ -31,7 +31,7 @@
         </activity>
 
         <service
-            android:name=".location.LocationService"
+            android:name=".location_access.LocationService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -42,7 +42,7 @@
         </service>
 
         <activity
-            android:name=".mainActivity.MainActivity"
+            android:name=".main_activity.MainActivity"
             android:exported="true"
             android:screenOrientation="reverseLandscape">
             <intent-filter>

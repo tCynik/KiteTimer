@@ -8,8 +8,8 @@ import android.widget.ScrollView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.racertimer.tracks_map.MapManager;
-import com.example.racertimer.tracks_map.TrackGridCalculator;
-import com.example.racertimer.tracks_map.TracksWindowModel;
+import com.example.racertimer.tracks_map.domain.TrackGridCalculator;
+import com.example.racertimer.tracks_map.presentation.TracksWindowModel;
 
 public class ScreenWindowShifter {
     private final static String PROJECT_LOG_TAG = "racer_timer_draw";

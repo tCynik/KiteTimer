@@ -11,4 +11,7 @@
     <string name="current_position">current</string>
     <string name="downwind">downwind</string>
     <string name="update">update</string>
+    <string name="project_log_tag">racer_timer</string>
+    <string name="broadcast_action">com.example.racertimer.action.new_location</string>
+    <string name="wind_dir_upd_from_net">wind direction updated from network</string>
 </resources>

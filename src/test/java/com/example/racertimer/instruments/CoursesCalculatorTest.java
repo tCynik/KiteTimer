@@ -3,7 +3,7 @@ package com.example.racertimer.instruments;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import com.example.racertimer.Instruments.CoursesCalculator;
+import com.example.racertimer.main_activity.domain.CoursesCalculator;
 
 import org.junit.Test;
 

@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import android.os.SystemClock;
 
+import com.example.racertimer.info_bar.InfoBarPresenter;
+import com.example.racertimer.info_bar.TextViewController;
+
 import org.junit.Test;
 
 import java.util.ArrayList;

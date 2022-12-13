@@ -1,11 +1,6 @@
 package com.example.racertimer.sailingToolsFragment
 
-import android.content.Context
-import android.media.AudioAttributes
-import android.media.SoundPool
-import com.example.racertimer.Instruments.CoursesCalculator
-import com.example.racertimer.R
-import com.example.racertimer.multimedia.BeepSounds
+import com.example.racertimer.main_activity.domain.CoursesCalculator
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin

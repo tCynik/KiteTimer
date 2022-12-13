@@ -9,6 +9,8 @@ import android.location.Location;
 import android.util.Log;
 import android.view.View;
 
+import com.example.racertimer.tracks_map.domain.TrackGridCalculator;
+
 public class TrackPaintingView extends View {
     private final static String PROJECT_LOG_TAG = "racer_timer_draw";
 
