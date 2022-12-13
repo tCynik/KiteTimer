@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.presentation
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.racertimer.forecast.domain.instruments.LocationsListOpener
@@ -45,6 +46,7 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     init {
         updateForecastUseCase.initLinesUpdater(linesUpdater)
         updateForecastWhenActivityOpened()
+        if (currentForecastLocation == null) locationNameLive.value = "Select location"
     }
 
     private fun updateForecastWhenActivityOpened() {
@@ -73,12 +75,6 @@ class ForecastViewModel(lastLocationNameRepository: LastLocationNameRepositoryIn
     fun getLocationsList(): LocationsList? {
         return locationsListOpener.execute()
     }
-
-//    fun openEmptyLocationList(): LocationsList {
-//
-//
-//
-//    }
 
     fun updateForecastByUserLocation() {
         if (currentUserLocation == null) awaitingUserLocation = true

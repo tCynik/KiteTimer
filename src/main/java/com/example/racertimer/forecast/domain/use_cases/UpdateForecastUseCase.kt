@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.domain.use_cases
 
+import android.util.Log
 import com.example.racertimer.forecast.data.network.ResponseResultInterface
 import com.example.racertimer.forecast.data.network.retrofit.request.ForecastApiInterface
 import com.example.racertimer.forecast.data.network.retrofit.RequestType

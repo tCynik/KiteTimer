@@ -1,5 +1,6 @@
 package com.example.racertimer.forecast.domain.use_cases
 
+import android.util.Log
 import com.example.racertimer.forecast.data.LocationSelectorByNameImpl
 import com.example.racertimer.forecast.domain.interfaces.LastLocationNameRepositoryInterface
 import com.example.racertimer.forecast.domain.interfaces.LocationsListRepositoryInterface
@@ -18,6 +19,8 @@ class RestoreLastSessionLocationUseCase(
     fun execute() : ForecastLocation? {
         var forecastLocation: ForecastLocation?
         val lastLocationName: String? = lastLocationNameRepository.load()
+        Log.i("bugfix: RestoreLastSessionLocationUseCase", "restoring location for last session = ${lastLocationName}")
+
         forecastLocation = if (lastLocationName == null || lastLocationName == CURRENT_POSITION) {
             updaterUserLocation.getUserLocation()
         } else {

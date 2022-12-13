@@ -536,7 +536,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startLocationService() {
         intentLocationService = new Intent(this, LocationService.class);
-        intentLocationService.setPackage("com.example.racertimer.Instruments");
+        intentLocationService.setPackage("com.example.racertimer.location_access");
         startService(intentLocationService);
     }
 

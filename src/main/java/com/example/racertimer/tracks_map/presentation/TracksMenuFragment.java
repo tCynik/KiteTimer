@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class TracksMenuFragment extends Fragment {
+    private final static String NO_SAVED_TRACK = "no saved tracks";
     private MainActivity mainActivity;
     private TracksDataManager tracksDataManager;
     private MapManager mapManager;
@@ -92,7 +93,6 @@ public class TracksMenuFragment extends Fragment {
             public void onClick(View v) {
                 TextView trackNameTV = selectedLine.findViewById(R.id.tracks_name);
                 String nameOfTheTrack = (String) trackNameTV.getText();
-
                 boolean trackShownOnMap = checkIsTrackOnMap(selectedLine);
                 if (trackShownOnMap) {
                     mapManager.hideTrackOnMap(nameOfTheTrack);
@@ -141,7 +141,7 @@ public class TracksMenuFragment extends Fragment {
                     fillNextLine(trackName, trackDuration, trackDiplayedStatus);
                 }
             } else {
-                fillNextLine("no saved tracks", "", "");
+                fillNextLine(NO_SAVED_TRACK, "", "");
             }
         }
     }
@@ -169,7 +169,7 @@ public class TracksMenuFragment extends Fragment {
 
     private void clearListAndFillTop () {
         trackLineToBeFilled.removeAllViewsInLayout();
-        fillNextLine("name", "duration", "on map");
+        fillNextLine("name", "duration", "");
     }
 
     private void fillNextLine(String name, String duration, String displayedStatus) {
@@ -201,7 +201,9 @@ public class TracksMenuFragment extends Fragment {
             clearAnySelectedLines();
             selectedLine = clickedItem;
             selectedLine.setBackgroundColor(Color.BLUE);
-            setButtonsVisibility(View.VISIBLE);
+            if (tracksDatabase.isItAnyTracks()) {
+                setButtonsVisibility(View.VISIBLE);
+            }
             if (checkIsTrackOnMap(selectedLine)) btnShow.setText("Hide");
             else btnShow.setText("Show");
         }

@@ -35,6 +35,7 @@ class ForecastLinesAdapter:  RecyclerView.Adapter<ForecastLinesAdapter.LinesView
             forecastStringWind.text = (line.windSpeed + "/")
             forecastStringGust.text = line.windGust
             forecastStringDir.text = line.windDir
+            forecastStringArrow.rotation = line.windDir.toFloat()//(line.windDir as Float)
 
             coloringDayNight(isItDay = checkDaytime(line.time),
                 forecastStringTime,
@@ -62,7 +63,7 @@ class ForecastLinesAdapter:  RecyclerView.Adapter<ForecastLinesAdapter.LinesView
         else
             views.forEach { e ->
                 e.setTextColor(android.graphics.Color.GRAY)
-                e.setBackgroundColor(R.color.color_primary)
+                e.setBackgroundColor(android.graphics.Color.BLACK)
             }
     }
 }
