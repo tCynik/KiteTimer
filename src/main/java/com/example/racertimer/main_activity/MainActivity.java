@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
     public MapManager mapManager;
     private String tracksFolderAddress = "\ntracks\nsaved\n";
 
-
     private int windDirection;
     private Location location = null; // текущее положение
 
@@ -487,7 +486,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() { // в случае нажатия кнопки назад диалог по переходу в главное меню
         AlertDialog.Builder confurmingRaceEnd = new AlertDialog.Builder(this); // строитель диалога
-        confurmingRaceEnd.setMessage("End the race?")
+        confurmingRaceEnd.setMessage("Are you sure you want to close the application?")
                 .setCancelable(false)
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -505,7 +504,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         AlertDialog alertDialog = confurmingRaceEnd.create(); // создание диалога
-        alertDialog.setTitle("Ending the race"); // заголовок
+        alertDialog.setTitle("Closing the app"); // заголовок
         alertDialog.show(); // отображение диалога
     }
 

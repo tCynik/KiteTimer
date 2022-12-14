@@ -61,34 +61,52 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
-        android:orientation="horizontal"
+        android:layout_margin="5dp"
+
+        android:orientation="vertical"
         android:gravity="center">
-
-        <TextView
-            android:id="@+id/timer_fragment_tv"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/button_instant_constraint"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_margin="10dp"
-            android:textSize="100sp"
-            android:layout_weight="2"
-            android:textColor="@color/red"
-            android:text="00:00" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <Button
+                android:id="@+id/instant_start_race"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:rotation="0"
+                android:text="Instant START"
+                android:layout_weight="1"
+                android:layout_gravity="center"/>
 
-        <Button
-            android:id="@+id/instant_start_race"
-            android:layout_width="0dp"
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:text="Instant START"
-            android:layout_weight="1"
-            android:layout_gravity="center"/>
+            android:layout_marginBottom="30sp"
+            android:layout_marginStart="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+            <TextView
+                android:id="@+id/timer_fragment_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleY="0.8"
+                android:gravity="center"
+                android:textSize="100sp"
+                android:textColor="@color/red"
+                android:text="00:00" />
 
-    </LinearLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 

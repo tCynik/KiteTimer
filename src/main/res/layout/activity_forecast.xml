@@ -48,9 +48,8 @@
 
         <LinearLayout
             android:id="@+id/title_layout"
-            android:paddingTop="10dp"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/location_select"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

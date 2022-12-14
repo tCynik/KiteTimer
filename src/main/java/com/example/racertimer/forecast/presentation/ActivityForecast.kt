@@ -21,7 +21,6 @@ import com.example.racertimer.forecast.domain.use_cases.SelectLocationByPopupUse
 import com.example.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 import com.example.racertimer.forecast.presentation.models_mappers.LocationMapper
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.io.InputStream
 
 private const val CURRENT_POSITION = "current position"//"DEFAULT"
 const val BROADCAST_ACTION =
@@ -70,7 +69,6 @@ class ActivityForecast : AppCompatActivity() {
                 selectLocationByPopupUseCase.execute(buttonSelectLocation, locationsList)
             }
         })
-
         fillTitle(layoutDataBinding.titleLayout)
         updateLocationFromIntent()
         // todo: in release remove fun firstTimeLaunch and locations coordinates hardcode below:
