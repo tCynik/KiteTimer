@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".forecast.app.App"
+        android:name="com.tcynik.racertimer.forecast.app.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -21,7 +21,7 @@
         tools:targetApi="p">
 
         <activity
-            android:name=".forecast.presentation.ActivityForecast"
+            android:name="com.tcynik.racertimer.forecast.presentation.ActivityForecast"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.ActivityForecast2"  />
@@ -31,7 +31,7 @@
         </activity>
 
         <service
-            android:name=".location_access.LocationService"
+            android:name="com.tcynik.racertimer.location_access.LocationService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -42,7 +42,7 @@
         </service>
 
         <activity
-            android:name=".main_activity.MainActivity"
+            android:name="com.tcynik.racertimer.main_activity.MainActivity"
             android:exported="true"
             android:screenOrientation="reverseLandscape">
             <intent-filter>

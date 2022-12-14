@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".tracks_map.presentation.MapFragment">
+    tools:context="com.tcynik.racertimer.tracks_map.presentation.MapFragment">
 
     <Button
         android:id="@+id/btn_tracks_menu"
@@ -15,7 +15,7 @@
         android:text="Tracks"/>
 
 
-<com.example.racertimer.tracks_map.presentation.scrolls.MapScrollView
+<com.tcynik.racertimer.tracks_map.presentation.scrolls.MapScrollView
     android:id="@+id/window_map"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     android:scrollbars="none">
-    <com.example.racertimer.tracks_map.presentation.scrolls.MapHorizontalScrollView
+    <com.tcynik.racertimer.tracks_map.presentation.scrolls.MapHorizontalScrollView
         android:id="@+id/horizontal_map_scroll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -50,8 +50,8 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
 
-    </com.example.racertimer.tracks_map.presentation.scrolls.MapHorizontalScrollView>
-</com.example.racertimer.tracks_map.presentation.scrolls.MapScrollView>
+    </com.tcynik.racertimer.tracks_map.presentation.scrolls.MapHorizontalScrollView>
+</com.tcynik.racertimer.tracks_map.presentation.scrolls.MapScrollView>
 
     <ImageView
         android:id="@+id/wind_direction_arrow_on_map"

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.racertimer.main_activity.MainActivity"
+    tools:context="com.example.racertimer.com.tcynik.racertimer.main_activity.MainActivity"
     >
     <item
         android:id="@+id/action_settings"
