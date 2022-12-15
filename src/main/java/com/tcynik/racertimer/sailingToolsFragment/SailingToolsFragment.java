@@ -15,14 +15,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.tcynik.racertimer.main_activity.domain.CoursesCalculator;
-import com.tcynik.racertimer.main_activity.data.wind_direction.WindProvider;
-import com.tcynik.racertimer.main_activity.presentation.interfaces.LocationHeraldInterface;
-import com.tcynik.racertimer.main_activity.MainActivity;
 import com.example.racertimer.R;
-import com.tcynik.racertimer.main_activity.presentation.interfaces.StatusUiUpdater;
+import com.tcynik.racertimer.main_activity.MainActivity;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindProvider;
 import com.tcynik.racertimer.main_activity.domain.CoursesCalculator;
+import com.tcynik.racertimer.main_activity.presentation.interfaces.LocationHeraldInterface;
+import com.tcynik.racertimer.main_activity.presentation.interfaces.StatusUiUpdater;
 
 /**
  * фрагмент для отображения данных с текущими лавировочными параметрами
@@ -34,9 +32,8 @@ public class SailingToolsFragment extends Fragment {
     private ViewModel viewModel;
 
     VmgBeeper beeperVMG;
-    //BeepSounds voiceover;
     ConstraintLayout arrowsLayoutCL, centralParametersCL, windLayoutCL;
-    ImageView arrowVelocityIV, arrowDirectionIV2, arrowDirectionIV;
+    ImageView arrowVelocityIV, arrowDirectionIV;
     TextView velocityTV, bearingTV, windTV, velocityMadeGoodTV, bestDownwindTV, maxVelocityTV, bestUpwindTV, courseToWindTV;
 
     private int fullSpeedSize = 0; // максимальный ход стрелки
@@ -44,8 +41,6 @@ public class SailingToolsFragment extends Fragment {
     private double vmgBeeperSensitivity = 0.5; // чувствительность бипера - с какого % от максимального ВМГ начинаем пикать
 
     private boolean voiceoverIsMuted = false; // переменная отключен ли звук пищалки
-
-    private boolean isRaceStarted  = false;
 
     private MainActivity mainActivity;
 
@@ -85,7 +80,7 @@ public class SailingToolsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        calculateArrowHeometricFromViewses(); // добавил еще один вызов при создании
+        calculateArrowGeometricFromViews(); // добавил еще один вызов при создании
 
     }
 
@@ -255,8 +250,6 @@ public class SailingToolsFragment extends Fragment {
 
             switch (provider) {
                 case DEFAULT:
-                    windTV.setTextColor(Color.RED);
-                    break;
                 case HISTORY:
                     windTV.setTextColor(Color.RED);
                     break;
@@ -291,35 +284,32 @@ public class SailingToolsFragment extends Fragment {
 
     private void updateArrowPositionByPercent (int percent) { // обновление позиции стрелки скорости
         if (fullSpeedSize == 0) {
-            calculateArrowHeometricFromViewses(); // получаем начальную позицию из размеров вьюшек
+            calculateArrowGeometricFromViews(); // получаем начальную позицию из размеров вьюшек
         }
-        float position = (float) ( ( percent * fullSpeedSize )/100); //+ centralParametersCL.getHeight());
-        arrowVelocityIV.setY(fullSpeedSize - position);
+        float position = (float) ( ( (100 - percent) * fullSpeedSize )/100); //+ centralParametersCL.getHeight());
+        arrowVelocityIV.setY(position);
     }
 
-    private void calculateArrowHeometricFromViewses() { // готовимся к отображению динамических вьюшек
+    private void calculateArrowGeometricFromViews() { // готовимся к отображению динамических вьюшек
         RetryTimer retryTimer = new RetryTimer(new RetryTimer.EndingTimerInterface() {
             @Override
             public void onTimerEnded() { // todo: переделать Scope (цикличная работа только в рамках Ж.Ц. Activity)
-                calculateArrowHeometricFromViewses();
+                calculateArrowGeometricFromViews();
             }
         });
 
-        if (centralParametersCL.getHeight() != 0 && arrowDirectionIV.getHeight()!=0) {
-            fullSpeedSize = arrowDirectionIV.getHeight(); // диапазон, в котором ходит стрелка
-
+        if (centralParametersCL.getHeight() != 0 ) {
+            fullSpeedSize = (int)(arrowsLayoutCL.getHeight()/(5.6)); // диапазон, в котором ходит стрелка
         } else {
             retryTimer.execute();
         }
     }
 
     public void startTheRace() {
-        isRaceStarted = true;
         beeperVMG.setRaceStatus(true);
     }
 
     public void stopTheRace () {
-        isRaceStarted = false;
         beeperVMG.setRaceStatus(false);
     }
 }
