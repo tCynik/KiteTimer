@@ -104,7 +104,6 @@ public class MapManager {
 
     private void makeTrackGirdCalculator (Location location) {
         trackGridCalculator = new TrackGridCalculator(
-                //this,
                 location,
                 tracksWindowModel);
         trackGridCalculator.setTracksLayout(tracksLayout);
@@ -208,27 +207,21 @@ public class MapManager {
 
     public void onLocationChanged(Location location) {
         Log.i(PROJECT_LOG_TAG+"/MapManager", "new location in Track Painter, speed is: " +location.getSpeed());
-
         int speed = (int) (location.getSpeed()*3.6);
-        //if (speed > 5) { // todo: зачем создание калькулятора и шифтера при таком условии? Карта не работает!
-        if (true) {
-            if (currentMapStatus == MapStatus.HAS_SIZES_NO_LANDMARK) {
-            //if (trackGridCalculator == null) {
-                mapStatusManager.gotLandmark();
-                Log.i(PROJECT_LOG_TAG, " trackGirdCalculator is null, making new one ");
-                makeTrackGirdCalculator(location);
-                screenWindowShifter = new ScreenWindowShifter(
-                        this,
-                        trackGridCalculator,
-                        tracksLayout,
-                        windowMap,
-                        horizontalMapScroll,
-                        scale);
-            }
+        if (currentMapStatus == MapStatus.HAS_SIZES_NO_LANDMARK) {
+            mapStatusManager.gotLandmark();
+            Log.i(PROJECT_LOG_TAG, " trackGirdCalculator is null, making new one ");
+            makeTrackGirdCalculator(location);
+            screenWindowShifter = new ScreenWindowShifter(
+                    this,
+                    trackGridCalculator,
+                    tracksLayout,
+                    windowMap,
+                    horizontalMapScroll,
+                    scale);
         }
 
         if (currentMapStatus == MapStatus.READY) {
-        //if (trackGridCalculator != null) {
             arrowMover.moveArrowToPosition(location);
             if (screenCenterPinnedOnPosition) {
                 scrollingIsManual = false;
@@ -238,12 +231,10 @@ public class MapManager {
             if (isRecordingInProgress) {
                 currentTrackLine.drawNextSegmentByLocation(location);
             } else {
-                if (speed >5) {
-                    if (dutyTrackLine == null) {
-                        beginNewDutyTrackDrawing(location);
-                    }
-                    dutyTrackLine.drawNextSegmentByLocation(location);
+                if (dutyTrackLine == null) {
+                    beginNewDutyTrackDrawing(location);
                 }
+                dutyTrackLine.drawNextSegmentByLocation(location);
             }
         }
         currentLocation = location;
@@ -255,14 +246,12 @@ public class MapManager {
             boolean hasIMoved = false;
             for (Location nextLocation: missedLocations) {
                 if (currentLocation.distanceTo(nextLocation) > MINIMAL_DIST_MOVE) {
-                    Log.i("bugfix", "mapManager: missed location's distance = "+currentLocation.distanceTo(nextLocation));
                     hasIMoved = true;
                     break;
                 }
             }
             if (hasIMoved) for (Location nextLocation: missedLocations) {
                 i++;
-                Log.i("bugfix", "mapManager: loaded the missed location #"+i);
                 if (isRecordingInProgress) currentTrackLine.drawNextSegmentByLocation(nextLocation);
                 else if (dutyTrackLine != null) dutyTrackLine.drawNextSegmentByLocation(nextLocation);
             }
@@ -324,7 +313,7 @@ public class MapManager {
             if (currentLocation != null) {
                 scrollingIsManual = false;
                 if (screenCenterPinnedOnPosition) {
-                    screenWindowShifter.onScaleChanged(scale); //todo: bug: shifter is null!
+                    screenWindowShifter.onScaleChanged(scale);
                 }
 
                 tracksLayout.setScaleX((float)scale);

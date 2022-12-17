@@ -178,6 +178,7 @@ public class SailingToolsFragment extends Fragment {
             public void onClick(View view) {
                 try {
                     MainActivity mainActivity = (MainActivity) getActivity();
+                    assert mainActivity != null;
                     mainActivity.manuallyWindManager();
                     Log.i(PROJECT_LOG_TAG, " windManager in fragment pressed ");
                 } catch (Exception e) {
@@ -190,6 +191,7 @@ public class SailingToolsFragment extends Fragment {
     private void passInstanceToMain(){
         if (mainActivity == null) {
             mainActivity = (MainActivity) getActivity();
+            assert mainActivity != null;
             mainActivity.setSailingToolsFragment(this);
         }
     }

@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 
 import com.tcynik.racertimer.tracks_map.domain.TrackGridCalculator;
-import com.tcynik.racertimer.tracks_map.domain.TrackGridCalculator;
 
 public class TrackPaintingView extends View {
     private final static String PROJECT_LOG_TAG = "racer_timer_draw";
