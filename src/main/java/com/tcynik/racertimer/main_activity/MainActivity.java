@@ -381,6 +381,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
+                        tracksDataManager.resetTrackPoints();
                     }
                 })
                 .setNeutralButton("delete track", new DialogInterface.OnClickListener() {

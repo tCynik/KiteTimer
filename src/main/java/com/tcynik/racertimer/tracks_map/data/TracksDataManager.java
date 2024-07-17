@@ -2,11 +2,10 @@ package com.tcynik.racertimer.tracks_map.data;
 
 import android.location.Location;
 
-import com.tcynik.racertimer.main_activity.presentation.interfaces.LocationHeraldInterface;
-import com.tcynik.racertimer.main_activity.data.wind_direction.WindProvider;
 import com.tcynik.racertimer.main_activity.MainActivity;
-import com.tcynik.racertimer.tracks_map.data.models.GeoTrack;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindProvider;
+import com.tcynik.racertimer.main_activity.presentation.interfaces.LocationHeraldInterface;
+import com.tcynik.racertimer.tracks_map.data.models.GeoTrack;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +50,7 @@ public class TracksDataManager {
     }
 
     public void beginRecordTrack () {
+        resetTrackPoints();
         isTrackRecordingProgress = true;
     }
 
@@ -116,11 +116,16 @@ public class TracksDataManager {
         GeoTrack trackToBeSaved = new GeoTrack();
         trackToBeSaved.setTrackName(trackNameToBeSaved);
         trackToBeSaved.setPointsListToSave(trackPoints);
+        resetTrackPoints();
 
         TracksDatabase writedTracks = loadTracksDatabase();
         writedTracks.addTrack(trackToBeSaved);
         tracksSaver.saveTracksDatabase(writedTracks);
         return trackToBeSaved;
+    }
+
+    public void resetTrackPoints(){
+        trackPoints = new ArrayList<>();
     }
 
     public void deleteTrackByName (String nameTractToBeDeleted) {
