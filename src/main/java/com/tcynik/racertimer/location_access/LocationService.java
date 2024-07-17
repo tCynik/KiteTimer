@@ -17,10 +17,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import com.tcynik.racertimer.main_activity.data.wind_direction.WindProvider;
-import com.tcynik.racertimer.main_activity.data.wind_direction.WindByCompareCalculator;
-import com.tcynik.racertimer.main_activity.data.wind_direction.WindByStatistics;
-import com.tcynik.racertimer.main_activity.data.wind_direction.WindChangedHeraldInterface;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindByCompareCalculator;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindByStatistics;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindChangedHeraldInterface;
@@ -209,6 +205,10 @@ public class LocationService extends Service {
             tempLocationsData = new ArrayList<>();
             Log.i(PROJECT_LOG_TAG, " app is paused ");
         }
+    }
+
+    public void startTracking(){
+        tempLocationsData = new ArrayList<>();
     }
 
     private void addLocationToTempData(Location location) {

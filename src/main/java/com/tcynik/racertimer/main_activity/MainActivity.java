@@ -684,6 +684,7 @@ public class MainActivity extends AppCompatActivity {
         undeployTimerFragment();
         infoBarPresenter.updateTheBar("start");
         locationService.setCalculatorStatus(true);
+        locationService.startTracking();
         btnStopStartTimerAndStopRace.setText("STOP RACE");
         startRacingTimer();
     }
