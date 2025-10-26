@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -27,11 +28,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.racertimer.R;
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.info_bar.InfoBarPresenter;
 import com.tcynik.racertimer.info_bar.InfoBarStatusUpdater;
 import com.tcynik.racertimer.info_bar.TextViewController;
@@ -140,11 +142,13 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
             public void askPermissionGPS() {
-                requestPermissions(new String[]{
-                                Manifest.permission.ACCESS_COARSE_LOCATION,
-                                Manifest.permission.ACCESS_FINE_LOCATION},
-                        100); // ключ 100, такой же как ниже
-            }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            requestPermissions(new String[]{
+                                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                                            Manifest.permission.ACCESS_FINE_LOCATION},
+                                    100); // ключ 100, такой же как ниже
+                        }
+                    }
 
             @Override
             public void finishApp() {
@@ -611,7 +615,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         IntentFilter locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
-        registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(locationBroadcastReceiver, locationIntentFilter, ContextCompat.RECEIVER_NOT_EXPORTED); // регистрируем слушатель
+        }
     }
 
     private void changeWindDirAndSave(int updatedWindDirection, WindProvider provider) { // смена направления ветра

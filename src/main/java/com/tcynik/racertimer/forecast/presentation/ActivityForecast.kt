@@ -1,5 +1,6 @@
 package com.tcynik.racertimer.forecast.presentation
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.racertimer.R
-import com.example.racertimer.databinding.ActivityForecastBinding
+import com.tcynik.racertimer.R
+import com.tcynik.racertimer.databinding.ActivityForecastBinding
 import com.tcynik.racertimer.forecast.domain.models.ForecastLine
 import com.tcynik.racertimer.forecast.domain.models.ForecastLocation
 import com.tcynik.racertimer.forecast.domain.use_cases.SelectLocationByPopupUseCase
@@ -35,7 +36,7 @@ class ActivityForecast : AppCompatActivity() {
             if (forecastLocation == null)
             {
                 forecastViewModel.updateForecastByUserLocation()
-                Log.i("bugfix: ActivityForecast", "SelectLocationInterface selected null location")
+                Log.i("d_ActivityForecast", "SelectLocationInterface selected null location")
             }
             else {
                 forecastViewModel.updateForecastByLocation(forecastLocation)
@@ -62,7 +63,7 @@ class ActivityForecast : AppCompatActivity() {
             val locationsList = forecastViewModel.getLocationsList()
             if (locationsList != null) {
                 if (locationsList.size == 0) {
-                    Log.i("bugfix: activityForecast", "location list is empty!")
+                    Log.i("b_activityForecast", "location list is empty!")
 //                    locationsList = forecastViewModel.openEmptyLocationList()
 //                    firstTimeLaunch(saveLocationsListUseCase)
                 }
@@ -120,6 +121,7 @@ class ActivityForecast : AppCompatActivity() {
                 }
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun initLocationBroadcastListener() {
         val locationBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) { // обработка интента

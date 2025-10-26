@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.racertimer.databinding.ForecastLineBinding
+import com.tcynik.racertimer.databinding.ForecastLineBinding
 import com.tcynik.racertimer.forecast.domain.models.ForecastLine
 import java.text.SimpleDateFormat
 

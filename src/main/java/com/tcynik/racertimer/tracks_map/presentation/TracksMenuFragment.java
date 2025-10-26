@@ -13,16 +13,13 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.main_activity.MainActivity;
-import com.example.racertimer.R;
+import com.tcynik.racertimer.tracks_map.MapManager;
 import com.tcynik.racertimer.tracks_map.data.GPSTrackLoader;
 import com.tcynik.racertimer.tracks_map.data.TracksDataManager;
 import com.tcynik.racertimer.tracks_map.data.TracksDatabase;
 import com.tcynik.racertimer.tracks_map.data.models.GeoTrack;
-import com.tcynik.racertimer.tracks_map.MapManager;
-import com.tcynik.racertimer.tracks_map.MapManager;
-import com.tcynik.racertimer.tracks_map.data.TracksDataManager;
-import com.tcynik.racertimer.tracks_map.data.TracksDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

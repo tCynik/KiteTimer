@@ -13,9 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.example.racertimer.R;
-import com.tcynik.racertimer.info_bar.InfoBarStatusUpdater;
-import com.tcynik.racertimer.main_activity.MainActivity;
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.info_bar.InfoBarStatusUpdater;
 import com.tcynik.racertimer.main_activity.MainActivity;
 

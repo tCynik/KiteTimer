@@ -4,8 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.PopupMenu
-import com.example.racertimer.R
-//import com.example.racertimer.R
+import com.tcynik.racertimer.R
 import com.tcynik.racertimer.forecast.domain.models.LocationsList
 import com.tcynik.racertimer.forecast.presentation.interfaces.SelectLocationInterface
 

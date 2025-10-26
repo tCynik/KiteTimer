@@ -3,7 +3,7 @@ package com.tcynik.racertimer.multimedia;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.racertimer.R;
+import com.tcynik.racertimer.R;
 
 public class BeepSounds extends VoiceoverMain {
     private static final int PRIORITY_BEEP = 2; // звуки индикации положения VMG
@@ -18,7 +18,7 @@ public class BeepSounds extends VoiceoverMain {
     }
 
     public void playRepeatSound (int percentVMG) { // проигрывание циклических звуков - пищалка ВМГ
-        Log.i("racer_timer_tools_fragment", " called playRepeatSound with percent = "+percentVMG+", mute = "+vmgIsMuted);
+        Log.i("tools_fragment", " called playRepeatSound with percent = "+percentVMG+", mute = "+vmgIsMuted);
 
         if (repeatSoundId !=0 ) { // если уже что-то играем, то сначала останавливаем звук
             try { // одиночный патч для маскировки прерывания звука
@@ -33,7 +33,7 @@ public class BeepSounds extends VoiceoverMain {
 
     private void startPlayingRepeatSound (int percentVMG) {
         float rate = calculateRateFromPercent(percentVMG); // высчитываем скорость воспроизведения
-        Log.i("racer_timer_tools_fragment", " start playing with rate ="+rate);
+        Log.i("tools_fragment", " start playing with rate ="+rate);
         while (repeatSoundId == 0) // повторяем запуск звука пока он не запустится
             repeatSoundId = soundPool.play(SOUND_ASSET_BEEP, 1, 1, PRIORITY_BEEP, 100, rate);
 //        Log.i("racer_timer", " beeping started, id = " + repeatSoundId);
