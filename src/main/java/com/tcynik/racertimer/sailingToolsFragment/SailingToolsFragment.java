@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.racertimer.R;
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.main_activity.MainActivity;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindProvider;
 import com.tcynik.racertimer.main_activity.domain.CoursesCalculator;
@@ -27,7 +27,7 @@ import com.tcynik.racertimer.main_activity.presentation.interfaces.StatusUiUpdat
  */
 
 public class SailingToolsFragment extends Fragment {
-    private final static String PROJECT_LOG_TAG = "racer_timer_sailing_tools";
+    private final static String PROJECT_LOG_TAG = "sailing_tools";
     private final String MODULE_NAME = "sailing_tools";
     private ViewModel viewModel;
 

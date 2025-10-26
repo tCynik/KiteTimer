@@ -2,7 +2,7 @@ package com.tcynik.racertimer.multimedia;
 
 import android.content.Context;
 
-import com.example.racertimer.R;
+import com.tcynik.racertimer.R;
 
 public class TimerVoiceover extends VoiceoverMain {
     private static final int PRIORITY_TIMER = 3; // озвучка таймера

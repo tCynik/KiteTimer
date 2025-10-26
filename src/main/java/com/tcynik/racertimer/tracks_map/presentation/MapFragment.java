@@ -11,11 +11,8 @@ import android.widget.ImageView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
-import com.example.racertimer.R;
-import com.tcynik.racertimer.main_activity.presentation.interfaces.StatusUiUpdater;
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.main_activity.MainActivity;
-import com.tcynik.racertimer.tracks_map.presentation.scrolls.MapHorizontalScrollView;
-import com.tcynik.racertimer.tracks_map.presentation.scrolls.MapScrollView;
 import com.tcynik.racertimer.main_activity.presentation.interfaces.StatusUiUpdater;
 import com.tcynik.racertimer.tracks_map.presentation.scrolls.MapHorizontalScrollView;
 import com.tcynik.racertimer.tracks_map.presentation.scrolls.MapScrollView;

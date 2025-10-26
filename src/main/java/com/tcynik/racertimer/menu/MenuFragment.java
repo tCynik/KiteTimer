@@ -13,7 +13,7 @@ import android.widget.ImageButton;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
-import com.example.racertimer.R;
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.forecast.presentation.ActivityForecast;
 import com.tcynik.racertimer.main_activity.MainActivity;
 

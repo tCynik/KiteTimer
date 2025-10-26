@@ -4,7 +4,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.racertimer.R;
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.main_activity.MainActivity;
 
 public class ManagerVisibilityUI {
@@ -19,7 +19,7 @@ public class ManagerVisibilityUI {
 
     public ManagerVisibilityUI(MainActivity context) {
         this.context = context;
-        Log.i("bugfix: managerVisibility", "manager was created");
+        Log.i("d_managerVisibility", "manager was created");
         timeoutManager = new TimeOutManager(context, timeoutEndingInterface);
         setBarInvisible();
         TextView racingTimerTV = context.findViewById(R.id.racing_timer);
@@ -33,14 +33,14 @@ public class ManagerVisibilityUI {
 
     public void hideBarAfterTimeout() {
         if (isBarVisible()) {
-            Log.i("bugfix: managerVisibility", "running timeout");
+            Log.i("d_managerVisibility", "running timeout");
             timeoutManager.sartTimeoutToHide();
         }
     }
 
     private boolean isBarVisible() {
         int visibility = context.getWindow().getDecorView().getVisibility();
-        Log.i("bugfix: managerVisibility", "checking the bar visibility: "+visibility);
+        Log.i("d_managerVisibility", "checking the bar visibility: "+visibility);
         return (visibility == 0);//View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
     }
 

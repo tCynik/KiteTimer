@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import com.example.racertimer.R;
+import com.tcynik.racertimer.R;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindChangedHeraldInterface;
 import com.tcynik.racertimer.main_activity.data.wind_direction.WindProvider;
 import com.tcynik.racertimer.main_activity.domain.CoursesCalculator;
@@ -76,7 +76,7 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
                 .setPositiveButton("set", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.i("racer_timer_tools_fragment", " toasting = " + inputText.getText() );
+                        Log.i("tools_fragment", " toasting = " + inputText.getText() );
                         Toast.makeText(context, "new wind dir = " + inputText.getText(), Toast.LENGTH_LONG);
                         int windDirection = 10000; // первоначальное значение 10000 = данных нет
                         try { // преобразуем полученный стринг в int
@@ -111,7 +111,7 @@ public class ManuallyWind implements SeekBar.OnSeekBarChangeListener {
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
         if (seekBar == seekbarWind) {
-            Log.i("racer_timer_tools_fragment", " seekbar wind = " + i );
+            Log.i("tools_fragment", " seekbar wind = " + i );
             onWindChanged(i);
         }
     }
