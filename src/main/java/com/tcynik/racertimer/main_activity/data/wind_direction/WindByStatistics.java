@@ -42,6 +42,7 @@ public class WindByStatistics {
     private boolean windDiagramIsRepresentable = false; // флаг того, что статистика набрана достаточная
 
     WindChangedHeraldInterface windChangedHerald; // интерфейс для вывода нового значения ветра
+    private WindDirectionSmoother windSmoother; // Smoother for reducing discreteness and improving accuracy
     private CountDownTimer countDownTimer; // таймер для причесывания диаграммы когда не приходят новые данные
     private Timer timer; // таймер для причесывания диаграммы когда какое-то время не приходят новые данные
     private TimerTask timerTask; // тело задачи, которая выполняется по команде таймера
@@ -62,6 +63,10 @@ public class WindByStatistics {
         }
         this.windChangedHerald = windChangedHeraldInterface;
         sensitivity = 50; // параметр чувствистельности для настройки
+        
+        // Initialize smoother with moderate smoothing (0.2 = 20% of new value, 80% of old)
+        // Higher smoothing for statistics method as it can be more noisy
+        this.windSmoother = new WindDirectionSmoother(0.2);
 
     }
 
@@ -97,7 +102,7 @@ public class WindByStatistics {
             }
 
             // высчитываем новое направление ветра
-            windDirection = calculateWindDirection();
+            int rawWindDirection = calculateWindDirection();
 
             if (windDiagramIsRepresentable) { //  запускаем/обнуляем таймер причесывания
             }
@@ -123,11 +128,25 @@ public class WindByStatistics {
                 };
                 timer.schedule(timerTask, 60000, 1000); // запускаем его заново
 
-                // отправляем бродкаст с новыми данными
-                if (lastWindDirection != windDirection) { // если зафиксировано изменение направления ветра с прошлой итерации
-                    Log.i(PROJECT_LOG_TAG, "sending wind direction broadcast");
-                    windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED);// отправляем broadcast с новым направлением
+                // Apply smoothing to reduce discreteness and improve accuracy
+                int smoothedWindDirection = windSmoother.processWindDirection(rawWindDirection);
+                
+                if (smoothedWindDirection != 10000) {
+                    // Only update and broadcast if smoother indicates significant change
+                    windDirection = smoothedWindDirection;
+                    if (lastWindDirection != windDirection) { // если зафиксировано изменение направления ветра с прошлой итерации
+                        Log.i(PROJECT_LOG_TAG, "sending wind direction broadcast (raw: " + rawWindDirection + 
+                              ", smoothed: " + windDirection + ")");
+                        windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED);// отправляем broadcast с новым направлением
+                    }
+                } else {
+                    // Smoother filtered out the change (too small or outlier)
+                    Log.d(PROJECT_LOG_TAG, " wind direction change filtered by smoother (raw: " + rawWindDirection + 
+                          ", current: " + windDirection + ")");
                 }
+            } else {
+                // Diagram not yet representative, but update internal value
+                windDirection = rawWindDirection;
             }
             lastWindDirection = windDirection; // обновляем данные по направлению ветра для фиксации изменений
         }

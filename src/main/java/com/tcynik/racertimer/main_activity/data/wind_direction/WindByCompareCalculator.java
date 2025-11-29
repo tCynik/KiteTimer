@@ -22,14 +22,28 @@ public class WindByCompareCalculator {
     private int windDirection = 10000; // направление ветра, 10000 = нет данных
     private TackDirection lastTackDirection; // последний номер галса: 1 - правый бакштаг, 2 - правый бейдевинд, 3 - левый бейдевинд 4 - левый бакштаг
     private WindChangedHeraldInterface windChangedHerald; // экземпляр интерфейса для отправки измененного направления
+    private WindDirectionSmoother windSmoother; // Smoother for reducing discreteness and improving accuracy
 
     public WindByCompareCalculator(WindChangedHeraldInterface windChangedHerald, int windDirection) {
         this.windChangedHerald = windChangedHerald;
         this.windDirection = windDirection;
+        // Initialize smoother with moderate smoothing (0.15 = 15% of new value, 85% of old)
+        this.windSmoother = new WindDirectionSmoother(0.15);
+        if (windDirection != 10000) {
+            // Initialize smoother with initial wind direction
+            windSmoother.processWindDirection(windDirection);
+        }
     }
 
     public void setWindDirection (int windDirection) {
         this.windDirection = windDirection;
+        // Update smoother with new wind direction (may be manual or from forecast)
+        if (windDirection != 10000) {
+            int smoothed = windSmoother.processWindDirection(windDirection);
+            if (smoothed != 10000) {
+                this.windDirection = smoothed; // Update internal value with smoothed version
+            }
+        }
     }
 
     public void setCalculatorStatus(boolean isItOn) {
@@ -155,9 +169,22 @@ public class WindByCompareCalculator {
         int bearingRight = tackRight.getBestBearing();
         Log.i(PROJECT_LOG_TAG, " recalculating. LeftBearing = "+ bearingLeft +", right one = "+bearingRight);
 
-        windDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingLeft, bearingRight);
-        Log.i(PROJECT_LOG_TAG, " calculated wind direction is = "+ windDirection +", sending the broadcast ");
-        windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
+        int rawWindDirection = CoursesCalculator.windBetweenTwoUpwinds(bearingLeft, bearingRight);
+        Log.i(PROJECT_LOG_TAG, " raw calculated wind direction is = "+ rawWindDirection);
+        
+        // Apply smoothing to reduce discreteness and improve accuracy
+        int smoothedWindDirection = windSmoother.processWindDirection(rawWindDirection);
+        
+        if (smoothedWindDirection != 10000) {
+            // Only update and broadcast if smoother indicates significant change
+            windDirection = smoothedWindDirection;
+            Log.i(PROJECT_LOG_TAG, " smoothed wind direction is = "+ windDirection +", sending the broadcast ");
+            windChangedHerald.onWindDirectionChanged(windDirection, WindProvider.CALCULATED); // отправляем сообщение с новым значением
+        } else {
+            // Smoother filtered out the change (too small or outlier)
+            Log.d(PROJECT_LOG_TAG, " wind direction change filtered by smoother (raw: " + rawWindDirection + 
+                  ", current: " + windDirection + ")");
+        }
 
         forceCalculating = false;
     }
