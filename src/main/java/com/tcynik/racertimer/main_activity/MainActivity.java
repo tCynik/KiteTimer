@@ -113,6 +113,9 @@ public class MainActivity extends AppCompatActivity {
     private StatusUIModulesDispatcher statusUIModulesDispatcher;
 
     private boolean isWindDataFresh = false;
+    private boolean isLocationReceiverRegistered = false;
+    private boolean isServiceBound = false;
+    private ServiceConnection locationServiceConnection;
 
     private String lastTimer;
 
@@ -544,22 +547,32 @@ public class MainActivity extends AppCompatActivity {
         Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "Making service connection... " );
         // приводим биндер к кастомному биндеру с методом связи
         // получаем экземпляр нашего сервиса через биндер
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "Location service binded ");
-                binder = (LocationService.MyBinder) iBinder; // приводим биндер к кастомному биндеру с методом связи
-                locationService = ((LocationService.MyBinder) binder).getService(); // получаем экземпляр нашего сервиса через биндер
-                serviceIsRan();
-            }
+        if (locationServiceConnection == null) {
+            locationServiceConnection = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                    Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "Location service binded ");
+                    binder = (LocationService.MyBinder) iBinder; // приводим биндер к кастомному биндеру с методом связи
+                    locationService = ((LocationService.MyBinder) binder).getService(); // получаем экземпляр нашего сервиса через биндер
+                    isServiceBound = true;
+                    serviceIsRan();
+                }
 
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "location service disconnected ");
-            }
-        };
+                @Override
+                public void onServiceDisconnected(ComponentName componentName) {
+                    Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "location service disconnected ");
+                    isServiceBound = false;
+                    locationService = null;
+                    binder = null;
+                }
+            };
+        }
         try{
-            bindService(intentLocationService, serviceConnection, BIND_EXTERNAL_SERVICE);
+            boolean isBound = bindService(intentLocationService, locationServiceConnection, Context.BIND_AUTO_CREATE);
+            if (!isBound) {
+                Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "bindService returned false");
+                isServiceBound = false;
+            }
         } catch (Exception e) {
             Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "location service disconnected ");
             Toast.makeText(this, "Error corrupted: " + e, Toast.LENGTH_LONG).show();
@@ -610,8 +623,11 @@ public class MainActivity extends AppCompatActivity {
             };
         }
 
-        IntentFilter locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
-        registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
+        if (!isLocationReceiverRegistered) {
+            IntentFilter locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
+            registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
+            isLocationReceiverRegistered = true;
+        }
     }
 
     private void changeWindDirAndSave(int updatedWindDirection, WindProvider provider) { // смена направления ветра
@@ -702,5 +718,37 @@ public class MainActivity extends AppCompatActivity {
 
     public String getTracksPackage() {
         return tracksFolderAddress;
+    }
+
+    private void removeBroadcastListener() {
+        if (isLocationReceiverRegistered && locationBroadcastReceiver != null) {
+            try {
+                unregisterReceiver(locationBroadcastReceiver);
+            } catch (IllegalArgumentException e) {
+                Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "Receiver already unregistered");
+            }
+            isLocationReceiverRegistered = false;
+        }
+    }
+
+    private void unbindLocationService() {
+        if (isServiceBound && locationServiceConnection != null) {
+            try {
+                unbindService(locationServiceConnection);
+            } catch (IllegalArgumentException e) {
+                Log.i(PROJECT_LOG_TAG+MODULE_LOG_TAG, "Service already unbound");
+            }
+            isServiceBound = false;
+            locationServiceConnection = null;
+            locationService = null;
+            binder = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        removeBroadcastListener();
+        unbindLocationService();
+        super.onDestroy();
     }
 }
