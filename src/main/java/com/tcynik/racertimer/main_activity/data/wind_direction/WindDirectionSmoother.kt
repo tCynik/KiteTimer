@@ -67,7 +67,7 @@ class WindDirectionSmoother {
         updateCount++
 
         // Round to integer
-        var roundedDirection = smoothedWindDirection.roundToInt()
+        var roundedDirection = smoothedWindDirection.toInt()
         roundedDirection = normalizeAngle(roundedDirection)
 
         // Only report if change exceeds threshold

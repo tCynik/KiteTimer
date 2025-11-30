@@ -625,7 +625,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (!isLocationReceiverRegistered) {
             IntentFilter locationIntentFilter = new IntentFilter(BROADCAST_ACTION); // прописываем интент фильтр для слушателя
-            registerReceiver(locationBroadcastReceiver, locationIntentFilter); // регистрируем слушатель
+            registerReceiver(
+                    locationBroadcastReceiver,
+                    locationIntentFilter,
+                    Context.RECEIVER_NOT_EXPORTED
+            );
             isLocationReceiverRegistered = true;
         }
     }
