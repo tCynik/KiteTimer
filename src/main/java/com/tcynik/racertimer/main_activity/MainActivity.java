@@ -628,7 +628,7 @@ public class MainActivity extends AppCompatActivity {
             registerReceiver(
                     locationBroadcastReceiver,
                     locationIntentFilter,
-                    Context.RECEIVER_NOT_EXPORTED
+                    Context.RECEIVER_EXPORTED
             );
             isLocationReceiverRegistered = true;
         }
